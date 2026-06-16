@@ -14,7 +14,7 @@
         </span>
       </os-message>
       <span class="sign-in-message" v-else>
-        Already have an OpenSpecimen ID? <a @click="gotoSignIn">Sign In here</a>
+        Already have an OpenSpecimen ID? <a :href="signInUrl">Sign In here</a>
       </span>
     </template>
 
@@ -23,7 +23,7 @@
     </template>
 
     <template #secondary-actions v-else>
-      <os-button primary label="Sign In" @click="gotoSignIn" />
+      <a class="primary-link" :href="signInUrl">Sign In</a>
     </template>
   </FormCard>
 </template>
@@ -56,6 +56,10 @@ export default {
   },
 
   computed: {
+    signInUrl: function() {
+      return routerSvc.getUrl('UserLogin');
+    },
+
     signUpSchema: function() {
       return this.ctx.showMessage ? {rows: []} : signUpSchema.layout;
     }
@@ -73,10 +77,6 @@ export default {
           this.ctx.approved = (user.activityStatus == 'Active');
         }
       );
-    },
-
-    gotoSignIn: function() {
-      routerSvc.goto('UserLogin');
     },
 
     _getDomains: function() {
@@ -107,5 +107,24 @@ export default {
   text-align: center;
   width: 100%;
   margin: 0.25rem;
+}
+
+.primary-link {
+  color: #fff;
+  background-color: #337ab7;
+  border: 1px solid #2e6da4;
+  border-radius: 1.125rem;
+  display: inline-block;
+  height: 2.25rem;
+  padding: 7px 16px;
+  text-decoration: none;
+}
+
+.primary-link:hover,
+.primary-link:focus {
+  color: #fff;
+  background-color: #286090;
+  border-color: #204d74;
+  text-decoration: none;
 }
 </style>

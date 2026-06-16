@@ -19,13 +19,13 @@
       <os-page-toolbar>
         <template #default>
           <span v-if="!ctx.selectedQueries || ctx.selectedQueries.length == 0">
-            <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createQuery"
+            <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createQueryUrl"
               v-show-if-allowed="queryResources.createOpts" />
 
             <os-button left-icon="upload" :label="$t('common.buttons.import')" @click="showImportQueryDialog"
               v-show-if-allowed="queryResources.createOpts" />
 
-            <os-button left-icon="list" :label="$t('queries.view_audit_logs')" @click="viewAuditLogs"
+            <os-button-link left-icon="list" :label="$t('queries.view_audit_logs')" :url="auditLogsUrl"
               v-show-if-allowed="'institute-admin'" />
 
             <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
@@ -53,11 +53,15 @@
                 <span v-t="'queries.folders'">Folders</span>
               </div>
               <ul>
-                <li :class="{selected: !folderId}" @click="selectFolder(null)">
-                  <span v-t="'queries.my_queries'">My Queries</span>
+                <li :class="{selected: !folderId}">
+                  <a :href="folderUrl(null)">
+                    <span v-t="'queries.my_queries'">My Queries</span>
+                  </a>
                 </li>
-                <li :class="{selected: folderId == -1}" @click="selectFolder(-1)">
-                  <span v-t="'queries.all_queries'">All Queries</span>
+                <li :class="{selected: folderId == -1}">
+                  <a :href="folderUrl(-1)">
+                    <span v-t="'queries.all_queries'">All Queries</span>
+                  </a>
                 </li>
               </ul>
             </div>
@@ -71,7 +75,7 @@
                 </li>
 
                 <li :class="{selected: folderId == folder.id}" v-for="folder of ctx.myFolders" :key="folder.id">
-                  <a @click="selectFolder(folder.id)">
+                  <a :href="folderUrl(folder.id)">
                     <span>{{folder.name}}</span>
                   </a>
                   <os-button text left-icon="edit" @click="showUpdateFolderDialog(folder)" />
@@ -84,7 +88,7 @@
               </div>
               <ul>
                 <li :class="{selected: folderId == folder.id}" v-for="folder of ctx.sharedFolders" :key="folder.id">
-                  <a @click="selectFolder(folder.id)">
+                  <a :href="folderUrl(folder.id)">
                     <span>{{folder.name}}</span>
                   </a>
                   <os-button text left-icon="edit" @click="showUpdateFolderDialog(folder)" v-if="folder.editable" />
@@ -247,6 +251,14 @@ export default {
   },
 
   computed: {
+    createQueryUrl: function() {
+      return routerSvc.getUrl('QueryDetail.AddEdit', {queryId: -1});
+    },
+
+    auditLogsUrl: function() {
+      return routerSvc.getUrl('QueryAuditLogs');
+    },
+
     selectedFolder: function() {
       if (!this.folderId || this.folderId == -1) {
         return null;
@@ -297,7 +309,7 @@ export default {
         options.push({
           icon: 'edit',
           caption: this.$t('common.buttons.edit'),
-          onSelect: () => this._editQuery(query)
+          url: this.editQueryUrl(query)
         });
       }
 
@@ -311,7 +323,7 @@ export default {
         options.push({
           icon: 'calendar',
           caption: this.$t('queries.schedule'),
-          onSelect: () => this._scheduleQuery(query)
+          url: this.scheduleQueryUrl(query)
         });
       }
 
@@ -345,6 +357,10 @@ export default {
       if (resp.status) {
         query.starred = !query.starred;
       }
+    },
+
+    folderUrl: function(folderId) {
+      return routerSvc.getUrl('QueriesList', {}, {filters: this.filters, folderId});
     },
 
     selectFolder: function(folderId) {
@@ -441,10 +457,6 @@ export default {
       this.$refs.updateFolderDialog.open();
     },
 
-    createQuery: function() {
-      routerSvc.goto('QueryDetail.AddEdit', {queryId: -1});
-    },
-
     showImportQueryDialog: function() {
       this.$refs.importQueryDialog.open();
     },
@@ -466,20 +478,16 @@ export default {
       );
     },
 
-    viewAuditLogs: function() {
-      routerSvc.goto('QueryAuditLogs');
-    },
-
-    _editQuery: function(query) {
-      routerSvc.goto('QueryDetail.AddEdit', {queryId: query.id});
+    editQueryUrl: function(query) {
+      return routerSvc.getUrl('QueryDetail.AddEdit', {queryId: query.id});
     },
 
     _downloadQuery: function(query) {
       savedQuerySvc.downloadQuery(query.id);
     },
 
-    _scheduleQuery: function(query) {
-      routerSvc.goto('JobAddEdit', {jobId: -1}, {queryId: query.id});
+    scheduleQueryUrl: function(query) {
+      return routerSvc.getUrl('JobAddEdit', {jobId: -1}, {queryId: query.id});
     },
 
     _deleteQuery: function(query) {

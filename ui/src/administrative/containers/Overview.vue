@@ -1,7 +1,7 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editContainer"
+      <os-button-link left-icon="edit" :label="$t('common.buttons.edit')" :url="editContainerUrl"
         v-if="ctx.editAllowed && ctx.container.activityStatus == 'Active'" />
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainer"
@@ -205,6 +205,12 @@ export default {
     }
   },
 
+  computed: {
+    editContainerUrl: function() {
+      return routerSvc.getUrl('ContainerAddEdit', {containerId: this.container.id});
+    }
+  },
+
   methods: {
     setupView: async function() {
       const ctx = this.ctx;
@@ -270,10 +276,6 @@ export default {
 
       ctx.moreOpts.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
 
-    },
-
-    editContainer: function() {
-      routerSvc.goto('ContainerAddEdit', {containerId: this.container.id});
     },
 
     showTransferForm: function(action) {

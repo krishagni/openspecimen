@@ -20,10 +20,10 @@
           <os-page-toolbar>
             <template #default>
               <span v-if="!ctx.selectedItems || ctx.selectedItems.length == 0">
-                <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createCp"
+                <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createCpUrl"
                   v-show-if-allowed="cpResources.createOpts" />
 
-                <os-button :label="$t('cpgs.list')" @click="viewCpGroupsList" />
+                <os-button-link :label="$t('cpgs.list')" :url="cpGroupsUrl" />
 
                 <os-menu :label="$t('common.buttons.more')" :options="moreMenuOpts" />
 
@@ -66,14 +66,14 @@
 
             <template #actions="{rowObject}">
               <os-button-group>
-                <os-button left-icon="eye" @click="viewCpDetails(rowObject)"
+                <os-button-link left-icon="eye" :url="cpDetailsUrl(rowObject)"
                   v-os-tooltip.bottom="$t('cps.view_details')" />
 
-                <os-button left-icon="table" @click="viewCatalog(rowObject)"
+                <os-button-link left-icon="table" :url="catalogUrl(rowObject)"
                   v-os-tooltip.bottom="$t('cps.view_catalog')"
                   v-if="hasCatalog && queryReadAllowed && rowObject.hidden.catalogId > 0" />
 
-                <os-button left-icon="chart-line" @click="viewDashboard(rowObject)"
+                <os-button-link left-icon="chart-line" :url="dashboardUrl(rowObject)"
                   v-os-tooltip.bottom="$t('cps.view_dashboard')"
                   v-if="hasDashboard && queryReadAllowed" />
               </os-button-group>
@@ -253,12 +253,12 @@ export default {
         options.push({
           icon: 'upload',
           caption: this.$t('cps.import_biospecimen_data'),
-          onSelect: () => routerSvc.goto('MultiCpImportRecords')
+          url: routerSvc.getUrl('MultiCpImportRecords')
         });
         options.push({
           icon: 'table',
           caption: this.$t('import.view_past_imports'),
-          onSelect: () => routerSvc.goto('MultiCpImportJobsList')
+          url: routerSvc.getUrl('MultiCpImportJobsList')
         });
       }
 
@@ -270,7 +270,7 @@ export default {
         options.push({
           icon: 'download',
           caption: this.$t('common.buttons.export'),
-          onSelect: () => routerSvc.goto('MultiCpExportRecords')
+          url: routerSvc.getUrl('MultiCpExportRecords')
         });
       }
 
@@ -289,13 +289,13 @@ export default {
       options.push({
         icon: 'cogs',
         caption: this.$t('lab_services.list'),
-        onSelect: () => this.viewLabServices()
+        url: routerSvc.getUrl('LabServicesList', {}, {})
       });
 
       options.push({
         icon: 'money-bill-alt',
         caption: this.$t('lab_services.rate_lists'),
-        onSelect: () => this.viewRateLists()
+        url: routerSvc.getUrl('RateLists', {rateListId: -1}, {})
       });
 
       options.push({
@@ -305,6 +305,14 @@ export default {
       });
 
       return options;
+    },
+
+    createCpUrl: function() {
+      return routerSvc.getUrl('CpAddEdit', {cpId: -1});
+    },
+
+    cpGroupsUrl: function() {
+      return routerSvc.getUrl('CpgsList', {cpgId: -1});
     }
   },
 
@@ -328,16 +336,16 @@ export default {
       routerSvc.goto('ParticipantsList', {cpId, cprId: -1}, {});
     },
 
-    viewCpDetails: function({hidden: {cpId}}) {
-      routerSvc.goto('CpDetail.Overview', { cpId }, {filters: this.ctx.query});
+    cpDetailsUrl: function({hidden: {cpId}}) {
+      return routerSvc.getUrl('CpDetail.Overview', { cpId }, {filters: this.ctx.query});
     },
 
-    viewCatalog: function({hidden: {cpId, catalogId}}) {
-      routerSvc.goto('CatalogSearch', {catalogId}, {cpId});
+    catalogUrl: function({hidden: {cpId, catalogId}}) {
+      return routerSvc.getUrl('CatalogSearch', {catalogId}, {cpId});
     },
 
-    viewDashboard: function({hidden: {cpId}}) {
-      routerSvc.goto('dbCpDashboard', {cpId});
+    dashboardUrl: function({hidden: {cpId}}) {
+      return routerSvc.getUrl('dbCpDashboard', {cpId});
     },
 
     onItemRowStarToggle: function(event) {
@@ -403,14 +411,6 @@ export default {
       this.$refs.list.toggleShowFilters();
     },
 
-    createCp: function() {
-      routerSvc.goto('CpAddEdit', {cpId: -1});
-    },
-
-    viewCpGroupsList: function() {
-      routerSvc.goto('CpgsList', {cpgId: -1});
-    },
-
     deleteCps: function() {
       this.$refs.deleteCpsDialog.open().then(
         ({reason}) => {
@@ -468,14 +468,6 @@ export default {
         Array.prototype.push.apply(dict, await cpSvc.getDict());
         return dict;
       }
-    },
-
-    viewLabServices: function() {
-      routerSvc.goto('LabServicesList', {}, {});
-    },
-
-    viewRateLists: function() {
-      routerSvc.goto('RateLists', {rateListId: -1}, {});
     },
 
     _exportRecords: function(objectType) {

@@ -2,7 +2,7 @@
   <os-page-toolbar>
     <template #default>
       <span v-show-if-allowed="dpResources.updateOpts">
-        <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="edit" />
+        <os-button-link left-icon="edit" :label="$t('common.buttons.edit')" :url="editUrl" />
 
         <os-button left-icon="times" :label="$t('common.buttons.close')" @click="confirmClose"
           v-if="ctx.dp.activityStatus == 'Active'" />
@@ -14,7 +14,7 @@
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteDp"
         v-show-if-allowed="dpResources.deleteOpts" />
 
-      <os-button left-icon="share" :label="$t('dps.view_orders')" @click="viewOrders"
+      <os-button-link left-icon="share" :label="$t('dps.view_orders')" :url="ordersUrl"
         v-show-if-allowed="dpResources.orderOpts" />
 
       <os-plugin-views page="dp-overview" view="more-menu" :view-props="{dp: ctx.dp}" />
@@ -89,6 +89,17 @@ export default {
     }
   },
 
+  computed: {
+    editUrl: function() {
+      return routerSvc.getUrl('DpAddEdit', {dpId: this.ctx.dp.id});
+    },
+
+    ordersUrl: function() {
+      const fb = util.uriEncode({dpShortTitle: this.ctx.dp.shortTitle});
+      return routerSvc.getUrl('OrdersList', {orderId: -1}, {filters: fb});
+    }
+  },
+
   methods: {
     setupDp: function() {
       const dp = this.ctx.dp = this.dp;
@@ -107,10 +118,6 @@ export default {
         dependents: () => dpSvc.getDependents(this.dp),
         deleteObj: () => dpSvc.delete(this.dp)
       };
-    },
-
-    edit: function() {
-      routerSvc.goto('DpAddEdit', {dpId: this.ctx.dp.id});
     },
 
     confirmClose: async function() {
@@ -140,11 +147,6 @@ export default {
       if (resp == 'deleted') {
         routerSvc.goto('DpsList', {dpId: -2}, this.ctx.routeQuery);
       }
-    },
-
-    viewOrders: function() {
-      const fb = util.uriEncode({dpShortTitle: this.ctx.dp.shortTitle});
-      routerSvc.goto('OrdersList', {orderId: -1}, {filters: fb});
     },
 
     viewAuditTrail: function() {

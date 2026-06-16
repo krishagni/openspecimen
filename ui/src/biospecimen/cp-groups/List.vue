@@ -26,8 +26,8 @@
         <os-page-body>
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
-              <os-button left-icon="plus" :label="$t('common.buttons.create')"
-                v-show-if-allowed="{resource: 'CollectionProtocol', operations: ['Update']}" @click="createGroup" />
+              <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createGroupUrl"
+                v-show-if-allowed="{resource: 'CollectionProtocol', operations: ['Update']}" />
             </template>
 
             <template #right>
@@ -102,6 +102,12 @@ export default {
     }
   },
 
+  computed: {
+    createGroupUrl: function() {
+      return routerSvc.getUrl('CpgAddEdit', {cpgId: -1});
+    }
+  },
+
   methods: {
     openSearch: function() {
       this.$refs.listView.toggleShowFilters();
@@ -167,9 +173,6 @@ export default {
       }
     },
 
-    createGroup: function() {
-      routerSvc.goto('CpgAddEdit', {cpgId: -1});
-    },
   }
 }
 </script>

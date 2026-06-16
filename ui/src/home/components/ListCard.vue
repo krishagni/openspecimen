@@ -9,7 +9,7 @@
         <span class="actions">
           <os-button size="small" left-icon="search" @click="showSearchText"
             v-os-tooltip.bottom="$t('common.buttons.search')" v-if="!hideSearch" />
-          <os-button size="small" left-icon="expand" @click="showDetailedList"
+          <os-button-link size="small" left-icon="expand" :url="detailedListUrl" :no-outline="true"
             v-os-tooltip.bottom="$t('common.expand_to_show_more_details')" v-if="listUrl" />
         </span>
       </div>
@@ -43,7 +43,6 @@
 </template>
 
 <script>
-
 import routerSvc from '@/common/services/Router.js';
 
 export default {
@@ -71,6 +70,13 @@ export default {
     }
   },
 
+  computed: {
+    detailedListUrl: function() {
+      const {name, params, query} = this.listUrl || {};
+      return routerSvc.getUrl(name, params, query);
+    }
+  },
+
   methods: {
     showSearchText: function() {
       this.ctx.showSearch = true;
@@ -81,11 +87,6 @@ export default {
       this.ctx.search = null;
     },
 
-    showDetailedList: function() {
-      const {name, params, query} = this.listUrl || {};
-      routerSvc.goto(name, params, query);
-    },
-      
     toggleStar: function(item) {
       this.$emit('toggle-star', item);
     }

@@ -1,13 +1,13 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editCp"
+      <os-button-link left-icon="edit" :label="$t('common.buttons.edit')" :url="editCpUrl"
         v-show-if-allowed="cpResources.updateOpts" />
 
       <os-button left-icon="check" :label="$t('cps.publish')" @click="showPublishCpDialog"
         v-show-if-allowed="cpResources.updateOpts" v-if="cp.draftMode && cp.activityStatus == 'Active'" />
 
-      <os-button left-icon="copy" :label="$t('common.buttons.clone')" @click="cloneCp"
+      <os-button-link left-icon="copy" :label="$t('common.buttons.clone')" :url="cloneCpUrl"
         v-show-if-allowed="cpResources.createOpts" />
 
       <os-button left-icon="ban" :label="$t('common.buttons.close')" @click="closeCp"
@@ -19,10 +19,10 @@
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteCp"
         v-show-if-allowed="cpResources.deleteOpts" />
 
-      <os-button left-icon="users" :label="$t('cps.view_participants')" @click="viewParticipants"
+      <os-button-link left-icon="users" :label="$t('cps.view_participants')" :url="participantsUrl"
         v-if="!cp.specimenCentric" />
 
-      <os-button left-icon="flask" :label="$t('cps.view_specimens')" @click="viewSpecimens"
+      <os-button-link left-icon="flask" :label="$t('cps.view_specimens')" :url="specimensUrl"
         v-if="cp.specimenCentric" />
 
       <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
@@ -158,14 +158,26 @@ export default {
 
     importParams: function() {
       return {cpId: this.cp.id};
+    },
+
+    editCpUrl: function() {
+      return routerSvc.getUrl('CpAddEdit', {cpId: this.cp.id});
+    },
+
+    cloneCpUrl: function() {
+      return routerSvc.getUrl('CpAddEdit', {cpId: -1}, {copyOf: this.cp.id});
+    },
+
+    participantsUrl: function() {
+      return routerSvc.getUrl('ParticipantsList', {cprId: -1});
+    },
+
+    specimensUrl: function() {
+      return routerSvc.getUrl('ParticipantsList', {cprId: -1}, {view: 'specimens_list'});
     }
   },
 
   methods: {
-    editCp: function() {
-      routerSvc.goto('CpAddEdit', {cpId: this.cp.id});
-    },
-
     showPublishCpDialog: function() {
       this.ctx.publish = {};
       this.$refs.publishCpDialog.open();
@@ -187,10 +199,6 @@ export default {
 
     hidePublishCpDialog: function() {
       this.$refs.publishCpDialog.close();
-    },
-
-    cloneCp: function() {
-      routerSvc.goto('CpAddEdit', {cpId: -1}, {copyOf: this.cp.id});
     },
 
     closeCp: function() {
@@ -245,14 +253,6 @@ export default {
           }
         }
       );
-    },
-
-    viewParticipants: function() {
-      routerSvc.goto('ParticipantsList', {cprId: -1});
-    },
-
-    viewSpecimens: function() {
-      routerSvc.goto('ParticipantsList', {cprId: -1}, {view: 'specimens_list'});
     },
 
     showImportEventsDialog: function() {
@@ -335,7 +335,11 @@ export default {
         if (authSvc.isAllowed(cpResources.updateOpts)) {
           moreOptions.push({icon: 'list-alt', caption: this.$t('cps.import_events'), onSelect: this.showImportEventsDialog});
           moreOptions.push({icon: 'flask', caption: this.$t('cps.import_srs'), onSelect: this.showImportSrsDialog});
-          moreOptions.push({icon: 'table', caption: this.$t('import.view_past_imports'), onSelect: this.viewPastImports});
+          moreOptions.push({
+            icon: 'table',
+            caption: this.$t('import.view_past_imports'),
+            url: routerSvc.getUrl('CpDetail.ImportJobs', {cpId: this.cp.id})
+          });
           moreOptions.push({divider: true});
         }
 

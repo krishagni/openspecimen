@@ -3,8 +3,8 @@
   <os-page-toolbar>
     <template #default>
       <span v-if="visit.id > 0">
-        <os-button left-icon="edit" :label="$t('common.buttons.edit')"
-          @click="editVisit" v-if="isUpdateAllowed" />
+        <os-button-link left-icon="edit" :label="$t('common.buttons.edit')"
+          :url="editVisitUrl" v-if="isUpdateAllowed" />
 
         <os-button left-icon="plus" :label="$t('participants.add_specimen')"
           @click="addSpecimen" v-if="cpr.hasConsented && ctx.visit.status == 'Complete' && isCreateSpecimenAllowed" />
@@ -122,14 +122,14 @@ export default {
 
     isPrintSpecimenLabelAllowed: function() {
       return this.cpViewCtx.isPrintSpecimenAllowed(this.cpr) && !this.cpViewCtx.isCoordinator();
+    },
+
+    editVisitUrl: function() {
+      return routerSvc.getUrl('VisitAddEdit', {cpId: this.ctx.cp.id, cprId: this.cpr.id, visitId: this.visit.id});
     }
   },
 
   methods: {
-    editVisit: function() {
-      routerSvc.goto('VisitAddEdit', {cpId: this.ctx.cp.id, cprId: this.cpr.id, visitId: this.visit.id});
-    },
-
     addSpecimen: function() {
       wfSvc.addSpecimen(this.ctx.cp, this.visit);
     },

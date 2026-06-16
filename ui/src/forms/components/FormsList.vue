@@ -41,8 +41,12 @@
         <template #expansionRow="{rowObject}">
           <div v-if="record">
             <div class="toolbar">
+              <os-button-link left-icon="edit" :label="$t('common.buttons.edit')"
+                :url="addEditFormRecordUrl(rowObject)"
+                v-if="canUpdateRecord(rowObject) && addEditFormRecordUrl(rowObject)" />
+
               <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editRecord(rowObject)"
-                v-if="isUpdateAllowed && expanded.length > 0 && !expanded[0].sysForm" />
+                v-else-if="canUpdateRecord(rowObject)" />
 
               <os-button left-icon="poll" :label="$t('forms.survey_mode')"
                 @click="switchToSurveyMode(surveyMap[rowObject.fcId], true, rowObject.recordId)"
@@ -129,7 +133,16 @@ export default {
   computed: {
     formsList: function() {
       return (this.forms || []).filter(form => !form.sysForm && (form.noOfRecords == 0 || form.multiRecord))
-        .map(form => ({caption: form.formCaption, onSelect: () => this.addRecord(form)}));
+        .map(
+          form => {
+            const option = {caption: form.formCaption, url: this.addEditFormRecordUrl(form)};
+            if (!option.url) {
+              option.onSelect = () => this.addRecord(form);
+            }
+
+            return option;
+          }
+        );
     },
 
     filledFormsList: function() {
@@ -241,6 +254,18 @@ export default {
       routerSvc.goto(name, params, Object.assign(query, {formId, recordId}));
     },
 
+    canUpdateRecord: function() {
+      return this.isUpdateAllowed && this.expanded.length > 0 && !this.expanded[0].sysForm;
+    },
+
+    addEditFormRecordUrl: function({formId, fcId, formCtxtId, recordId}) {
+      if (!this.api || typeof this.api.getAddEditFormRecordUrl != 'function') {
+        return null;
+      }
+
+      return this.api.getAddEditFormRecordUrl(formId, fcId || formCtxtId, recordId);
+    },
+
     addRecord: function({formId, formCtxtId}) {
       this.api.addEditFormRecord(formId, formCtxtId);
     },
@@ -327,7 +352,8 @@ export default {
   margin-bottom: 1.25rem;
 }
 
-.records-list .toolbar :deep(.btn) {
+.records-list .toolbar :deep(.btn),
+.records-list .toolbar :deep(a.button-link) {
   margin-right: 0.5rem;
 }
 

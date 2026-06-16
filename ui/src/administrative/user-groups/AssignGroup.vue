@@ -26,7 +26,7 @@
         </a>
       </li>
       <li>
-        <a @click="viewGroups" v-if="groups.length > 0">
+        <a :href="userGroupsUrl" v-if="groups.length > 0">
           <span v-t="'user_groups.manage_groups'">Manage Groups </span>
         </a>
       </li>
@@ -46,6 +46,12 @@ export default {
       searchTerm: '',
 
       groups: []
+    }
+  },
+
+  computed: {
+    userGroupsUrl: function() {
+      return routerSvc.getUrl('UserGroupsList');
     }
   },
 
@@ -105,10 +111,6 @@ export default {
 
     createNewGroup: function(event) {
       this.addToGroup(event, null);
-    },
-
-    viewGroups: function() {
-      routerSvc.goto('UserGroupsList');
     }
   }
 }

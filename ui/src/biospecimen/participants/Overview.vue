@@ -1,8 +1,8 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="edit" :label="$t('common.buttons.edit')"
-        @click="edit" v-if="isUpdateAllowed" />
+      <os-button-link left-icon="edit" :label="$t('common.buttons.edit')"
+        :url="editUrl" v-if="isUpdateAllowed" />
 
       <os-button left-icon="print" :label="$t('common.buttons.print')"
         @click="printLabels" v-if="isPrintSpecimenLabelsAllowed" />
@@ -195,6 +195,11 @@ export default {
 
     isPrintSpecimenLabelsAllowed: function() {
       return this.cpViewCtx.isPrintSpecimenAllowed(this.cpr) && !this.cpViewCtx.isCoordinator();
+    },
+
+    editUrl: function() {
+      const {id: cprId, cpId} = this.ctx.cpr;
+      return routerSvc.getUrl('ParticipantAddEdit', {cpId, cprId});
     }
   },
 
@@ -208,11 +213,6 @@ export default {
   },
 
   methods: {
-    edit: function() {
-      const cpr = this.ctx.cpr;
-      routerSvc.goto('ParticipantAddEdit', {cpId: cpr.cpId, cprId: cpr.id});
-    },
-
     printLabels: function() {
       const cpr = this.ctx.cpr;
       const ts = util.formatDate(new Date(), 'yyyyMMdd_HHmmss');

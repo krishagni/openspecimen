@@ -16,8 +16,8 @@
     </template>
 
     <template #secondary-actions>
-      <os-button text label="Return to Sign In Page" @click="gotoSignIn" v-if="ctx.showMessage" />
-      <os-button text label="Cancel" @click="gotoSignIn" v-else />
+      <a :href="signInUrl" v-if="ctx.showMessage">Return to Sign In Page</a>
+      <a :href="signInUrl" v-else>Cancel</a>
     </template>
   </FormCard>
 </template>
@@ -51,6 +51,10 @@ export default {
   },
 
   computed: {
+    signInUrl: function() {
+      return routerSvc.getUrl('UserLogin');
+    },
+
     resetPasswordSchema: function() {
       const {passwordSettings, showMessage} = this.ctx;
       if (showMessage) {
@@ -94,10 +98,6 @@ export default {
           this.ctx.showMessage = resp;
         }
       );
-    },
-
-    gotoSignIn: function() {
-      routerSvc.goto('UserLogin');
     }
   }
 }

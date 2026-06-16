@@ -2,13 +2,13 @@
   <os-page-toolbar>
     <template #default>
       <div v-if="(ui.currentUser.admin || !ctx.user.admin) && ctx.user.activityStatus != 'Pending'">
-        <os-button left-icon="edit"
-          :label="$t('common.buttons.edit')" @click="goto('UserAddEdit', {userId: ctx.user.id})"
+        <os-button-link left-icon="edit"
+          :label="$t('common.buttons.edit')" :url="editUserUrl"
           v-if="updateAllowed"
         />
 
-        <os-button left-icon="edit"
-          :label="$t('common.buttons.edit')" @click="goto('UserEditProfile', {userId: ctx.user.id})"
+        <os-button-link left-icon="edit"
+          :label="$t('common.buttons.edit')" :url="editProfileUrl"
           v-if="!updateAllowed && ui.currentUser.id == ctx.user.id"
         />
 
@@ -40,8 +40,8 @@
           v-show-if-allowed="userResources.deleteOpts"
         />
 
-        <os-button left-icon="key"
-          :label="$t('users.change_password')" @click="goto('UserChangePassword', {userId: ctx.user.id})"
+        <os-button-link left-icon="key"
+          :label="$t('users.change_password')" :url="changePasswordUrl"
           v-if="ctx.user.type != 'CONTACT' && ctx.user.domainName == 'openspecimen' &&
             (ui.currentUser.id == ctx.user.id || ui.currentUser.admin || ui.currentUser.instituteAdmin) &&
             (ctx.user.activityStatus == 'Active' || ctx.user.activityStatus == 'Expired')"
@@ -141,6 +141,18 @@ export default {
   computed: {
     updateAllowed: function() {
       return userResources.isUpdateAllowed();
+    },
+
+    editUserUrl: function() {
+      return routerSvc.getUrl('UserAddEdit', {userId: this.ctx.user.id});
+    },
+
+    editProfileUrl: function() {
+      return routerSvc.getUrl('UserEditProfile', {userId: this.ctx.user.id});
+    },
+
+    changePasswordUrl: function() {
+      return routerSvc.getUrl('UserChangePassword', {userId: this.ctx.user.id});
     }
   },
 
@@ -157,8 +169,6 @@ export default {
 
       ctx.userObjs = [{objectName: 'user', objectId: this.user.id}];
     },
-
-    goto: (name, params, query) => routerSvc.goto(name, params, query),
 
     updateStatus: function(status, msg) {
       let self = this;

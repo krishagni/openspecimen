@@ -25,8 +25,7 @@
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
               <span v-show-if-allowed="'admin'">
-                <os-button left-icon="plus" :label="$t('common.buttons.create')"
-                  @click="$goto('UserRoleAddEdit', {roleId: -1}, {})" />
+                <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createRoleUrl" />
               </span>
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
@@ -107,6 +106,12 @@ export default {
       } else {
         this.showTable(newValue == -2);
       }
+    }
+  },
+
+  computed: {
+    createRoleUrl: function() {
+      return routerSvc.getUrl('UserRoleAddEdit', {roleId: -1});
     }
   },
 

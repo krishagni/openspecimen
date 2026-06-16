@@ -32,17 +32,17 @@
               <span class="title">{{ctx.selectedForm.formCaption}}</span>
               <span v-if="entity.isActive && entity.isUpdateAllowed">
                 <span v-if="!ctx.selectedRecord || !ctx.selectedRecord.recordId">
-                  <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="addRecord" />
+                  <os-button-link left-icon="plus" :label="$t('common.buttons.add')" :url="addRecordUrl" />
                 </span>
                 <span v-else>
-                  <os-button primary left-icon="edit"
-                    :label="$t('common.buttons.edit')" @click="editRecord(ctx.selectedRecord)" />
+                  <os-button-link primary left-icon="edit"
+                    :label="$t('common.buttons.edit')" :url="editRecordUrl(ctx.selectedRecord)" />
 
                   <os-button danger left-icon="trash"
                     :label="$t('common.buttons.delete')" @click="deleteRecord(ctx.selectedRecord)" />
 
-                  <os-button v-if="ctx.selectedForm.multiRecord" left-icon="plus"
-                    :label="$t('common.buttons.add_another')" @click="addRecord" />
+                  <os-button-link v-if="ctx.selectedForm.multiRecord" left-icon="plus"
+                    :label="$t('common.buttons.add_another')" :url="addRecordUrl" />
                 </span>
               </span>
             </span>
@@ -80,7 +80,7 @@
                     </td>
                     <td>
                       <os-button-group v-if="entity.isActive && entity.isUpdateAllowed">
-                        <os-button left-icon="edit"  size="small" @click="editRecord(record)" />
+                        <os-button-link left-icon="edit" size="small" :url="editRecordUrl(record)" />
                         <os-button left-icon="trash" size="small" @click="deleteRecord(record)" />
                       </os-button-group>
                     </td>
@@ -176,6 +176,16 @@ export default {
     return { ctx };
   },
 
+  computed: {
+    addRecordUrl: function() {
+      let selectedForm = this.ctx.selectedForm;
+      return this.$router.resolve({
+        name: this.addEditView,
+        query: { ...this.routeQuery, formId: selectedForm.formId, formCtxtId: selectedForm.formCtxtId }
+      }).href;
+    }
+  },
+
   methods: {
     onFormSelect: function(event, replace) {
       let form = event.item;
@@ -198,17 +208,9 @@ export default {
       });
     },
 
-    addRecord: function() {
+    editRecordUrl: function(record) {
       let selectedForm = this.ctx.selectedForm;
-      this.$router.push({
-        name: this.addEditView,
-        query: { ...this.routeQuery, formId: selectedForm.formId, formCtxtId: selectedForm.formCtxtId }
-      });
-    },
-
-    editRecord: function(record) {
-      let selectedForm = this.ctx.selectedForm;
-      this.$router.push({
+      return this.$router.resolve({
         name: this.addEditView,
         query: {
           ...this.routeQuery,
@@ -216,7 +218,7 @@ export default {
           formCtxtId: selectedForm.formCtxtId,
           recordId: record.recordId || record.id
         }
-      });
+      }).href;
     },
 
     deleteRecord: function(record) {

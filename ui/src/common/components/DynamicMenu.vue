@@ -8,8 +8,8 @@
       </li>
     </ul>
     <ul class="options">
-      <li v-for="(option, idx) of options || []" :key="idx" @click="optionSelected($event, option)">
-        <a> {{option.displayName}} </a>
+      <li v-for="(option, idx) of options || []" :key="idx">
+        <a :href="option.url" @click="optionSelected($event, option)"> {{option.displayName}} </a>
       </li>
 
       <li v-if="options && options.length == 0">
@@ -59,12 +59,20 @@ export default {
     },
 
     optionSelected: function(event, option) {
+      if (option && option.url && this._isModifiedClick(event)) {
+        this.$refs.menuOptions.hide(event);
+        return;
+      }
+
       if (event) {
         this.$refs.menuOptions.toggle(event);
       }
 
-
       this.$emit('option-selected', option);
+    },
+
+    _isModifiedClick: function(event) {
+      return event && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0);
     }
   }
 }

@@ -9,7 +9,7 @@
     @node-select="selectContainer"
     :loading="loading">
     <template #default="slotProps">
-      <a :ref="'node-' + slotProps.node.key" @click="nodeClick">
+      <a :ref="'node-' + slotProps.node.key" :href="nodeUrl(slotProps.node)" @click="nodeClick">
         <span>{{slotProps.node.label}}</span>
       </a>
     </template>
@@ -19,6 +19,7 @@
 <script>
 import Tree from 'primevue/tree';
 
+import routerSvc from '@/common/services/Router.js';
 import containerSvc from '@/administrative/services/Container.js';
 
 export default {
@@ -176,6 +177,20 @@ export default {
 
       this.selectedNodes = {}
       this.selectedNodes[node.key] = true;
+    },
+
+    nodeUrl: function(node) {
+      const route = this.$route.matched[this.$route.matched.length - 1];
+      return routerSvc.getUrl(route.name, {containerId: node.data.container.id}, this.$route.query);
+    },
+
+    nodeClick: function(event) {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.button != 0) {
+        event.stopPropagation();
+        return;
+      }
+
+      event.preventDefault();
     },
 
     getStatusBallColor: function(container) {

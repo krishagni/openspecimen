@@ -11,7 +11,7 @@
     </template>
 
     <template #secondary-actions>
-      <os-button text label="Return to Sign In Page" @click="gotoSignIn" />
+      <a :href="signInUrl">Return to Sign In Page</a>
     </template>
   </FormCard>
 </template>
@@ -33,9 +33,9 @@ export default {
     };
   },
 
-  methods: {
-    gotoSignIn: function() {
-      routerSvc.goto('UserLogin');
+  computed: {
+    signInUrl: function() {
+      return routerSvc.getUrl('UserLogin');
     }
   }
 }

@@ -27,12 +27,12 @@
             </span>
 
             <span v-else>
-              <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createContainer"
+              <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createContainerUrl"
                 v-show-if-allowed="containerResources.createOpts" />
 
-              <os-button left-icon="cubes" :label="$t('containers.types')" @click="viewContainerTypes" />
+              <os-button-link left-icon="cubes" :label="$t('containers.types')" :url="containerTypesUrl" />
 
-              <os-button left-icon="tasks" :label="$t('containers.tasks')" @click="viewContainerTasks" />
+              <os-button-link left-icon="tasks" :label="$t('containers.tasks')" :url="containerTasksUrl" />
 
               <os-menu :label="$t('common.buttons.import')" :options="importOpts"
                 v-show-if-allowed="containerResources.importOpts" />
@@ -172,12 +172,12 @@ export default {
         {
           icon: 'box-open',
           caption: this.$t('containers.list'),
-          onSelect: () => routerSvc.goto('ContainerImportRecords')
+          url: routerSvc.getUrl('ContainerImportRecords')
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.goto('ContainerImportJobs')
+          url: routerSvc.getUrl('ContainerImportJobs')
         }
       ],
 
@@ -199,45 +199,57 @@ export default {
       return result;
     },
 
+    createContainerUrl: function() {
+      return routerSvc.getUrl('ContainerAddEdit', {containerId: -1});
+    },
+
+    containerTypesUrl: function() {
+      return routerSvc.getUrl('ContainerTypesList', {typeId: -1});
+    },
+
+    containerTasksUrl: function() {
+      return routerSvc.getUrl('ContainerTasksList');
+    },
+
     actionOpts: function() {
       const actionOpts = [];
       if (authSvc.isAllowed(containerResources.updateOpts)) {
         actionOpts.push({
           icon: 'archive',
           caption: this.$t('common.buttons.archive'),
-          onSelect: () => routerSvc.goto('BulkContainerArchive')
+          url: routerSvc.getUrl('BulkContainerArchive')
         });
         actionOpts.push({
           icon: 'sign-in-alt',
           caption: this.$t('containers.check_in_button'),
-          onSelect: () => routerSvc.goto('BulkContainerCheckin')
+          url: routerSvc.getUrl('BulkContainerCheckin')
         });
         actionOpts.push({
           icon: 'sign-out-alt',
           caption: this.$t('containers.check_out_button'),
-          onSelect: () => routerSvc.goto('BulkContainerCheckout')
+          url: routerSvc.getUrl('BulkContainerCheckout')
         });
         actionOpts.push({
           icon: 'arrows-alt-h',
           caption: this.$t('containers.transfer'),
-          onSelect: () => routerSvc.goto('BulkContainerTransfer')
+          url: routerSvc.getUrl('BulkContainerTransfer')
         });
         actionOpts.push({
           icon: 'box',
           caption: this.$t('containers.find_places.title'),
-          onSelect: () => routerSvc.goto('ContainerFindPlaces')
+          url: routerSvc.getUrl('ContainerFindPlaces')
         });
         actionOpts.push({
           icon: 'check',
           caption: this.$t('containers.unblock'),
-          onSelect: () => routerSvc.goto('UnblockLocations')
+          url: routerSvc.getUrl('UnblockLocations')
         });
 
         if (this.ctx.scanners && this.ctx.scanners.length > 0) {
           actionOpts.push({
             icon: 'qrcode',
             caption: this.$t('containers.scan_boxes'),
-            onSelect: () => routerSvc.goto('ScanBoxes')
+            url: routerSvc.getUrl('ScanBoxes')
           });
         }
       }
@@ -346,18 +358,6 @@ export default {
       await containerSvc.bulkDelete(containerIds, true);
       alertsSvc.success({code: 'containers.bulk_deleted'});
       this.$refs.listView.reload();
-    },
-
-    createContainer: function() {
-      routerSvc.goto('ContainerAddEdit', {containerId: -1});
-    },
-
-    viewContainerTypes: function() {
-      routerSvc.goto('ContainerTypesList', {typeId: -1});
-    },
-
-    viewContainerTasks: function() {
-      routerSvc.goto('ContainerTasksList');
     },
 
     showTransferReportDialog: function() {

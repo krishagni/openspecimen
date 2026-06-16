@@ -30,10 +30,10 @@
             </template>
             <template #default>
               <div class="modules-list">
-                <div class="module" :class="ctx.selectedModule == module ? 'selected' : ''"
-                  v-for="(module, idx) in ctx.modules" :key="idx" @click="selectModule(module)">
+                <a class="module" :class="ctx.selectedModule == module ? 'selected' : ''"
+                  v-for="(module, idx) in ctx.modules" :key="idx" :href="moduleUrl(module)">
                   <span v-t="'settings.' + module + '.title'">{{module}}</span>
-                </div>
+                </a>
               </div>
             </template>
           </os-panel>
@@ -64,7 +64,7 @@
                   <tr v-for="(setting, idx) in ctx.settings[ctx.selectedModule]"
                     :key="idx" @click="selectSetting(setting)">
                     <td>
-                      <span>{{setting.uiName}}</span>
+                      <a :href="settingUrl(setting)" @click.stop>{{setting.uiName}}</a>
                     </td>
                     <td>
                       <os-html :content="setting.uiDesc" />
@@ -267,8 +267,17 @@ export default {
       );
     },
 
+    moduleUrl: function(module) {
+      return routerSvc.getUrl('SettingsList', {}, {module, property: undefined});
+    },
+
     selectModule: function(module) {
       routerSvc.goto('SettingsList', {}, {module, property: undefined});
+    },
+
+    settingUrl: function(setting) {
+      const {module, name: property} = setting;
+      return routerSvc.getUrl('SettingsList', {}, {module, property});
     },
 
     selectSetting: function(setting) {
@@ -422,9 +431,12 @@ export default {
 }
 
 .module {
+  display: block;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #ddd;
   cursor: pointer;
+  color: inherit;
+  text-decoration: none;
 }
 
 .module:last-child {

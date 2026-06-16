@@ -50,7 +50,8 @@
         :selected-positions="ctx.selectedPositions" :focussed-occupant="ctx.focussedOccupant"
         @occupant-clicked="showOccupantDetails" v-if="!isDimensionless">
         <template #occupant_container="slotProps">
-          <a class="occupant" @click="showOccupantDetails($event, slotProps.occupant)">
+          <a class="occupant" :href="occupantUrl(slotProps.occupant)"
+            @click="showOccupantDetails($event, slotProps.occupant)">
             <os-icon class="blocked" name="ban" v-os-tooltip="$t('containers.blocked')"
               v-if="slotProps.occupant.blocked" />
             <os-icon class="container-icon" name="box-open" v-else />
@@ -60,7 +61,7 @@
           </a>
         </template>
         <template #occupant_specimen="slotProps">
-          <a class="occupant" 
+          <a class="occupant" :href="occupantUrl(slotProps.occupant)"
             :class="{'new-occupant': !slotProps.occupant.id, 'displaced-occupant': !!slotProps.occupant.oldOccupant}"
             @click="showOccupantDetails($event, slotProps.occupant)">
 
@@ -93,9 +94,9 @@
           </div>
         </template>
         <template #empty="slotProps">
-          <div v-if="!ctx.container.storeSpecimensEnabled">
-            <os-button text left-icon="plus" v-os-tooltip="$t('containers.click_to_add_container')"
-              @click="createContainer(slotProps)" /> 
+          <div class="add-button" v-if="!ctx.container.storeSpecimensEnabled">
+            <os-button-link left-icon="plus" :url="createContainerUrl(slotProps)"
+              v-os-tooltip="$t('containers.click_to_add_container')" />
           </div>
           <div v-else>
             <os-boolean-checkbox class="position-selector"
@@ -109,7 +110,7 @@
           <span v-t="'containers.no_map_for_dimless'">The map view is not available for dimensionless container.</span>
         </os-message>
 
-        <os-button primary :label="$t('containers.view_specimens')" @click="viewSpecimens" />
+        <os-button-link primary :label="$t('containers.view_specimens')" :url="specimensUrl" />
       </div>
     </os-grid-column>
 
@@ -263,6 +264,10 @@ export default {
 
     isSpecimenContainer: function() {
       return this.ctx.container.storeSpecimensEnabled && this.ctx.container.usedFor == 'STORAGE';
+    },
+
+    specimensUrl: function() {
+      return routerSvc.getUrl('ContainerDetail.Specimens', {containerId: this.ctx.container.id});
     }
   },
 
@@ -333,9 +338,30 @@ export default {
       ); 
     },
 
+    occupantUrl: function(occupant) {
+      const entityId = occupant.occupyingEntityId || occupant.blockedEntityId;
+      if (!entityId) {
+        return null;
+      }
+
+      if (occupant.occuypingEntity == 'container') {
+        return routerSvc.getUrl('ContainerDetail.Overview', {containerId: entityId});
+      }
+
+      return routerSvc.getUrl('SpecimenResolver', {specimenId: entityId});
+    },
+
     showOccupantDetails: async function(event, occupant) {
       if (!occupant.id) {
         return;
+      }
+
+      if (this.occupantUrl(occupant)) {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.button != 0) {
+          return;
+        }
+
+        event.preventDefault();
       }
 
       this.ctx.occupant = {};
@@ -392,8 +418,8 @@ export default {
       this.$emit('toggle-container-tree', {show: true});
     },
 
-    createContainer: function({position}) {
-      routerSvc.goto('ContainerAddEdit', {containerId: -1}, { parentContainerName: this.container.name,
+    createContainerUrl: function({position}) {
+      return routerSvc.getUrl('ContainerAddEdit', {containerId: -1}, { parentContainerName: this.container.name,
         row: position.rowStr, column: position.columnStr, position: position.position});
     },
 
@@ -645,10 +671,6 @@ export default {
       return resp == 'proceed';
     },
 
-    viewSpecimens: function() {
-      routerSvc.goto('ContainerDetail.Specimens', {containerId: this.ctx.container.id});
-    },
-
     _addCpShortTitleAndPpid: function(dict) {
       const fixedFields = [
         {
@@ -798,6 +820,13 @@ export default {
 
 .os-container-locations .map :deep(button) {
   width: 100%;
+}
+
+.os-container-locations .map .add-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 }
 
 table.os-specimen-color-coding {

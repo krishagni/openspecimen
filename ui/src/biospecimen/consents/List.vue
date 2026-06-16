@@ -18,8 +18,7 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-button left-icon="plus" :label="$t('common.buttons.create')"
-            @click="$goto('ConsentStatementAddEdit', {statementId: -1})" />
+          <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createStatementUrl" />
 
           <os-plugin-views page="consent-statements" view="toolbar" />
         </template>
@@ -66,6 +65,12 @@ export default {
 
       listSchema,
     };
+  },
+
+  computed: {
+    createStatementUrl: function() {
+      return routerSvc.getUrl('ConsentStatementAddEdit', {statementId: -1});
+    }
   },
 
   methods: {

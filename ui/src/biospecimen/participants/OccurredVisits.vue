@@ -73,7 +73,6 @@ export default {
       if (!prev || prev.visit != rowObject.visit) {
         this.expandedVisits.push(rowObject);
       }
-      // this.gotoVisit(visit);
     },
 
     downloadReport: function({visit}) {
@@ -85,7 +84,7 @@ export default {
       options.push({
         icon: 'eye',
         caption: this.$t('participants.view_visit'),
-        onSelect: () => this.gotoVisit(visit)
+        url: this.getVisitUrl(visit)
       });
 
       if (this.cpr.hasConsented && this.cpViewCtx.isCreateVisitAllowed(this.cpr)) {
@@ -135,19 +134,19 @@ export default {
       return options;
     },
 
-    gotoVisit: function(visit) {
+    getVisitUrl: function(visit) {
       const route = routerSvc.getCurrentRoute();
       const params = {
         cpId: visit.cpId,
         cprId: visit.cprId,
-        visitId: visit.id || -1,
-        eventId: visit.eventId
+        visitId: visit.id || -1
       };
+      const {eventId} = visit;
 
       if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
-        routerSvc.goto('ParticipantsListItemVisitDetail.Overview', params);
+        return routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', params, {eventId});
       } else {
-        routerSvc.goto('VisitDetail.Overview', params);
+        return routerSvc.getUrl('VisitDetail.Overview', params, {eventId});
       }
     },
 

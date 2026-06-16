@@ -1,11 +1,11 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button v-show-if-allowed="typeResources.createOpts"
-        left-icon="box-open" :label="$t('container_types.create_container')" @click="createContainer" />
+      <os-button-link v-show-if-allowed="typeResources.createOpts"
+        left-icon="box-open" :label="$t('container_types.create_container')" :url="createContainerUrl" />
 
-      <os-button v-show-if-allowed="'institute-admin'"
-        left-icon="edit" :label="$t('common.buttons.edit')" @click="editType" />
+      <os-button-link v-show-if-allowed="'institute-admin'"
+        left-icon="edit" :label="$t('common.buttons.edit')" :url="editTypeUrl" />
 
       <os-button v-show-if-allowed="'institute-admin'"
         left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteType" />
@@ -67,6 +67,16 @@ export default {
     }
   },
 
+  computed: {
+    createContainerUrl: function() {
+      return routerSvc.getUrl('ContainerAddEdit', {containerId: -1}, {typeId: this.type.id, mode: 'hierarchy'});
+    },
+
+    editTypeUrl: function() {
+      return routerSvc.getUrl('ContainerTypeAddEdit', {typeId: this.type.id});
+    }
+  },
+
   methods: {
     setupView: async function() {
       this.ctx.type = this.type;
@@ -77,14 +87,6 @@ export default {
         dependents: () => typesSvc.getDependents(this.type),
         deleteObj: () => typesSvc.delete(this.type)
       };
-    },
-
-    createContainer: function() {
-      routerSvc.goto('ContainerAddEdit', {containerId: -1}, {typeId: this.type.id, mode: 'hierarchy'});
-    },
-
-    editType: function() {
-      routerSvc.goto('ContainerTypeAddEdit', {typeId: this.type.id});
     },
 
     deleteType: function() {

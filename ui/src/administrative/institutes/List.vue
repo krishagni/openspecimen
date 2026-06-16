@@ -28,8 +28,8 @@
             <template #default>
               <span v-show-if-allowed="'admin'">
                 <span v-if="!ctx.selectedInstitutes || ctx.selectedInstitutes.length == 0">
-                  <os-button left-icon="plus" :label="$t('common.buttons.create')"
-                    @click="$goto('InstituteAddEdit', {instituteId: -1})" />
+                  <os-button-link left-icon="plus" :label="$t('common.buttons.create')"
+                    :url="createInstituteUrl" />
 
                   <os-menu :label="$t('common.buttons.import')" :options="importOpts" />
                 </span>
@@ -107,12 +107,12 @@ export default {
         {
           icon: 'university',
           caption: this.$t('institutes.list'),
-          onSelect: () => routerSvc.goto('InstituteImportRecords')
+          url: routerSvc.getUrl('InstituteImportRecords')
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.goto('InstituteImportJobs')
+          url: routerSvc.getUrl('InstituteImportJobs')
         }
       ]
     };
@@ -138,6 +138,12 @@ export default {
       } else {
         this.showTable(newValue == -2);
       }
+    }
+  },
+
+  computed: {
+    createInstituteUrl: function() {
+      return routerSvc.getUrl('InstituteAddEdit', {instituteId: -1});
     }
   },
 

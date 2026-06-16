@@ -66,6 +66,7 @@ export default {
 }
 
 .os-panel :deep(.p-panel-header button.btn),
+.os-panel :deep(.p-panel-header a.button-link),
 .os-panel :deep(.p-panel-header .os-btn-group) {
   margin-right: 0.25rem;
 }

@@ -2,7 +2,7 @@
   <os-page-toolbar>
     <template #default>
       <span v-show-if-allowed="'institute-admin'">
-        <os-button left-icon="edit" label="Edit" @click="$goto('SiteAddEdit', {siteId: ctx.site.id})" />
+        <os-button-link left-icon="edit" label="Edit" :url="editSiteUrl" />
 
         <os-button left-icon="trash" label="Delete" @click="deleteSite" />
 
@@ -55,6 +55,12 @@ export default {
       if (newVal != oldVal) {
         this.setupSite();
       }
+    }
+  },
+
+  computed: {
+    editSiteUrl: function() {
+      return routerSvc.getUrl('SiteAddEdit', {siteId: this.ctx.site.id});
     }
   },
 

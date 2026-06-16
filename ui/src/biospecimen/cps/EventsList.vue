@@ -6,7 +6,7 @@
           <span v-t="'cps.events'">Events</span>
         </template>
         <template #actions>
-          <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="addEvent"
+          <os-button-link left-icon="plus" :label="$t('common.buttons.add')" :url="addEventUrl"
             v-if="!cp.specimenCentric" v-show-if-allowed="cpResources.updateOpts" />
         </template>
         <template #default="{item: {cpe}}">
@@ -31,8 +31,8 @@
 
         <template #actions v-if="ctx.selectedEvent && ctx.selectedEvent.cpe.id > 0 &&
           ctx.selectedEvent.cpe.activityStatus == 'Active'">
-          <os-button left-icon="plus" :label="$t('cps.add_req')"
-            @click="addReq(ctx.selectedEvent.cpe)"
+          <os-button-link left-icon="plus" :label="$t('cps.add_req')"
+            :url="addReqUrl(ctx.selectedEvent.cpe)"
             v-show-if-allowed="cpResources.updateOpts" />
         </template>
 
@@ -61,7 +61,7 @@
                 <span v-t="'cps.no_reqs_add_new'">No specimen requirements to show. Create a new specimen requirement by click on the Add Requirement button below</span>
               </os-message>
 
-              <os-button left-icon="plus" :label="$t('cps.add_req')" @click="addReq(ctx.selectedEvent.cpe)" />
+              <os-button-link left-icon="plus" :label="$t('cps.add_req')" :url="addReqUrl(ctx.selectedEvent.cpe)" />
             </div>
 
             <div v-else>
@@ -82,7 +82,7 @@
           <span v-t="'cps.no_cpes'"></span>
         </os-message>
 
-        <os-button left-icon="plus" :label="$t('cps.add_cpe')" @click="addEvent" />
+        <os-button-link left-icon="plus" :label="$t('cps.add_cpe')" :url="addEventUrl" />
       </div>
 
       <div v-else>
@@ -218,6 +218,10 @@ export default {
       const {cpe} = events && events.length > 0 ? events[0] : {};
       const reqs = (cpe && cpe.reqs) || [];
       return reqs.length > 0;
+    },
+
+    addEventUrl: function() {
+      return routerSvc.getUrl('CpDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: -1});
     }
   },
 
@@ -307,15 +311,15 @@ export default {
     eventOps: function({cpe}) {
       const ops = [];
       if (cpe.activityStatus != 'Closed') {
-        ops.push({icon: 'edit',  caption: this.$t('common.buttons.edit'),   onSelect: () => this.editEvent(cpe)});
-        ops.push({icon: 'copy',  caption: this.$t('common.buttons.copy'),   onSelect: () => this.copyEvent(cpe)});
+        ops.push({icon: 'edit', caption: this.$t('common.buttons.edit'), url: this.editEventUrl(cpe)});
+        ops.push({icon: 'copy', caption: this.$t('common.buttons.copy'), url: this.copyEventUrl(cpe)});
       }
 
       ops.push({icon: 'trash', caption: this.$t('common.buttons.delete'), onSelect: () => this.deleteEvent(cpe)});
       if (cpe.activityStatus != 'Closed') {
         ops.push({icon: 'ban',   caption: this.$t('common.buttons.close'),  onSelect: () => this.closeEvent(cpe)});
         ops.push({divider: true});
-        ops.push({icon: 'flask', caption: this.$t('cps.add_req'),  onSelect: () => this.addReq(cpe)});
+        ops.push({icon: 'flask', caption: this.$t('cps.add_req'), url: this.addReqUrl(cpe)});
       } else {
         ops.push({icon: 'check', caption: this.$t('common.buttons.reopen'), onSelect: () => this.reopenEvent(cpe)});
       }
@@ -323,16 +327,12 @@ export default {
       return ops;
     },
 
-    addEvent: function() {
-      routerSvc.goto('CpDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: -1});
+    editEventUrl: function(cpe) {
+      return routerSvc.getUrl('CpDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: cpe.id});
     },
 
-    editEvent: function(cpe) {
-      routerSvc.goto('CpDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: cpe.id});
-    },
-
-    copyEvent: function(cpe) {
-      routerSvc.goto('CpDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: -1, copyOf: cpe.id});
+    copyEventUrl: function(cpe) {
+      return routerSvc.getUrl('CpDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: -1, copyOf: cpe.id});
     },
 
     deleteEvent: async function(cpe) {
@@ -404,11 +404,11 @@ export default {
     reqOps: function(cpe, {sr}) {
       const ops = [];
       if (sr.activityStatus == 'Active') {
-        ops.push({icon: 'edit', caption: this.$t('common.buttons.edit'), onSelect: () => this.editReq(sr)});
+        ops.push({icon: 'edit', caption: this.$t('common.buttons.edit'), url: this.editReqUrl(sr)});
         ops.push({icon: 'copy', caption: this.$t('common.buttons.copy'), onSelect: () => this.copyReq(cpe, sr)});
         ops.push({divider: true});
-        ops.push({icon: 'share-alt', caption: this.$t('cps.create_aliquots'), onSelect: () => this.createAliquots(cpe, sr)});
-        ops.push({icon: 'flask', caption: this.$t('cps.create_derivative'), onSelect: () => this.createDerivative(cpe, sr)});
+        ops.push({icon: 'share-alt', caption: this.$t('cps.create_aliquots'), url: this.createAliquotsUrl(cpe, sr)});
+        ops.push({icon: 'flask', caption: this.$t('cps.create_derivative'), url: this.createDerivativeUrl(cpe, sr)});
         ops.push({divider: true});
         ops.push({icon: 'ban', caption: this.$t('common.buttons.close'), onSelect: () => this.closeReq(cpe, sr)});
       } else {
@@ -419,12 +419,12 @@ export default {
       return ops;
     },
 
-    addReq: function(cpe) {
-      routerSvc.goto('CpDetail.Events.AddEditReq', {cpId: this.cp.id}, {eventId: cpe.id});
+    addReqUrl: function(cpe) {
+      return routerSvc.getUrl('CpDetail.Events.AddEditReq', {cpId: this.cp.id}, {eventId: cpe.id});
     },
 
-    editReq: function(sr) {
-      routerSvc.goto('CpDetail.Events.AddEditReq', {cpId: this.cp.id}, {eventId: sr.eventId, reqId: sr.id});
+    editReqUrl: function(sr) {
+      return routerSvc.getUrl('CpDetail.Events.AddEditReq', {cpId: this.cp.id}, {eventId: sr.eventId, reqId: sr.id});
     },
 
     copyReq: function(cpe, sr) {
@@ -440,12 +440,12 @@ export default {
       );
     },
 
-    createAliquots: function(cpe, sr) {
-      routerSvc.goto('CpDetail.Events.CreateAliquots', {cpId: this.cp.id}, {eventId: cpe.id, parentReqId: sr.id});
+    createAliquotsUrl: function(cpe, sr) {
+      return routerSvc.getUrl('CpDetail.Events.CreateAliquots', {cpId: this.cp.id}, {eventId: cpe.id, parentReqId: sr.id});
     },
 
-    createDerivative: function(cpe, sr) {
-      routerSvc.goto('CpDetail.Events.CreateDerivedReq', {cpId: this.cp.id}, {eventId: cpe.id, parentReqId: sr.id});
+    createDerivativeUrl: function(cpe, sr) {
+      return routerSvc.getUrl('CpDetail.Events.CreateDerivedReq', {cpId: this.cp.id}, {eventId: cpe.id, parentReqId: sr.id});
     },
 
     deleteReq: async function(cpe, sr) {

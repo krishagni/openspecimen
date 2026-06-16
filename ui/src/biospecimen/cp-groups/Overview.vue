@@ -1,7 +1,7 @@
 <template>
   <os-page-toolbar v-if="ctx.selectedCps.length == 0 && (updateAllowed || importAllowed || exportAllowed || canAddCps)">
     <template #default>
-      <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="gotoEdit" v-if="updateAllowed" />
+      <os-button-link left-icon="edit" :label="$t('common.buttons.edit')" :url="editUrl" v-if="updateAllowed" />
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteCpg" v-if="updateAllowed" />
 
@@ -29,12 +29,12 @@
         @rowClicked="onCpRowClick" @selectedRows="onCpsSelection" @filtersUpdated="loadCps">
         <template #rowActions="{rowObject}">
           <os-button-group>
-            <os-button left-icon="user-friends" v-os-tooltip.bottom="$t('cps.view_participants')"
-              @click="viewParticipants(rowObject.cp)" v-if="!rowObject.cp.specimenCentric" />
-            <os-button left-icon="flask" v-os-tooltip.bottom="$t('cps.view_specimens')"
-              @click="viewSpecimens(rowObject.cp)" />
-            <os-button left-icon="table" v-os-tooltip.bottom="$t('cps.view_catalog')"
-              @click="viewCatalog(rowObject.cp)" v-if="rowObject.cp.catalogId > 0" />
+            <os-button-link left-icon="user-friends" :url="participantsUrl(rowObject.cp)"
+              v-os-tooltip.bottom="$t('cps.view_participants')" v-if="!rowObject.cp.specimenCentric" />
+            <os-button-link left-icon="flask" :url="specimensUrl(rowObject.cp)"
+              v-os-tooltip.bottom="$t('cps.view_specimens')" />
+            <os-button-link left-icon="table" :url="catalogUrl(rowObject.cp)"
+              v-os-tooltip.bottom="$t('cps.view_catalog')" v-if="rowObject.cp.catalogId > 0" />
             <os-button left-icon="times" v-os-tooltip.bottom="$t('common.buttons.remove')"
               @click="removeCp(rowObject.cp)" v-if="rowObject.updateAllowed" />
           </os-button-group>
@@ -200,6 +200,10 @@ export default {
       return (this.ctx.cps || []).map(cp => ({cp, updateAllowed: this._isUpdateAllowed(cp)}));
     },
 
+    editUrl: function() {
+      return routerSvc.getUrl('CpgAddEdit', {cpgId: this.cpg.id});
+    },
+
     workflowsUploadUrl: function() {
       return http.getUrl('collection-protocol-groups/' + this.cpg.id + '/workflows-file');
     },
@@ -230,10 +234,6 @@ export default {
 
     nextPage: function() {
       this._loadCps(this.ctx.startAt + this.ctx.pageSize - 1);
-    },
-
-    gotoEdit: function() {
-      routerSvc.goto('CpgAddEdit', {cpgId: this.cpg.id});
     },
 
     deleteCpg: function() {
@@ -292,16 +292,16 @@ export default {
       this.ctx.selectedCps = (selection || []).map(({rowObject: {cp}}) => cp);
     },
 
-    viewParticipants: function(cp) {
-      routerSvc.goto('ParticipantsList', {cpId: cp.id});
+    participantsUrl: function(cp) {
+      return routerSvc.getUrl('ParticipantsList', {cpId: cp.id});
     },
 
-    viewSpecimens: function(cp) {
-      routerSvc.goto('ParticipantsList', {cpId: cp.id}, {view: 'specimens_list'});
+    specimensUrl: function(cp) {
+      return routerSvc.getUrl('ParticipantsList', {cpId: cp.id}, {view: 'specimens_list'});
     },
 
-    viewCatalog: function(cp) {
-      routerSvc.goto('CatalogSearch', {catalogId: cp.catalogId}, {cpId: cp.id});
+    catalogUrl: function(cp) {
+      return routerSvc.getUrl('CatalogSearch', {catalogId: cp.catalogId}, {cpId: cp.id});
     },
 
     showAddCpsDialog: function() {

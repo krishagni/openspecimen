@@ -20,8 +20,8 @@
         <os-page-body>
           <os-page-toolbar>
             <template #default>
-              <os-button left-icon="plus" :label="$t('common.buttons.create')"
-                @click="$goto('JobAddEdit', {jobId: -1}, {})" v-show-if-allowed="jobResources.createOpts" />
+              <os-button-link left-icon="plus" :label="$t('common.buttons.create')"
+                :url="createJobUrl" v-show-if-allowed="jobResources.createOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://openspecimen.atlassian.net/wiki/x/CgBeAw" new-tab="true" />
@@ -137,6 +137,12 @@ export default {
     };
   },
 
+  computed: {
+    createJobUrl: function() {
+      return routerSvc.getUrl('JobAddEdit', {jobId: -1});
+    }
+  },
+
   methods: {
     openSearch: function() {
       this.$refs.listView.toggleShowFilters();
@@ -168,7 +174,7 @@ export default {
         options.push({
           icon: 'edit',
           caption: this.$t('common.buttons.edit'),
-          onSelect: () => this.editJob(job)
+          url: this.editJobUrl(job)
         });
       }
 
@@ -183,14 +189,14 @@ export default {
       options.push({
         icon: 'list',
         caption: this.$t('jobs.view_runs'),
-        onSelect: () => this.viewJobRuns(job)
+        url: this.jobRunsUrl(job)
       });
 
       return options;
     },
 
     onJobRowClick: function({job}) {
-      this.editJob(job);
+      routerSvc.goto('JobAddEdit', {jobId: job.id});
     },
 
     executeJob: function({job}) {
@@ -217,8 +223,8 @@ export default {
       this.$refs.jobArgsDialog.close();
     },
 
-    editJob: function(job) {
-      routerSvc.goto('JobAddEdit', {jobId: job.id});
+    editJobUrl: function(job) {
+      return routerSvc.getUrl('JobAddEdit', {jobId: job.id});
     },
 
     deleteJob: function(job) {
@@ -235,8 +241,8 @@ export default {
       );
     },
 
-    viewJobRuns: function(job) {
-      routerSvc.goto('JobRunsList', {jobId: job.id});
+    jobRunsUrl: function(job) {
+      return routerSvc.getUrl('JobRunsList', {jobId: job.id});
     }
   }
 }

@@ -62,7 +62,7 @@ export default {
         {
           icon: 'eye',
           caption: this.$t('participants.view_visit'),
-          onSelect: () => this._gotoVisit(visit)
+          url: this._getVisitUrl(visit)
         }
       ];
 
@@ -145,13 +145,13 @@ export default {
       };
     },
 
-    _gotoVisit: function({cpId, cprId, id, eventId}) {
+    _getVisitUrl: function({cpId, cprId, id, eventId}) {
       const route = routerSvc.getCurrentRoute();
       const params = {cpId, cprId, visitId: id || -1};
       if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
-        routerSvc.goto('ParticipantsListItemVisitDetail.Overview', params, {eventId});
+        return routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', params, {eventId});
       } else {
-        routerSvc.goto('VisitDetail.Overview', params, {eventId});
+        return routerSvc.getUrl('VisitDetail.Overview', params, {eventId});
       }
     },
   }

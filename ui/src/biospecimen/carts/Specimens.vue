@@ -92,29 +92,6 @@ export default {
       listInfo: { rows: [], size: 0, pageSize: 0 },
 
       selectedSpecimens: [],
-
-      moreOpts: [
-        {
-          icon: 'edit',
-          caption: this.$t('carts.edit_or_delete'),
-          onSelect: () => routerSvc.goto('SpecimenCartAddEdit', {cartId: this.cartId})
-        },
-        {
-          icon: 'plus',
-          caption: this.$t('carts.include_child_specimens'),
-          onSelect: () => this.addChildSpecimens()
-        },
-        {
-          icon: 'download',
-          caption: this.$t('carts.download_report'),
-          onSelect: () => this.downloadReport()
-        },
-        {
-          icon: 'trash',
-          caption: this.$t('carts.remove_from_cart'),
-          onSelect: () => this.removeFromCart()
-        }
-      ],
     };
   },
 
@@ -133,6 +110,31 @@ export default {
   computed: {
     displayName: function() {
       return cartSvc.getDisplayName(this.ctx.cart);
+    },
+
+    moreOpts: function() {
+      return [
+        {
+          icon: 'edit',
+          caption: this.$t('carts.edit_or_delete'),
+          url: routerSvc.getUrl('SpecimenCartAddEdit', {cartId: this.cartId})
+        },
+        {
+          icon: 'plus',
+          caption: this.$t('carts.include_child_specimens'),
+          onSelect: () => this.addChildSpecimens()
+        },
+        {
+          icon: 'download',
+          caption: this.$t('carts.download_report'),
+          onSelect: () => this.downloadReport()
+        },
+        {
+          icon: 'trash',
+          caption: this.$t('carts.remove_from_cart'),
+          onSelect: () => this.removeFromCart()
+        }
+      ];
     }
   },
 

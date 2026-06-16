@@ -1,8 +1,8 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button v-show-if-allowed="orderResources.updateOpts"
-        left-icon="edit" :label="$t('common.buttons.edit')" @click="editOrder" />
+      <os-button-link v-show-if-allowed="orderResources.updateOpts"
+        left-icon="edit" :label="$t('common.buttons.edit')" :url="editOrderUrl" />
 
       <os-button left-icon="download" :label="$t('orders.download_report')" @click="downloadReport" />
 
@@ -78,6 +78,12 @@ export default {
     }
   },
 
+  computed: {
+    editOrderUrl: function() {
+      return routerSvc.getUrl('OrderAddEdit', {orderId: this.order.id});
+    }
+  },
+
   methods: {
     setupView: async function() {
       const ctx = this.ctx;
@@ -91,10 +97,6 @@ export default {
         const setting = await settingSvc.getSetting('common', 'distribution_report_query');
         ctx.rptTmplConfigured = !!setting[0].value;
       }
-    },
-
-    editOrder: function() {
-      routerSvc.goto('OrderAddEdit', {orderId: this.order.id});
     },
 
     downloadReport: function() {

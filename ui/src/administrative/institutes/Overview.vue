@@ -2,8 +2,7 @@
   <os-page-toolbar>
     <template #default>
       <span v-show-if-allowed="'admin'">
-        <os-button left-icon="edit" :label="$t('common.buttons.edit')"
-          @click="$goto('InstituteAddEdit', {instituteId: ctx.institute.id})" />
+        <os-button-link left-icon="edit" :label="$t('common.buttons.edit')" :url="editUrl" />
 
         <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteInstitute" />
 
@@ -61,6 +60,12 @@ export default {
 
     this.$watch(() => this.institute, setup);
     setup();
+  },
+
+  computed: {
+    editUrl: function() {
+      return routerSvc.getUrl('InstituteAddEdit', {instituteId: this.ctx.institute.id});
+    }
   },
 
   methods: {

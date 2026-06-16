@@ -1,7 +1,7 @@
 <template>
   <os-page-toolbar v-show-if-allowed="dpResources.updateOpts">
     <template #default>
-      <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="addRequirement" />
+      <os-button-link left-icon="plus" :label="$t('common.buttons.add')" :url="addRequirementUrl" />
     </template>
   </os-page-toolbar>
 
@@ -14,7 +14,7 @@
   >
     <template #rowActions="slotProps">
       <os-button-group :style="{'min-width': '3.25rem'}" v-show-if-allowed="dpResources.updateOpts">
-        <os-button left-icon="edit"  @click="editRequirement(slotProps.rowObject)"  />
+        <os-button-link left-icon="edit" :url="editRequirementUrl(slotProps.rowObject)" />
         <os-button left-icon="trash" @click="confirmDeleteReq(slotProps.rowObject)" />
       </os-button-group>
     </template>
@@ -64,6 +64,12 @@ export default {
     this.loadRequirements();
   },
 
+  computed: {
+    addRequirementUrl: function() {
+      return this._requirementUrl(-1);
+    }
+  },
+
   methods: {
     loadRequirements: async function() {
       this.ctx.loading = true;
@@ -73,18 +79,15 @@ export default {
       this.ctx.loading = false;
     },
 
-    addRequirement: function() {
-      const route = this.$route.matched[this.$route.matched.length - 1];
-      const view  = route.name.split('.')[0];
-
-      routerSvc.goto(view + '.Requirements.AddEdit', {dpId: this.dp.id, reqId: -1});
+    editRequirementUrl: function({requirement}) {
+      return this._requirementUrl(requirement.id);
     },
 
-    editRequirement: function({requirement}) {
+    _requirementUrl: function(reqId) {
       const route = this.$route.matched[this.$route.matched.length - 1];
       const view  = route.name.split('.')[0];
 
-      routerSvc.goto(view + '.Requirements.AddEdit', {dpId: this.dp.id, reqId: requirement.id});
+      return routerSvc.getUrl(view + '.Requirements.AddEdit', {dpId: this.dp.id, reqId});
     },
 
     confirmDeleteReq: function({requirement}) {

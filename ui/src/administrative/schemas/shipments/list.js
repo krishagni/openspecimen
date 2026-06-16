@@ -35,7 +35,7 @@ export default {
     {
       "name": "shipment.name",
       "captionCode": "shipments.name",
-      "href": (row, query) => routerSvc.getUrl('ShipmentsListItemDetail.Overview', {shipmentId: row.rowObject.shipment.id, query}),
+      "href": (row, query) => routerSvc.getUrl('ShipmentsListItemDetail.Overview', {shipmentId: row.rowObject.shipment.id}, query),
       "value": (rowObject) => '#' + rowObject.shipment.id + ' ' + rowObject.shipment.name
     },
     {

@@ -31,7 +31,7 @@ export default {
     {
       "name": "form.caption",
       "captionCode": "forms.form_name",
-      "href": ({rowObject: {form}}) => routerSvc.getUrl('FormsListItemDetail.Overview', {formId: form.formId})
+      "href": ({rowObject: {form}}, query) => routerSvc.getUrl('FormsListItemDetail.Overview', {formId: form.formId}, query)
     },
     {
       "name": "form.createdBy",

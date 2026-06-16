@@ -5,8 +5,8 @@
       <os-page-toolbar>
         <template #default>
           <span v-if="specimen.id > 0">
-            <os-button left-icon="edit" :label="$t('common.buttons.edit')"
-              @click="edit" v-if="isAnyUserUpdateAllowed" />
+            <os-button-link left-icon="edit" :label="$t('common.buttons.edit')"
+              :url="editUrl" v-if="isAnyUserUpdateAllowed" />
 
             <os-menu icon="plus" :label="$t('common.buttons.create')"
               :options="[
@@ -45,8 +45,8 @@
         </template>
 
         <template #content>
-          <EventsSummaryList :events="ctx.events" :hide-actions="!isUpdateAllowed"
-            @click="showEvent($event)" @edit-event="editEvent($event)" @delete-event="deleteEvent($event)" />
+          <EventsSummaryList :events="ctx.events" :hide-actions="!isUpdateAllowed" :event-url="editEventUrl"
+            @click="showEvent($event)" @delete-event="deleteEvent($event)" />
         </template>
       </os-section>
     </os-grid-column>
@@ -89,7 +89,7 @@
       <os-plugin-views page="specimen-detail" view="event-overview" :view-props="eventOverviewPluginProps" />
       <os-button danger left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteEvent(ctx.event)"
         v-if="!ctx.event.sysForm && isUpdateAllowed" />
-      <os-button primary left-icon="edit" :label="$t('common.buttons.edit')" @click="editEvent(ctx.event)"
+      <os-button-link primary left-icon="edit" :label="$t('common.buttons.edit')" :url="editEventUrl(ctx.event)"
         v-if="ctx.event.isEditable && isUpdateAllowed" />
     </template>
   </os-dialog>
@@ -292,15 +292,15 @@ export default {
       }
 
       return dict.map(field => ({...field, label: this.$t(field.labelCode)}));
+    },
+
+    editUrl: function() {
+      const {cpId, cprId, visitId, eventId, id} = this.specimen;
+      return routerSvc.getUrl('SpecimenAddEdit', {cpId, cprId, visitId, specimenId: id}, {eventId});
     }
   },
 
   methods: {
-    edit: function() {
-      const {cpId, cprId, visitId, eventId, id} = this.specimen;
-      routerSvc.goto('SpecimenAddEdit', {cpId, cprId, visitId, specimenId: id}, {eventId});
-    },
-
     createAliquots: function() {
       wfSvc.createAliquots([this.ctx.specimen]);
     },
@@ -343,20 +343,20 @@ export default {
         eventForms => {
           this.ctx.eventForms = eventForms
             .filter(f => !f.sysForm)
-            .map(eventForm => ({caption: eventForm.formCaption, onSelect: () => this.addEvent(eventForm)}));
+            .map(eventForm => ({caption: eventForm.formCaption, url: this.addEventUrl(eventForm)}));
         }
       );
     },
 
-    addEvent: function(form) {
+    addEventUrl: function(form) {
       const {cpId, cprId, visitId, eventId, id} = this.specimen;
-      routerSvc.goto('SpecimenEventAddEdit', {cpId, cprId, visitId, specimenId: id}, {eventId, formId: form.formId, formCtxtId: form.formCtxtId});
+      return routerSvc.getUrl('SpecimenEventAddEdit', {cpId, cprId, visitId, specimenId: id}, {eventId, formId: form.formId, formCtxtId: form.formCtxtId});
     },
 
-    editEvent: function(event) {
+    editEventUrl: function(event) {
       const {cpId, cprId, visitId, eventId, id} = this.specimen;
       const {formId, formCtxtId, id: recordId} = event;
-      routerSvc.goto('SpecimenEventAddEdit', {cpId, cprId, visitId, specimenId: id}, {eventId, formId, formCtxtId, recordId});
+      return routerSvc.getUrl('SpecimenEventAddEdit', {cpId, cprId, visitId, specimenId: id}, {eventId, formId, formCtxtId, recordId});
     },
 
     showEvent: function(event) {

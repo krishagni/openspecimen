@@ -33,11 +33,10 @@
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
               <span v-if="ctx.selectedUsers.length == 0 && !ctx.group">
-                <os-button left-icon="plus" :label="$t('common.buttons.create')"
-                  @click="goto('UserAddEdit', {userId: -1})"
+                <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createUserUrl"
                   v-show-if-allowed="userResources.createOpts" />
 
-                <os-button left-icon="users" :label="$t('users.groups')" @click="goto('UserGroupsList')" />
+                <os-button-link left-icon="users" :label="$t('users.groups')" :url="userGroupsUrl" />
 
                 <os-menu :label="$t('common.buttons.import')" :options="importOpts"
                   v-show-if-allowed="userResources.importOpts" />
@@ -420,33 +419,39 @@ export default {
       }
 
       routerSvc.goto('UserExportRecords');
-    },
-
-    goto: (name, params) => routerSvc.goto(name, params)
+    }
   },
 
   computed: {
+    createUserUrl: function() {
+      return routerSvc.getUrl('UserAddEdit', {userId: -1});
+    },
+
+    userGroupsUrl: function() {
+      return routerSvc.getUrl('UserGroupsList');
+    },
+
     importOpts: function() {
       return [
         {
           icon: 'user',
           caption: this.$t('users.list'),
-          onSelect: () => routerSvc.goto('UserImportRecords', {}, {objectType: 'user'})
+          url: routerSvc.getUrl('UserImportRecords', {}, {objectType: 'user'})
         },
         {
           icon: 'lock',
           caption: this.$t('users.user_roles'),
-          onSelect: () => routerSvc.goto('UserImportRecords', {}, {objectType: 'userRoles'})
+          url: routerSvc.getUrl('UserImportRecords', {}, {objectType: 'userRoles'})
         },
         {
           icon: 'copy',
           caption: this.$t('users.user_forms'),
-          onSelect: () => routerSvc.goto('UserImportRecords', {}, {objectType: 'extensions'})
+          url: routerSvc.getUrl('UserImportRecords', {}, {objectType: 'extensions'})
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.goto('UserImportJobs')
+          url: routerSvc.getUrl('UserImportJobs')
         }
       ]
     },
@@ -473,13 +478,13 @@ export default {
         opts.push({
           icon: 'download',
           caption: this.$t('users.export_login_activity'),
-          onSelect: () => this.goto('extrasLoginActivityReport')
+          url: routerSvc.getUrl('extrasLoginActivityReport')
         });
 
         opts.push({
           icon: 'tachometer-alt',
           caption: this.$t('users.active_users'),
-          onSelect: () => this.goto('extrasActiveUsersReport')
+          url: routerSvc.getUrl('extrasActiveUsersReport')
         });
       }
 

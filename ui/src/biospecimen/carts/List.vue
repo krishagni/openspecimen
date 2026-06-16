@@ -35,12 +35,12 @@
             <template #default>
               <span v-if="!ctx.folder">
                 <span v-if="ctx.selectedCarts.length == 0">
-                  <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createCart" />
+                  <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createCartUrl" />
 
-                  <os-button :label="$t('carts.view_my_def_cart')" @click="viewDefaultCart" />
+                  <os-button-link :label="$t('carts.view_my_def_cart')" :url="defaultCartUrl" />
                 </span>
 
-                <os-button left-icon="folder" :label="$t('carts.view_folders')" @click="viewFolders" />
+                <os-button-link left-icon="folder" :label="$t('carts.view_folders')" :url="foldersUrl" />
 
                 <AssignCart :carts="ctx.selectedCarts" />
               </span>
@@ -172,6 +172,20 @@ export default {
     }
   },
 
+  computed: {
+    createCartUrl: function() {
+      return routerSvc.getUrl('SpecimenCartAddEdit', {cartId: -1});
+    },
+
+    defaultCartUrl: function() {
+      return routerSvc.getUrl('CartSpecimensList', {cartId: 0}, {filters: this.filters, folderId: this.folderId});
+    },
+
+    foldersUrl: function() {
+      return routerSvc.getUrl('SpecimenCartsFoldersList');
+    }
+  },
+
   methods: {
     openSearch: function() {
       this.$refs.listView.toggleShowFilters();
@@ -243,14 +257,6 @@ export default {
       }
     },
 
-    createCart: function() {
-      routerSvc.goto('SpecimenCartAddEdit', {cartId: -1});
-    },
-
-    viewDefaultCart: function() {
-      routerSvc.goto('CartSpecimensList', {cartId: 0}, {filters: this.filters, folderId: this.folderId});
-    },
-
     onToggleStar: async function({cart}) {
       let resp;
       if (cart.starred) {
@@ -266,10 +272,6 @@ export default {
 
     onCartsSelection: function(carts) {
       this.ctx.selectedCarts = carts.map(({rowObject}) => ({id: +rowObject.cart.id}));
-    },
-
-    viewFolders: function() {
-      routerSvc.goto('SpecimenCartsFoldersList');
     },
 
     removeFromFolder: function() {

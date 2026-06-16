@@ -19,7 +19,7 @@
   <os-button v-else-if="!lazyLoad && items.length == 1 && !items[0].url"
     :left-icon="items[0].icon" :label="items[0].label" @click="items[0].command" />
   <os-button-link v-else-if="!lazyLoad && items.length == 1 && items[0].url"
-    :left-icon="items[0].icon" :label="items[0].label" :url="item[0].url" />
+    :left-icon="items[0].icon" :label="items[0].label" :url="items[0].url" />
 </template>
 
 <script>

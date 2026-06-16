@@ -13,7 +13,7 @@ export default {
       name: "queryName",
       captionCode: "queries.title",
       value: ({query}) => '#' + query.id + ' ' + query.title,
-      href: ({rowObject: {query}}) => routerSvc.getUrl('QueryDetail.Results', {queryId: query.id})
+      href: ({rowObject: {query}}, routeQuery) => routerSvc.getUrl('QueryDetail.Results', {queryId: query.id}, routeQuery)
     },
     {
       name: "updatedBy",

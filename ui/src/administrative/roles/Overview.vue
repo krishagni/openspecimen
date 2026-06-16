@@ -2,8 +2,7 @@
   <os-page-toolbar>
     <template #default>
       <span v-show-if-allowed="'admin'">
-        <os-button left-icon="edit" :label="$t('common.buttons.edit')"
-          @click="$goto('UserRoleAddEdit', {roleId: ctx.role.id})" />
+        <os-button-link left-icon="edit" :label="$t('common.buttons.edit')" :url="editRoleUrl" />
       </span>
     </template>
   </os-page-toolbar>
@@ -70,6 +69,8 @@
 </template>
 
 <script>
+import routerSvc from '@/common/services/Router.js';
+
 export default {
   props: ['role'],
 
@@ -98,6 +99,10 @@ export default {
   },
 
   computed: {
+    editRoleUrl: function() {
+      return routerSvc.getUrl('UserRoleAddEdit', {roleId: this.ctx.role.id});
+    },
+
     acl: function() {
       const order = ['Read', 'Create', 'Update', 'Delete', 'Export Import', 'Lock', 'Unlock'];
       const icons = ['eye', 'plus', 'edit', 'trash', 'upload', 'lock', 'unlock'];

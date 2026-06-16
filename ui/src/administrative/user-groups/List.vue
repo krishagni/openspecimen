@@ -17,7 +17,7 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-button left-icon="user" :label="$t('user_groups.users')" @click="$goto('UsersList', {userId: -1})" />
+          <os-button-link left-icon="user" :label="$t('user_groups.users')" :url="usersListUrl" />
         </template>
 
         <template #right>
@@ -38,7 +38,7 @@
       >
         <template #rowActions="{rowObject}">
           <os-button-group>
-            <os-button left-icon="edit"   size="small" @click="editGroup(rowObject)"   />
+            <os-button-link left-icon="edit" size="small" :url="editGroupUrl(rowObject)" />
             <os-button left-icon="trash"  size="small" @click="deleteGroup(rowObject)" />
           </os-button-group>
         </template>
@@ -107,8 +107,8 @@ export default {
       routerSvc.goto('UsersList', {userId: -1}, {groupId: group.id});
     },
 
-    editGroup: function(group) {
-      routerSvc.goto('UserGroupAddEdit', {groupId: group.id}, {});
+    editGroupUrl: function(group) {
+      return routerSvc.getUrl('UserGroupAddEdit', {groupId: group.id}, {});
     },
 
     deleteGroup: function(group) {
@@ -134,6 +134,10 @@ export default {
   },
 
   computed: {
+    usersListUrl: function() {
+      return routerSvc.getUrl('UsersList', {userId: -1});
+    },
+
     updateAllowed: function() {
       return authSvc.isAllowed({resource: 'User', operations: ['Update']})
     }

@@ -16,7 +16,7 @@
     </template>
 
     <template #secondary-actions>
-      <os-button text label="Return to Sign In Page" @click="gotoSignIn" />
+      <a :href="signInUrl">Return to Sign In Page</a>
     </template>
   </FormCard>
 </template>
@@ -44,6 +44,12 @@ export default {
     };
   },
 
+  computed: {
+    signInUrl: function() {
+      return routerSvc.getUrl('UserLogin');
+    }
+  },
+
   methods: {
     emailResetPasswordLink: function() {
       if (!this.$refs.form.validate()) {
@@ -57,10 +63,6 @@ export default {
           }
         }
       );
-    },
-
-    gotoSignIn: function() {
-      routerSvc.goto('UserLogin');
     }
   }
 }

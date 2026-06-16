@@ -191,7 +191,8 @@
           </os-message>
           <Layout class="map" :container="ctx.boxMap.container" :occupants="ctx.boxMap.occupants">
             <template #occupant_specimen="slotProps">
-              <a class="occupant" @click="showOccupantDetails($event, slotProps.occupant)">
+              <a class="occupant" :href="specimenUrl(slotProps.occupant)"
+                @click="showOccupantDetails($event, slotProps.occupant)">
                 <os-icon class="specimen-icon"
                   :class="{
                     'read-error': slotProps.occupant.readError,
@@ -541,6 +542,11 @@ export default {
       this.$refs.boxMapView.close();
     },
 
+    specimenUrl: function(occupant) {
+      return occupant && occupant.occupyingEntityId ?
+        routerSvc.getUrl('SpecimenResolver', {specimenId: occupant.occupyingEntityId}) : null;
+    },
+
     showOccupantDetails: async function(event, occupant) {
       const currentTarget = event.currentTarget;
       this.ctx.occupant = {};
@@ -548,6 +554,14 @@ export default {
       const entityId = occupant.occupyingEntityId;
       if (!entityId) {
         return;
+      }
+
+      if (this.specimenUrl(occupant)) {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.button != 0) {
+          return;
+        }
+
+        event.preventDefault();
       }
 
       if (!this.ctx.specimenDict) {

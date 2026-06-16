@@ -27,7 +27,7 @@
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
               <span v-if="!ctx.selectedDps || ctx.selectedDps.length == 0">
-                <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createDp"
+                <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createDpUrl"
                   v-show-if-allowed="dpResources.createOpts" />
 
                 <os-menu :label="$t('common.buttons.import')" :options="importOpts"
@@ -36,7 +36,7 @@
                 <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportDps"
                   v-show-if-allowed="dpResources.importOpts" />
 
-                <os-button left-icon="share" :label="$t('dps.view_orders')" @click="viewOrders"
+                <os-button-link left-icon="share" :label="$t('dps.view_orders')" :url="ordersUrl"
                   v-show-if-allowed="dpResources.orderOpts" />
 
                 <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
@@ -113,17 +113,17 @@ export default {
         {
           icon: 'truck',
           caption: this.$t('dps.list'),
-          onSelect: () => routerSvc.goto('DpImportRecords')
+          url: routerSvc.getUrl('DpImportRecords')
         },
         {
           icon: 'list-ol',
           caption: this.$t('dps.requirements'),
-          onSelect: () => routerSvc.goto('DpImportRecords', {}, {objectType: 'dpRequirement'})
+          url: routerSvc.getUrl('DpImportRecords', {}, {objectType: 'dpRequirement'})
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.goto('DpImportJobs')
+          url: routerSvc.getUrl('DpImportJobs')
         }
       ],
 
@@ -153,6 +153,16 @@ export default {
       } else {
         this.showTable(newValue == -2);
       }
+    }
+  },
+
+  computed: {
+    createDpUrl: function() {
+      return routerSvc.getUrl('DpAddEdit', {dpId: -1});
+    },
+
+    ordersUrl: function() {
+      return routerSvc.getUrl('OrdersList', {orderId: -1});
     }
   },
 
@@ -221,10 +231,6 @@ export default {
       this.ctx.selectedDps = (selection || []).map((row) => row.rowObject.dp);
     },
 
-    createDp: function() {
-      routerSvc.goto('DpAddEdit', {dpId: -1});
-    },
-
     exportDps: function() {
       const dpIds = this.ctx.selectedDps.map(dp => dp.id);
       exportSvc.exportRecords({objectType: 'distributionProtocol', recordIds: dpIds});
@@ -239,10 +245,6 @@ export default {
           this.$refs.listView.reload();
         }
       );
-    },
-
-    viewOrders: function() {
-      routerSvc.goto('OrdersList', {orderId: -1});
     }
   }
 }

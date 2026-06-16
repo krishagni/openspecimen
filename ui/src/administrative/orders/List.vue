@@ -26,17 +26,17 @@
         <os-page-body>
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
-              <os-button left-icon="plus" :label="$t('common.buttons.create')"
-                @click="createOrder" v-show-if-allowed="orderResources.createOpts" />
+              <os-button-link left-icon="plus" :label="$t('common.buttons.create')"
+                :url="createOrderUrl" v-show-if-allowed="orderResources.createOpts" />
 
               <os-menu :label="$t('common.buttons.import')" :options="importOpts"
                 v-show-if-allowed="orderResources.importOpts" />
 
-              <os-button left-icon="undo" :label="$t('orders.return_specimens')"
-                @click="returnSpecimens" v-show-if-allowed="orderResources.updateOpts" />
+              <os-button-link left-icon="undo" :label="$t('orders.return_specimens')"
+                :url="returnSpecimensUrl" v-show-if-allowed="orderResources.updateOpts" />
 
-              <os-button left-icon="truck" :label="$t('orders.view_dps')"
-                @click="viewDps" v-show-if-allowed="orderResources.dpOpts" />
+              <os-button-link left-icon="truck" :label="$t('orders.view_dps')"
+                :url="dpsUrl" v-show-if-allowed="orderResources.dpOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://openspecimen.atlassian.net/wiki/x/FQD1W" new-tab="true" />
@@ -99,17 +99,17 @@ export default {
         {
           icon: 'share',
           caption: this.$t('orders.list'),
-          onSelect: () => routerSvc.goto('OrderImportRecords')
+          url: routerSvc.getUrl('OrderImportRecords')
         },
         {
           icon: 'undo',
           caption: this.$t('orders.return_specimens'),
-          onSelect: () => routerSvc.goto('OrderImportRecords', {}, {objectType: 'returnSpecimen'})
+          url: routerSvc.getUrl('OrderImportRecords', {}, {objectType: 'returnSpecimen'})
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.goto('OrderImportJobs')
+          url: routerSvc.getUrl('OrderImportJobs')
         }
       ],
     };
@@ -131,6 +131,20 @@ export default {
       } else {
         this.showTable(newValue == -2);
       }
+    }
+  },
+
+  computed: {
+    createOrderUrl: function() {
+      return routerSvc.getUrl('OrderAddEdit', {orderId: -1});
+    },
+
+    returnSpecimensUrl: function() {
+      return routerSvc.getUrl('OrderReturnSpecimens');
+    },
+
+    dpsUrl: function() {
+      return routerSvc.getUrl('DpsList', {dpId: -1});
     }
   },
 
@@ -192,17 +206,6 @@ export default {
       }
     },
 
-    createOrder: function() {
-      routerSvc.goto('OrderAddEdit', {orderId: -1});
-    },
-
-    returnSpecimens: function() {
-      routerSvc.goto('OrderReturnSpecimens');
-    },
-
-    viewDps: function() {
-      routerSvc.goto('DpsList', {dpId: -1});
-    }
   }
 }
 </script>

@@ -18,7 +18,7 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-button left-icon="shopping-cart" :label="$t('carts.view_carts')" @click="viewCarts" />
+          <os-button-link left-icon="shopping-cart" :label="$t('carts.view_carts')" :url="cartsUrl" />
         </template>
 
         <template #right>
@@ -38,8 +38,8 @@
 
         <template #rowActions="slotProps">
           <os-button-group v-if="slotProps.rowObject.editAllowed">
-            <os-button size="small" left-icon="edit" v-os-tooltip.bottom="$t('common.buttons.edit')"
-              @click="editFolder(slotProps.rowObject)" />
+            <os-button-link left-icon="edit" :url="editFolderUrl(slotProps.rowObject)"
+              v-os-tooltip.bottom="$t('common.buttons.edit')" />
             <os-button size="small" left-icon="trash" v-os-tooltip.bottom="$t('common.buttons.delete')"
               @click="deleteFolder(slotProps.rowObject)" />
           </os-button-group>
@@ -82,6 +82,12 @@ export default {
     };
   },
 
+  computed: {
+    cartsUrl: function() {
+      return routerSvc.getUrl('SpecimenCartsList', {cartId: -1}, {});
+    }
+  },
+
   methods: {
     openSearch: function() {
       this.$refs.listView.toggleShowFilters();
@@ -121,12 +127,8 @@ export default {
       routerSvc.goto('SpecimenCartsList', {cartId: -1}, {folderId: folder.id});
     },
 
-    viewCarts: function() {
-      routerSvc.goto('SpecimenCartsList', {cartId: -1}, {});
-    },
-
-    editFolder: function({folder}) {
-      routerSvc.goto('SpecimenCartsFolderAddEdit', {folderId: folder.id});
+    editFolderUrl: function({folder}) {
+      return routerSvc.getUrl('SpecimenCartsFolderAddEdit', {folderId: folder.id});
     },
 
     deleteFolder: function({folder}) {

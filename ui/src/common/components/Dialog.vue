@@ -87,9 +87,11 @@ export default {
   border-top: 0px;
 }
 
-.p-dialog .p-dialog-footer button {
+.p-dialog .p-dialog-footer button,
+.p-dialog .p-dialog-footer a.button-link {
   margin: 0.5rem 0.5rem 0.5rem 0rem;
 }
+
 
 .p-dialog .p-dialog-header .p-dialog-header-icon:enabled:hover {
   background: #ddd;

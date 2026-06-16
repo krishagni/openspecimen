@@ -23,14 +23,14 @@
       <os-page-toolbar>
         <template #default v-if="ctx.view == 'participants_list'">
           <span v-if="!ctx.selectedItems || ctx.selectedItems.length == 0">
-            <os-button left-icon="plus" :label="$t('participants.add_participant')"
-              @click="addParticipant" v-if="ctx.cp.activityStatus != 'Closed' && ctx.access.regAllowed" />
+            <os-button-link left-icon="plus" :label="$t('participants.add_participant')"
+              :url="addParticipantUrl" v-if="ctx.cp.activityStatus != 'Closed' && ctx.access.regAllowed" />
 
-            <os-button left-icon="flask" :label="$t('participants.view_specimens')"
-              @click="viewSpecimens" v-if="ctx.access.viewSpecimensAllowed" />
+            <os-button-link left-icon="flask" :label="$t('participants.view_specimens')"
+              :url="specimensListUrl" v-if="ctx.access.viewSpecimensAllowed" />
 
-            <os-button left-icon="calendar-alt" :label="$t('participants.view_cp_details')"
-              @click="$goto('CpDetail.Overview', {cpId: ctx.cp.id})" />
+            <os-button-link left-icon="calendar-alt" :label="$t('participants.view_cp_details')"
+              :url="cpDetailUrl" />
 
             <os-button-link left-icon="procedures" :label="$t('participants.view_sop')"
               :url="sopUrl" :new-tab="true" v-if="sopUrl" />
@@ -50,14 +50,14 @@
 
         <template #default v-else-if="ctx.view == 'specimens_list'">
           <span v-if="!ctx.selectedItems || ctx.selectedItems.length == 0">
-            <os-button left-icon="user-friends" :label="$t('participants.view_participants')"
-              @click="viewParticipants" v-if="!ctx.cp.specimenCentric" />
+            <os-button-link left-icon="user-friends" :label="$t('participants.view_participants')"
+              :url="participantsListUrl" v-if="!ctx.cp.specimenCentric" />
 
             <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen"
               v-else-if="ctx.cp.activityStatus != 'Closed' && ctx.access.createPrimarySpecimensAllowed" />
 
-            <os-button left-icon="calendar-alt" :label="$t('participants.view_cp_details')"
-              @click="$goto('CpDetail.Overview', {cpId: ctx.cp.id})" />
+            <os-button-link left-icon="calendar-alt" :label="$t('participants.view_cp_details')"
+              :url="cpDetailUrl" />
 
             <os-button-link left-icon="procedures" :label="$t('participants.view_sop')"
               :url="sopUrl" :new-tab="true" v-if="sopUrl" />
@@ -172,6 +172,8 @@ export default {
 
       moreOptions: [],
 
+      rapidWfId: undefined,
+
       access: {
         regAllowed: cpViewCtx.isCreateParticipantAllowed(),
 
@@ -188,7 +190,7 @@ export default {
     return { ctx };
   },
 
-  created() {
+  async created() {
     let filters = {};
     const {query} = this.ctx;
     if (query) {
@@ -199,6 +201,7 @@ export default {
       this.ctx.query = util.uriEncode(filters);
     }
 
+    this.ctx.rapidWfId = await this._getRapidCollectionWf();
     this.ctx.inited = true;
     this._loadMoreOptions();
   },
@@ -256,6 +259,27 @@ export default {
       }
 
       return null;
+    },
+
+    specimensListUrl: function() {
+      return routerSvc.getUrl('ParticipantsList', {cpId: this.ctx.cp.id}, {view: 'specimens_list'});
+    },
+
+    participantsListUrl: function() {
+      return routerSvc.getUrl('ParticipantsList', {cpId: this.ctx.cp.id}, {view: 'participants_list'});
+    },
+
+    cpDetailUrl: function() {
+      return routerSvc.getUrl('CpDetail.Overview', {cpId: this.ctx.cp.id});
+    },
+
+    addParticipantUrl: function() {
+      const {cp, rapidWfId} = this.ctx;
+      if (rapidWfId && rapidWfId > 0) {
+        return routerSvc.getUrl('tmWorkflowCreateInstance', {workflowId: rapidWfId}, {cpId: cp.id});
+      }
+
+      return routerSvc.getUrl('ParticipantAddEdit', {cpId: cp.id, cprId: -1});
     }
   },
 
@@ -311,15 +335,6 @@ export default {
       }, 0);
     },
 
-    addParticipant: async function() {
-      const rapidWfId = await this._getRapidCollectionWf();
-      if (rapidWfId && rapidWfId > 0) {
-        routerSvc.goto('tmWorkflowCreateInstance', {workflowId: rapidWfId}, {cpId: this.ctx.cp.id});
-      } else {
-        routerSvc.goto('ParticipantAddEdit', {cpId: this.ctx.cp.id, cprId: -1});
-      }
-    },
-
     editParticipants: function() {
       itemsSvc.setItems('participants', this.ctx.selectedItems.map(({cprId}) => ({id: cprId})));
       routerSvc.goto('ParticipantsBulkEdit', {cpId: this.ctx.cp.id});
@@ -342,14 +357,6 @@ export default {
           );
         }
       );
-    },
-
-    viewSpecimens: function() {
-      routerSvc.goto('ParticipantsList', {cpId: this.ctx.cp.id}, {view: 'specimens_list'});
-    },
-
-    viewParticipants: function() {
-      routerSvc.goto('ParticipantsList', {cpId: this.ctx.cp.id}, {view: 'participants_list'});
     },
 
     addSpecimen: function() {

@@ -16,8 +16,8 @@
             <span v-show="!!visit.name"> | {{visit.name}}</span>
           </h4>
           <div class="action-buttons" @click="$event.stopPropagation()">
-            <os-button left-icon="eye"  size="small" v-os-tooltip.bottom="$t('participants.view_visit')"
-              @click="gotoVisit(visit)" />
+            <os-button-link left-icon="eye" size="small" :url="getVisitUrl(visit)"
+              v-os-tooltip.bottom="$t('participants.view_visit')" />
             <os-button left-icon="redo" size="small" v-os-tooltip.bottom="$t('participants.new_visit')"
               @click="repeatVisit(visit)" v-if="visit.status && visit.status != 'Pending'" />
             <os-button left-icon="flask" size="small"
@@ -100,13 +100,13 @@ export default {
       this.ctx.visit = visit;
     },
 
-    gotoVisit: function(visit) {
+    getVisitUrl: function(visit) {
       const route = routerSvc.getCurrentRoute();
       const {cpId, cprId, id, eventId} = visit;
       if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
-        routerSvc.goto('ParticipantsListItemVisitDetail.Overview', {cpId, cprId, visitId: id || -1}, {eventId});
+        return routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', {cpId, cprId, visitId: id || -1}, {eventId});
       } else {
-        routerSvc.goto('VisitDetail.Overview', {cpId, cprId, visitId: id || -1}, {eventId});
+        return routerSvc.getUrl('VisitDetail.Overview', {cpId, cprId, visitId: id || -1}, {eventId});
       }
     },  
 
@@ -202,7 +202,8 @@ export default {
   display: flex;
 }
 
-.os-visit-card .headline .action-buttons :deep(.btn) {
+.os-visit-card .headline .action-buttons :deep(.btn),
+.os-visit-card .headline .action-buttons :deep(.button-link) {
   margin-right: 0.5rem;
 }
 

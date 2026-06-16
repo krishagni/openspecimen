@@ -89,13 +89,13 @@ export default {
         {
           icon: 'flask',
           caption: this.$t('shipments.specimens'),
-          onSelect: () => routerSvc.goto('ShipmentAddEdit', {shipmentId: -1})
+          url: routerSvc.getUrl('ShipmentAddEdit', {shipmentId: -1})
         },
 
         {
           icon: 'box-open',
           caption: this.$t('shipments.containers'),
-          onSelect: () => routerSvc.goto('ShipmentAddEdit', {shipmentId: -1}, {shipmentType: 'CONTAINER'})
+          url: routerSvc.getUrl('ShipmentAddEdit', {shipmentId: -1}, {shipmentType: 'CONTAINER'})
         }
       ],
 
@@ -103,17 +103,17 @@ export default {
         {
           icon: 'flask',
           caption: this.$t('shipments.specimen_shipments'),
-          onSelect: () => routerSvc.goto('ShipmentImportRecords', {}, {objectType: 'shipment'})
+          url: routerSvc.getUrl('ShipmentImportRecords', {}, {objectType: 'shipment'})
         },
         {
           icon: 'box-open',
           caption: this.$t('shipments.container_shipments'),
-          onSelect: () => routerSvc.goto('ShipmentImportRecords', {}, {objectType: 'containerShipment'})
+          url: routerSvc.getUrl('ShipmentImportRecords', {}, {objectType: 'containerShipment'})
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.goto('ShipmentImportJobs')
+          url: routerSvc.getUrl('ShipmentImportJobs')
         }
       ],
 

@@ -36,11 +36,11 @@
                 </span>
 
                 <span v-else>
-                  <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createType"
+                  <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createTypeUrl"
                     v-show-if-allowed="'institute-admin'" />
 
-                  <os-button left-icon="box-open" :label="$t('container_types.view_containers')"
-                    @click="viewContainers" />
+                  <os-button-link left-icon="box-open" :label="$t('container_types.view_containers')"
+                    :url="containersUrl" />
 
                   <os-menu :label="$t('common.buttons.import')" :options="importOpts"
                     v-show-if-allowed="'institute-admin'" />
@@ -120,12 +120,12 @@ export default {
         {
           icon: 'cubes',
           caption: this.$t('container_types.list'),
-          onSelect: () => routerSvc.goto('ContainerTypeImportRecords')
+          url: routerSvc.getUrl('ContainerTypeImportRecords')
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.goto('ContainerTypeImportJobs')
+          url: routerSvc.getUrl('ContainerTypeImportJobs')
         }
       ],
 
@@ -149,6 +149,16 @@ export default {
       } else {
         this.showTable(newValue == -2);
       }
+    }
+  },
+
+  computed: {
+    createTypeUrl: function() {
+      return routerSvc.getUrl('ContainerTypeAddEdit', {typeId: -1});
+    },
+
+    containersUrl: function() {
+      return routerSvc.getUrl('ContainersList');
     }
   },
 
@@ -212,14 +222,6 @@ export default {
 
     onTypesSelection: function(selection) {
       this.ctx.selectedTypes = selection;
-    },
-
-    createType: function() {
-      routerSvc.goto('ContainerTypeAddEdit', {typeId: -1})
-    },
-
-    viewContainers: function() {
-      routerSvc.goto('ContainersList');
     },
 
     confirmDelete: function() {

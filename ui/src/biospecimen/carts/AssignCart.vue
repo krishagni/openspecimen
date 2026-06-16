@@ -27,7 +27,7 @@
         </a>
       </li>
       <li>
-        <a @click="viewFolders" v-if="folders.length > 0">
+        <a :href="foldersUrl" v-if="folders.length > 0">
           <span v-t="'carts.manage_folders'">Manage Folders </span>
         </a>
       </li>
@@ -50,6 +50,12 @@ export default {
       searchTerm: '',
 
       folders: []
+    }
+  },
+
+  computed: {
+    foldersUrl: function() {
+      return routerSvc.getUrl('SpecimenCartsFoldersList');
     }
   },
 
@@ -130,10 +136,6 @@ export default {
 
       itemsSvc.setItems('carts', this.carts);
       routerSvc.goto('SpecimenCartsFolderAddEdit', {folderId: -1});
-    },
-
-    viewFolders: function() {
-      routerSvc.goto('SpecimenCartsFoldersList');
     }
   }
 }

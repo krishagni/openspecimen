@@ -1,21 +1,18 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="edit" :label="$t('common.buttons.edit')" v-show-if-allowed="shipmentResources.updateOpts"
-        @click="$goto('ShipmentAddEdit', {shipmentId: ctx.shipment.id}, {shipmentType: ctx.shipment.type})" />
+      <os-button-link left-icon="edit" :label="$t('common.buttons.edit')" :url="editShipmentUrl"
+        v-show-if-allowed="shipmentResources.updateOpts" />
 
       <os-menu :label="$t('shipments.request_status')" :options="ctx.reqStatuses"
         v-show-if-allowed="shipmentResources.updateOpts" />
 
-      <os-button left-icon="paper-plane" :label="$t('shipments.ship')"
+      <os-button-link left-icon="paper-plane" :label="$t('shipments.ship')" :url="shipShipmentUrl"
         v-if="(!ctx.shipment.request && ctx.shipment.status == 'Pending') || ctx.shipment.status == 'Requested'"
-        v-show-if-allowed="shipmentResources.updateOpts"
-        @click="$goto('ShipmentAddEdit', {shipmentId: ctx.shipment.id},
-          {shipmentType: ctx.shipment.type, action: 'ship'})" />
+        v-show-if-allowed="shipmentResources.updateOpts" />
 
-      <os-button left-icon="inbox" :label="$t('shipments.receive')" v-if="ctx.shipment.status == 'Shipped'"
-        v-show-if-allowed="shipmentResources.updateOpts"
-        @click="$goto('ShipmentReceive', {shipmentId: ctx.shipment.id}, {shipmentType: ctx.shipment.type})" />
+      <os-button-link left-icon="inbox" :label="$t('shipments.receive')" :url="receiveShipmentUrl"
+        v-if="ctx.shipment.status == 'Shipped'" v-show-if-allowed="shipmentResources.updateOpts" />
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" v-show-if-allowed="shipmentResources.deleteOpts"
         @click="deleteShipment" />
@@ -91,6 +88,24 @@ export default {
     shipment: function() {
       this.ctx.shipment = this.shipment;
       this.ctx.shipmentObjs = [{objectName: 'shipment', objectId: this.shipment.id}];
+    }
+  },
+
+  computed: {
+    editShipmentUrl: function() {
+      return routerSvc.getUrl('ShipmentAddEdit', {shipmentId: this.ctx.shipment.id}, {shipmentType: this.ctx.shipment.type});
+    },
+
+    shipShipmentUrl: function() {
+      return routerSvc.getUrl(
+        'ShipmentAddEdit',
+        {shipmentId: this.ctx.shipment.id},
+        {shipmentType: this.ctx.shipment.type, action: 'ship'}
+      );
+    },
+
+    receiveShipmentUrl: function() {
+      return routerSvc.getUrl('ShipmentReceive', {shipmentId: this.ctx.shipment.id}, {shipmentType: this.ctx.shipment.type});
     }
   },
 

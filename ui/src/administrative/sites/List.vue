@@ -28,8 +28,7 @@
             <template #default>
               <span v-show-if-allowed="'institute-admin'">
                 <span v-if="!ctx.selectedSites || ctx.selectedSites.length == 0">
-                  <os-button left-icon="plus" :label="$t('common.buttons.create')"
-                    @click="$goto('SiteAddEdit', {siteId: -1}, {})" />
+                  <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createSiteUrl" />
 
                   <os-menu :label="$t('common.buttons.import')" :options="importOpts" />
 
@@ -111,15 +110,21 @@ export default {
         {
           icon: 'hospital',
           caption: this.$t('sites.list'),
-          onSelect: () => routerSvc.goto('SiteImportRecords')
+          url: routerSvc.getUrl('SiteImportRecords')
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.goto('SiteImportJobs')
+          url: routerSvc.getUrl('SiteImportJobs')
         }
       ]
     };
+  },
+
+  computed: {
+    createSiteUrl: function() {
+      return routerSvc.getUrl('SiteAddEdit', {siteId: -1}, {});
+    }
   },
 
   watch: {

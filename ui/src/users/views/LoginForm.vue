@@ -9,9 +9,9 @@
     </template>
   
     <template #secondary-actions v-if="ctx.forgotPasswordEnabled || ctx.otpAuthEnabled">
-      <os-button text label="Forgot Password?" @click="gotoForgotPassword" v-if="ctx.forgotPasswordEnabled" />
+      <a :href="forgotPasswordUrl" v-if="ctx.forgotPasswordEnabled" style="margin-right: 1rem;">Forgot Password?</a>
 
-      <os-button text label="Reset OTP Secret Code?" @click="gotoResetOtpSecret" v-if="ctx.otpAuthEnabled" />
+      <a :href="resetOtpSecretUrl" v-if="ctx.otpAuthEnabled">Reset OTP Secret Code?</a>
     </template>
   </FormCard>
 </template>
@@ -74,6 +74,13 @@ export default {
   },
 
   computed: {
+    forgotPasswordUrl: function() {
+      return routerSvc.getUrl('UserForgotPassword');
+    },
+
+    resetOtpSecretUrl: function() {
+      return routerSvc.getUrl('UserResetOtpSecretCode');
+    }
   },
 
   watch: {
@@ -106,14 +113,6 @@ export default {
           }
         }
       );
-    },
-
-    gotoForgotPassword: function() {
-      routerSvc.goto('UserForgotPassword');
-    },
-
-    gotoResetOtpSecret: function() {
-      routerSvc.goto('UserResetOtpSecretCode');
     },
 
     _toggleExternalAuthSelected: function() {

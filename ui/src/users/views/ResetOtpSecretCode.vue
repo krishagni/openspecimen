@@ -27,7 +27,7 @@
     </template>
 
     <template #secondary-actions>
-      <os-button text label="Return to Sign In Page" @click="gotoSignIn" />
+      <a :href="signInUrl">Return to Sign In Page</a>
     </template>
   </FormCard>
 </template>
@@ -81,6 +81,10 @@ export default {
   computed: {
     resetOtpSecretCodeSchema: function() {
       return this.ctx.showMessage ? {rows: []} : resetOtpSecretCodeSchema.layout;
+    },
+
+    signInUrl: function() {
+      return routerSvc.getUrl('UserLogin');
     }
   },
 
@@ -91,10 +95,6 @@ export default {
       }
 
       loginSvc.generateOtpSecretCodeToken(this.ctx.userDetail).then(() => this.ctx.showMessage = true);
-    },
-
-    gotoSignIn: function() {
-      routerSvc.goto('UserLogin');
     },
 
     _getDomains: function() {

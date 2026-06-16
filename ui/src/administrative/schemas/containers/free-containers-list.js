@@ -12,7 +12,7 @@ export default {
 
         return container.freezerName;
       },
-      href: (row) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: row.rowObject.container.freezerId})
+      href: (row, query) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: row.rowObject.container.freezerId}, query)
     },
     {
       name: "containerName",
@@ -24,7 +24,7 @@ export default {
 
         return container.name;
       },
-      href: (row) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: row.rowObject.container.id})
+      href: (row, query) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: row.rowObject.container.id}, query)
     },
     {
       name: "container.typeName",

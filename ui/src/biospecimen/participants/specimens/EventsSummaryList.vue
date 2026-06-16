@@ -21,8 +21,8 @@
         </div>
         <div class="action-buttons" v-if="!hideActions && (event.sysForm || event.isEditable)">
           <os-button-group class="buttons" v-if="event.isEditable">
-            <os-button left-icon="edit" size="small" v-os-tooltip.bottom="$t('specimens.edit_event')"
-              @click="editEvent($event, event)" />
+            <os-button-link left-icon="edit" size="small" :url="eventUrl(event)"
+              v-os-tooltip.bottom="$t('specimens.edit_event')" @click.stop />
             <os-button left-icon="trash" size="small" v-os-tooltip.bottom="$t('specimens.delete_event')"
               @click="deleteEvent($event, event)" v-if="!event.sysForm" />
           </os-button-group>
@@ -35,16 +35,11 @@
 
 <script>
 export default {
-  props: ['events', 'hide-actions'],
+  props: ['events', 'hide-actions', 'event-url'],
 
-  emits: ['edit-event', 'delete-event', 'click'],
+  emits: ['delete-event', 'click'],
 
   methods: {
-    editEvent: function(uiEvent, event) {
-      uiEvent.stopPropagation();
-      this.$emit('edit-event', event);
-    },
-
     deleteEvent: function(uiEvent, event) {
       uiEvent.stopPropagation();
       this.$emit('delete-event', event);

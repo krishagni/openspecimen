@@ -1,11 +1,12 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="map" :label="$t('containers.view_utilisation_heatmap')" @click="showUtilisationMap"
+      <os-button-link left-icon="map" :label="$t('containers.view_utilisation_heatmap')" :url="utilisationMapUrl"
         v-if="isSpecimensCountView" />
 
       <span v-else>
-        <os-button left-icon="chart-pie" :label="$t('containers.specimens_by_type')" @click="showSpecimensCount" />
+        <os-button-link left-icon="chart-pie" :label="$t('containers.specimens_by_type')"
+          :url="specimensCountUrl" />
 
         <os-button left-icon="palette" :label="$t('containers.view_utilisation_legend')" @click="toggleLegend"
           v-if="!isDimensionless && hasChildContainers" />
@@ -43,9 +44,10 @@
 
     <Layout class="map" :container="ctx.container" :occupants="ctx.occupants" v-else-if="!isDimensionless && hasChildContainers">
       <template #occupant_container="slotProps">
-        <a :class="['utilisation-cell', getUtilisationClass(slotProps.occupant)]"
+        <a :href="utilisationUrl(slotProps.occupant)"
+          :class="['utilisation-cell', getUtilisationClass(slotProps.occupant)]"
           v-os-tooltip="getTooltip(slotProps.occupant)"
-          @click.prevent="showUtilisation(slotProps.occupant)">
+          @click.stop>
           <span class="container-name">{{getDisplayName(slotProps.occupant)}}</span>
           <span class="utilisation-value">{{slotProps.occupant.utilisation}}%</span>
           <span class="utilisation-counts">
@@ -189,6 +191,14 @@ export default {
       return this._getView() == 'specimensCount';
     },
 
+    utilisationMapUrl: function() {
+      return this._viewUrl('heatmap');
+    },
+
+    specimensCountUrl: function() {
+      return this._viewUrl('specimensCount');
+    },
+
     legend: function() {
       return [
         {key: 'full',   range: '100%',  label: this.$t('containers.utilisation_full')},
@@ -302,11 +312,13 @@ export default {
       );
     },
 
-    showUtilisation: function(occupant) {
+    utilisationUrl: function(occupant) {
       const containerId = occupant.id;
       if (containerId) {
-        routerSvc.goto('ContainerDetail.Utilisation', {containerId});
+        return routerSvc.getUrl('ContainerDetail.Utilisation', {containerId});
       }
+
+      return null;
     },
 
     getDisplayName: function(occupant) {
@@ -390,6 +402,11 @@ export default {
     _updateViewInRoute: function(view) {
       const {name, params, query} = this.$route || {};
       this.$router.replace({name, params, query: {...query, view}});
+    },
+
+    _viewUrl: function(view) {
+      const {name, params, query} = this.$route || {};
+      return routerSvc.getUrl(name, params, {...query, view});
     }
   }
 }

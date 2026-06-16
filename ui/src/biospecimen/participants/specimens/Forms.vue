@@ -22,6 +22,7 @@ export default {
       getForms         : this._getForms,
       getSurveyForms   : this._getSurveyForms,
       getFormRecords   : this._getFormRecords,
+      getAddEditFormRecordUrl: this._getAddEditFormRecordUrl,
       addEditFormRecord: this._addEditFormRecord,
       isUpdateAllowed  : this._isUpdateAllowed,
       getPage          : () => 'specimen-forms',
@@ -69,6 +70,11 @@ export default {
 
     _getFormRecords: async function() {
       return specimenSvc.getFormRecords(this.specimen);
+    },
+
+    _getAddEditFormRecordUrl: function(formId, formCtxtId, recordId) {
+      const {cpId, cprId, visitId, eventId, id: specimenId} = this.specimen;
+      return routerSvc.getUrl('SpecimenAddEditFormRecord', {cpId, cprId, visitId, specimenId}, {formId, formCtxtId, recordId, eventId});
     },
 
     _addEditFormRecord: function(formId, formCtxtId, recordId) {

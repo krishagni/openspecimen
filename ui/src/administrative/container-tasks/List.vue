@@ -18,9 +18,11 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createTask" v-if="ctx.allowEdits" />
+          <os-button-link left-icon="plus" :label="$t('common.buttons.create')" :url="createTaskUrl"
+            v-if="ctx.allowEdits" />
 
-          <os-button left-icon="box-open" :label="$t('container_tasks.view_containers')" @click="viewContainers" />
+          <os-button-link left-icon="box-open" :label="$t('container_tasks.view_containers')"
+            :url="containersUrl" />
         </template>
 
         <template #right>
@@ -86,6 +88,16 @@ export default {
     this.ctx.allowEdits = this.$ui.currentUser.admin || this.$ui.currentUser.instituteAdmin;
   },
 
+  computed: {
+    createTaskUrl: function() {
+      return routerSvc.getUrl('ContainerTaskAddEdit', {taskId: -1});
+    },
+
+    containersUrl: function() {
+      return routerSvc.getUrl('ContainersList');
+    }
+  },
+
   methods: {
     openSearch: function() {
       this.$refs.listView.toggleShowFilters();
@@ -119,14 +131,6 @@ export default {
       }
 
       routerSvc.goto('ContainerTaskAddEdit', {taskId: task.id});
-    },
-
-    createTask: function() {
-      routerSvc.goto('ContainerTaskAddEdit', {taskId: -1})
-    },
-
-    viewContainers: function() {
-      routerSvc.goto('ContainersList');
     },
 
     confirmArchiveTask: function({task}) {

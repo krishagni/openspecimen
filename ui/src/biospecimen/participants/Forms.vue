@@ -22,6 +22,7 @@ export default {
       getForms         : this._getForms,
       getSurveyForms   : this._getSurveyForms,
       getFormRecords   : this._getFormRecords,
+      getAddEditFormRecordUrl: this._getAddEditFormRecordUrl,
       addEditFormRecord: this._addEditFormRecord,
       isUpdateAllowed  : this._isUpdateAllowed,
       getPage          : () => 'participant-forms',
@@ -69,6 +70,11 @@ export default {
 
     _getFormRecords: async function() {
       return cprSvc.getFormRecords(this.cpr);
+    },
+
+    _getAddEditFormRecordUrl: function(formId, formCtxtId, recordId) {
+      const {cpId, id: cprId} = this.cpr;
+      return routerSvc.getUrl('ParticipantAddEditFormRecord', {cpId, cprId}, {formId, formCtxtId, recordId});
     },
 
     _addEditFormRecord: function(formId, formCtxtId, recordId) {

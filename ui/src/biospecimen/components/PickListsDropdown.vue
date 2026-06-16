@@ -3,9 +3,9 @@
     <os-button left-icon="dolly" :label="$t('carts.pick_lists')" @click="showCreatePickListDialog"
       v-if="!cart || !cart.id" />
 
-    <os-dynamic-menu ref="pickListsMenu" icon="dolly" :label="$t('carts.pick_lists')" :options="ctx.pickLists"
+    <os-dynamic-menu ref="pickListsMenu" icon="dolly" :label="$t('carts.pick_lists')" :options="pickLists"
       :no-options-label="$t('carts.no_pick_lists')" :search-hint="$t('carts.search_pick_lists')"
-      @option-selected="viewPickList($event)" @search-options="loadPickLists($event)" :key="cart.id" v-else>
+      @search-options="loadPickLists($event)" :key="cart.id" v-else>
       <template #fixed-options>
         <li>
           <a @click="showCreatePickListDialog">
@@ -13,7 +13,7 @@
           </a>
         </li>
         <li>
-          <a @click="viewPickLists">
+          <a :href="pickListsUrl">
             <span v-t="'carts.manage_pick_lists'">Manage Pick Lists</span>
           </a>
         </li>
@@ -41,6 +41,21 @@ export default {
     }
   },
 
+  computed: {
+    pickLists: function() {
+      return (this.ctx.pickLists || []).map(
+        pickList => ({
+          ...pickList,
+          url: routerSvc.getUrl('PickList', {cartId: this.cart.id, listId: pickList.id})
+        })
+      );
+    },
+
+    pickListsUrl: function() {
+      return routerSvc.getUrl('PickLists', {cartId: this.cart.id});
+    }
+  },
+
   methods: {
     showCreatePickListDialog: function(event) {
       if (this.cart && this.cart.id > 0) {
@@ -48,14 +63,6 @@ export default {
       }
 
       this.$refs.addEditPickListDialog.open(this.cart, {});
-    },
-
-    viewPickLists: function() {
-      routerSvc.goto('PickLists', {cartId: this.cart.id});
-    },
-
-    viewPickList: function(pickList) {
-      routerSvc.goto('PickList', {cartId: this.cart.id, listId: pickList.id});
     },
 
     loadPickLists: function(name) {
