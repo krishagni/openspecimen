@@ -2752,7 +2752,7 @@ public class Specimen extends BaseExtensionEntity {
 			specimen.setPrimarySpecimen(getPrimarySpecimen());
 			specimen.setCollectionStatus(status);
 			specimen.updateAvailableStatus();
-			daoFactory.getSpecimenDao().saveOrUpdate(specimen);
+			daoFactory.getSpecimenDao().saveOrUpdate(specimen, true);
 			specimen.addOrUpdateExtension();
 			getChildCollection().add(specimen);
 
@@ -2850,7 +2850,7 @@ public class Specimen extends BaseExtensionEntity {
 			specimen.setLabelIfEmpty();
 
 			parent.addChildSpecimen(specimen);
-			daoFactory.getSpecimenDao().saveOrUpdate(specimen);
+			daoFactory.getSpecimenDao().saveOrUpdate(specimen, true);
 			specimen.addOrUpdateExtension();
 			EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
 

@@ -400,7 +400,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 
 		parent.setKitLabelsIfEmpty();
 		parent.setLabelIfEmpty();
-		daoFactory.getSpecimenDao().saveOrUpdate(parent);
+		daoFactory.getSpecimenDao().saveOrUpdate(parent, true);
 		parent.addOrUpdateExtension();
 		if (!parent.isPrimary()) {
 			parent.setAutoCollectParents(true);
