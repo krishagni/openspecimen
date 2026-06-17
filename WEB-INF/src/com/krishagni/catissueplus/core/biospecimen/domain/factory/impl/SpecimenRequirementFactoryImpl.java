@@ -533,7 +533,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		eventInput.setCpShortTitle(cp.getShortTitle());
 		cpe = cpeFactory.createCpe(eventInput);
 		cp.addCpe(cpe);
-		daoFactory.getCollectionProtocolDao().saveOrUpdate(cp, true);
+		daoFactory.getCollectionProtocolDao().saveCpe(cpe);
 
 		Visit visit = daoFactory.getVisitsDao().getByName(cp.getVisitName());
 		if (visit != null) {
