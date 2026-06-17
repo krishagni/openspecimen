@@ -322,58 +322,6 @@
         s.parent_container_id = :parentId and s.activity_status != 'Disabled'
     </sql-query>
 
-    <sql-query name="getLeastEmptyContainerId">
-      select
-        c.identifier as containerId
-      from
-        os_storage_containers c
-        left join os_stor_container_comp_cps allowed_cps on allowed_cps.storage_container_id = c.identifier
-      where
-        c.store_specimens = 1 and
-        c.activity_status = 'Active' and
-        (c.status is null or c.status != 'CHECKED_OUT') and
-        (
-          allowed_cps.cp_id = :cpId or
-          (allowed_cps.cp_id is null and
-            (
-              select
-                count(*)
-              from
-                catissue_site_cp cp_site
-              where
-                cp_site.site_id = c.site_id and
-                cp_site.collection_protocol_id = :cpId
-            ) > 0
-          )
-        ) and
-        (
-          (
-            select
-              count(*)
-            from
-              os_stor_cont_comp_spec_classes cc
-              inner join catissue_permissible_value pcc on pcc.identifier = cc.specimen_class_id
-            where
-              pcc.value = :specimenClass and
-              storage_container_id = c.identifier
-          ) > 0
-          or
-          (
-            select
-              count(*)
-            from
-              os_stor_cont_comp_spec_types ct
-              inner join catissue_permissible_value pct on pct.identifier = ct.specimen_type_id
-            where
-              pct.value = :specimenType and
-              storage_container_id = c.identifier
-          ) > 0
-        ) and
-        (c.no_of_rows * c.no_of_cols - c.utilisation) > (:minFreeLocs - 1)
-      order by
-        (c.no_of_rows * c.no_of_cols - c.utilisation), c.identifier
-    </sql-query>
-
     <sql-query name="getRootContainerSpecimensCount">
       <return-scalar column="containerId" type="long"/>
       <return-scalar column="storedSpecimens" type="integer"/>

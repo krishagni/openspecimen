@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.StandardBasicTypes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import com.krishagni.catissueplus.core.administrative.events.ContainerCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategy;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.TransactionCache;
-import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Configurable
@@ -70,18 +69,12 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 	private List<Long> getLeastEmptyContainerIds(ContainerCriteria crit, Boolean aliquotsInSameContainer) {
 		sessionFactory.getCurrentSession().flush();
 
-		String sql = sessionFactory.getCurrentSession().createNamedQuery(GET_LEAST_EMPTY_CONTAINER_ID, Long.class).getQueryString();
-		int orderByIdx = sql.indexOf("order by");
-		String beforeOrderBySql = sql.substring(0, orderByIdx);
-		String orderByLaterSql  = sql.substring(orderByIdx);
-		sql = beforeOrderBySql;
-
-		sql += " and (" + getAccessRestrictions(crit) + ") ";
+		String restrictions = getAccessRestrictions(crit);
 		if (crit.rule() != null) {
-			sql += " and (" + crit.rule().getSql("c", crit.ruleParams()) + ") ";
+			restrictions = "(" + restrictions + ") and (" + crit.rule().getSql("c", crit.ruleParams()) + ")";
 		}
 
-		sql += orderByLaterSql;
+		String sql = String.format(GET_LEAST_EMPTY_CONTAINER_ID_SQL, restrictions);
 		return sessionFactory.getCurrentSession().createNativeQuery(sql, Long.class)
 			.addScalar("containerId", StandardBasicTypes.LONG)
 			.setParameter("cpId", crit.specimen().getCpId())
@@ -102,17 +95,10 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 	}
 
 	private String getAccessRestrictions(ContainerCriteria crit) {
-		List<String> accessRestrictions = new ArrayList<>();
-
-		for (SiteCpPair siteCp : crit.siteCps()) {
-			accessRestrictions.add("(c.site_id = " + siteCp.getSiteId() +
-				" and " +
-				"(allowed_cps.cp_id is null or allowed_cps.cp_id = " + siteCp.getCpId() + ")" +
-				")"
-			);
-		}
-
-		return StringUtils.join(accessRestrictions, " or ");
+		String condition = "(c.site_id = %d and (allowed_cps.cp_id is null or allowed_cps.cp_id = %d))";
+		return crit.siteCps().stream()
+			.map(siteCp -> String.format(condition, siteCp.getSiteId(), siteCp.getCpId()))
+			.collect(Collectors.joining(" or "));
 	}
 
 	//
@@ -127,5 +113,56 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 		return TransactionCache.getInstance().get("containersCache", new HashMap<>());
 	}
 
-	private static final String GET_LEAST_EMPTY_CONTAINER_ID = StorageContainer.class.getName() + ".getLeastEmptyContainerId";
+	private static final String GET_LEAST_EMPTY_CONTAINER_ID_SQL =
+		"select " +
+		"  c.identifier as containerId " +
+		"from " +
+		"  os_storage_containers c " +
+		"  left join os_stor_container_comp_cps allowed_cps on allowed_cps.storage_container_id = c.identifier " +
+		"where " +
+		"  c.store_specimens = 1 and " +
+		"  c.activity_status = 'Active' and " +
+		"  (c.status is null or c.status != 'CHECKED_OUT') and " +
+		"  ( " +
+		"    allowed_cps.cp_id = :cpId or " +
+		"    ( " +
+		"      allowed_cps.cp_id is null and " +
+		"	   ( " +
+		"	     select " +
+		"	       count(*) " +
+		"        from " +
+		"          catissue_site_cp cp_site " +
+		"        where " +
+		"          cp_site.site_id = c.site_id and " +
+		"          cp_site.collection_protocol_id = :cpId " +
+		"      ) > 0 " +
+		"    ) " +
+		"  ) and " +
+		"  ( " +
+		"    ( " +
+		"      select " +
+		"        count(*) " +
+		"      from " +
+		"        os_stor_cont_comp_spec_classes cc " +
+		"        inner join catissue_permissible_value pcc on pcc.identifier = cc.specimen_class_id " +
+		"      where " +
+		"        pcc.value = :specimenClass and " +
+		"        storage_container_id = c.identifier " +
+		"    ) > 0 " +
+		"    or " +
+		"    ( " +
+		"	   select " +
+		"	     count(*) " +
+		"      from " +
+		"        os_stor_cont_comp_spec_types ct " +
+		"        inner join catissue_permissible_value pct on pct.identifier = ct.specimen_type_id " +
+		"	   where " +
+		"        pct.value = :specimenType and " +
+		"        storage_container_id = c.identifier " +
+		"    ) > 0 " +
+		"  ) and " +
+		"  (c.free_spaces > (:minFreeLocs - 1)) and " +
+		"  (%s) " +
+		"order by " +
+		"  c.free_spaces, c.identifier ";
 }
