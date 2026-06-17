@@ -4,7 +4,10 @@
     <span>-</span>
   </span>
   <span v-else>
-    <span v-if="field.type == 'fileUpload'">
+    <a v-if="url" :href="url" target="_blank" rel="noopener">
+      <span>{{displayValue}}</span>
+    </a>
+    <span v-else-if="field.type == 'fileUpload'">
       <a :href="fileUrl" target="_blank" rel="noopener">
         {{field.value.filename}}
       </a>
@@ -63,6 +66,14 @@ export default {
       } else {
         return this.field.value;
       }
+    },
+
+    url: function() {
+      if (!this.field.url || !this.displayValue) {
+        return null;
+      }
+
+      return this.field.url.replaceAll('{{$value}}', this.displayValue);
     }
   }
 }

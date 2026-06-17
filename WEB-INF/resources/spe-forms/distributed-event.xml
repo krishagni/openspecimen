@@ -14,6 +14,7 @@
         <udn>name</udn>
         <caption>#getMessage("order_name")</caption>
         <column>NAME</column>
+        <recordUrl>#/object-state-params-resolver?stateName=OrderDetail.Overview&amp;objectName=distribution_order&amp;key=name&amp;value={{$value}}</recordUrl>
       </textField>
     </row>
 
@@ -26,6 +27,7 @@
         <options>
           <sql>select short_title from catissue_distribution_protocol where activity_status != 'Disabled' order by short_title</sql>
         </options>
+        <recordUrl>#/object-state-params-resolver?stateName=DpDetail.Overview&amp;objectName=distribution_protocol&amp;key=shortTitle&amp;value={{$value}}</recordUrl>
       </dropDown>
     </row>
 

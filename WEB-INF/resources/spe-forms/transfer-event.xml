@@ -13,6 +13,7 @@
         <udn>fromContainer</udn>
         <caption>#getMessage("transfer_event_from_container")</caption>
         <column>FROM_STORAGE_CONTAINER_ID</column>
+        <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Overview&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
       </storageContainer>
 
       <textField>
@@ -57,6 +58,7 @@
         <udn>toContainer</udn>
         <caption>#getMessage("transfer_event_to_container")</caption>
         <column>TO_STORAGE_CONTAINER_ID</column>
+        <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Overview&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
       </storageContainer>
 
       <textField>
