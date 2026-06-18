@@ -23,13 +23,15 @@ export default {
   left: 0px;
   width: 54px;
   border-right: 1px solid #ddd;
-  transition: width 0.3s ease;
+  box-shadow: none;
+  transition: width 0.2s ease, box-shadow 0.2s ease;
   background: #fff;
   z-index: 1000;
 }
 
 .os-side-menu:hover {
   width: 225px;
+  box-shadow: 3px 0 8px rgb(0 0 0 / 15%);
 }
 
 .os-side-menu :deep(ul) {

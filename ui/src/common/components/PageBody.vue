@@ -45,10 +45,5 @@
 
 .os-page-body :deep(.os-side-menu ~ div) {
   margin-left: 64px;
-  transition: all 0.3s ease-in-out;
-}
-
-.os-page-body :deep(.os-side-menu:hover ~ div) {
-  margin-left: 225px;
 }
 </style>
