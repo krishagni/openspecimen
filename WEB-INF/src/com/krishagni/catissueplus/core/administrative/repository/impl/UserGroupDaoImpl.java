@@ -26,46 +26,13 @@ public class UserGroupDaoImpl extends AbstractDao<UserGroup> implements UserGrou
 
 	@Override
 	public List<UserGroup> getGroups(UserGroupListCriteria crit) {
-		Criteria<UserGroup> query = createCriteria(UserGroup.class, "g")
-			.join("g.institute", "institute");
-
-		if (StringUtils.isNotBlank(crit.query())) {
-			query.add(query.ilike("g.name", crit.query()));
-		}
-
-		if (StringUtils.isNotBlank(crit.institute())) {
-			query.add(query.eq("institute.name", crit.institute()));
-		} else if (StringUtils.isNotBlank(crit.site())) {
-			SubQuery<Long> instituteId = query.createSubQuery(Site.class, "site")
-				.join("site.institute", "institute")
-				.distinct().select("institute.id");
-			instituteId.add(instituteId.eq("site.name", crit.site()));
-			query.add(query.in("institute.id", instituteId));
-		}
-
+		Criteria<UserGroup> query = getGroupsQuery(crit);
 		return query.orderBy(query.asc("g.name")).list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
 	public Long getGroupsCount(UserGroupListCriteria crit) {
-		Criteria<UserGroup> query = createCriteria(UserGroup.class, "g")
-			.createAlias("g.institute", "institute");
-
-		if (StringUtils.isNotBlank(crit.query())) {
-			query.add(query.ilike("g.name", crit.query()));
-		}
-
-		if (StringUtils.isNotBlank(crit.institute())) {
-			query.add(query.eq("institute.name", crit.institute()));
-		} else if (StringUtils.isNotBlank(crit.site())) {
-			SubQuery<Long> instituteId = query.createSubQuery(Site.class, "site")
-				.join("site.institute", "institute")
-				.distinct().select("institute.id");
-			instituteId.add(instituteId.eq("site.name", crit.site()));
-			query.add(query.in("institute.id", instituteId));
-		}
-
-		return query.getCount("g.id");
+		return getGroupsQuery(crit).getCount("g.id");
 	}
 
 	@Override
@@ -110,6 +77,38 @@ public class UserGroupDaoImpl extends AbstractDao<UserGroup> implements UserGrou
 			.select(query.count("user.id"))
 			.uniqueResult();
 		return count != null && count > 0;
+	}
+
+	private Criteria<UserGroup> getGroupsQuery(UserGroupListCriteria crit) {
+		Criteria<UserGroup> query = createCriteria(UserGroup.class, "g")
+			.join("g.institute", "institute");
+
+		if (StringUtils.isNotBlank(crit.query())) {
+			query.add(query.ilike("g.name", crit.query()));
+		}
+
+		if (StringUtils.isNotBlank(crit.institute())) {
+			query.add(query.eq("institute.name", crit.institute()));
+		} else if (StringUtils.isNotBlank(crit.site())) {
+			SubQuery<Long> instituteId = query.createSubQuery(Site.class, "site")
+				.join("site.institute", "institute")
+				.distinct().select("institute.id");
+			instituteId.add(instituteId.eq("site.name", crit.site()));
+			query.add(query.in("institute.id", instituteId));
+		}
+
+		if (crit.userId() != null || StringUtils.isNotBlank(crit.userEmail())) {
+			query.join("g.users", "user");
+			if (crit.userId() != null) {
+				query.add(query.eq("user.id", crit.userId()));
+			}
+
+			if (StringUtils.isNotBlank(crit.userEmail())) {
+				query.add(query.eq("user.emailAddress", crit.userEmail()));
+			}
+		}
+
+		return query;
 	}
 
 	private static final String FQN = UserGroup.class.getName();

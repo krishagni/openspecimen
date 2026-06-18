@@ -70,7 +70,49 @@
 
   <os-grid>
     <os-grid-column width="12">
-      <os-overview :schema="userSchema.fields" :object="ctx" :col-type="'md'"/>
+      <os-overview :schema="userSchema.fields" :object="ctx" />
+
+      <os-section>
+        <template #title>
+          <span v-t="'user_groups.list'">User Groups</span>
+        </template>
+
+        <template #content>
+          <table class="os-table muted-header os-border">
+            <thead>
+              <tr>
+                <th>
+                  <span v-t="'user_groups.name'">Name</span>
+                </th>
+                <th>
+                  <span v-t="'user_groups.description'">Description</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="os-table-body">
+              <tr v-if="ctx.loadingUserGroups">
+                <td colspan="2">
+                  <span v-t="'common.loading'">Loading...</span>
+                </td>
+              </tr>
+              <tr v-for="group in ctx.userGroups" :key="group.id">
+                <td>{{group.name}}</td>
+                <td>{{group.description}}</td>
+              </tr>
+              <tr v-if="!ctx.loadingUserGroups && ctx.userGroups.length == 0">
+                <td colspan="2">
+                  <span v-t="'user_groups.no_groups'">No user groups to show.</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="user-groups-actions" v-if="ctx.hasMoreUserGroups">
+            <span v-t="'user_groups.more_groups'">There are more user groups. Click "View All" to see all groups.</span>
+            <os-button text :label="$t('common.buttons.view_all')" @click="viewAllUserGroups" />
+          </div>
+        </template>
+      </os-section>
     </os-grid-column>
   </os-grid>
 
@@ -95,6 +137,8 @@ import { useRoute } from 'vue-router';
 
 import alertSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
+import util from '@/common/services/Util.js';
+import userGrpSvc from '@/administrative/services/UserGroup.js';
 import userSvc from '@/administrative/services/User.js';
 
 import userResources from '@/administrative/users/Resources.js';
@@ -121,6 +165,12 @@ export default {
 
       userObjs: [],      // list of objects whose audit info is being queried
 
+      userGroups: [],
+
+      hasMoreUserGroups: false,
+
+      loadingUserGroups: false,
+
       routeQuery: route.query
     });
 
@@ -129,12 +179,12 @@ export default {
   },
 
   created() {
-    this.setupUser();
+    this._setupUser();
   },
 
   watch: {
     user: function() {
-      this.setupUser();
+      this._setupUser();
     }
   },
 
@@ -157,42 +207,18 @@ export default {
   },
 
   methods: {
-    setupUser: function() {
-      const ctx = this.ctx;
-      ctx.user = this.user;
-      ctx.deleteOpts = {
-        type: this.$t('users.singular'),
-        title: this.user.firstName + ' ' + this.user.lastName,
-        dependents: () => userSvc.getDependents(this.user),
-        deleteObj: () => userSvc.delete(this.user)
-      };
-
-      ctx.userObjs = [{objectName: 'user', objectId: this.user.id}];
-    },
-
-    updateStatus: function(status, msg) {
-      let self = this;
-      userSvc.updateStatus(self.ctx.user, status).then(
-        (savedUser) => {
-          self.ctx.user = savedUser;
-          Object.assign(this.user, savedUser); // OPSMN-5800: switch between tabs
-          alertSvc.success({code: msg, args: {count: 1}});
-        }
-      );
-    },
-
     lock: function() {
-      this.updateStatus('Locked', 'users.locked');
+      this._updateStatus('Locked', 'users.locked');
     },
 
     activate: function() {
       const status = this.ctx.user.activityStatus;
       const msg = status == 'Locked' ? 'users.unlocked' : (status == 'Closed' ? 'users.reactivated' : 'users.approved');
-      this.updateStatus('Active', msg);
+      this._updateStatus('Active', msg);
     },
 
     archive: function() {
-      this.updateStatus('Closed', 'users.archived');
+      this._updateStatus('Closed', 'users.archived');
     },
 
     deleteUser: function() {
@@ -217,7 +243,72 @@ export default {
 
     viewAuditTrail: function() {
       this.$refs.auditTrailDialog.open();
+    },
+
+    viewAllUserGroups: function() {
+      const filters = util.uriEncode({userId: this.ctx.user.id});
+      routerSvc.goto('UserGroupsList', {}, {filters});
+    },
+
+    _setupUser: function() {
+      const ctx = this.ctx;
+      ctx.user = this.user;
+      ctx.deleteOpts = {
+        type: this.$t('users.singular'),
+        title: this.user.firstName + ' ' + this.user.lastName,
+        dependents: () => userSvc.getDependents(this.user),
+        deleteObj: () => userSvc.delete(this.user)
+      };
+
+      ctx.userObjs = [{objectName: 'user', objectId: this.user.id}];
+      this._loadUserGroups();
+    },
+
+    _updateStatus: function(status, msg) {
+      let self = this;
+      userSvc.updateStatus(self.ctx.user, status).then(
+        (savedUser) => {
+          self.ctx.user = savedUser;
+          Object.assign(this.user, savedUser); // OPSMN-5800: switch between tabs
+          alertSvc.success({code: msg, args: {count: 1}});
+        }
+      );
+    },
+
+    _loadUserGroups: async function() {
+      const ctx = this.ctx;
+      ctx.userGroups = [];
+      ctx.hasMoreUserGroups = false;
+      ctx.loadingUserGroups = false;
+
+      if (!ctx.user || !ctx.user.id) {
+        return;
+      }
+
+      const userId = ctx.user.id;
+      ctx.loadingUserGroups = true;
+      try {
+        const groups = await userGrpSvc.getGroups({userId, maxResults: 11});
+        if (ctx.user.id == userId) {
+          ctx.userGroups = groups.slice(0, 10);
+          ctx.hasMoreUserGroups = groups.length > 10;
+        }
+      } finally {
+        if (ctx.user.id == userId) {
+          ctx.loadingUserGroups = false;
+        }
+      }
     }
   }
 }
 </script>
+
+<style scoped>
+.user-groups-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  margin-top: 0.75rem;
+}
+</style>

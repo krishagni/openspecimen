@@ -196,6 +196,7 @@
       "update": "Update",
       "upload": "Upload",
       "validate": "Validate",
+      "view_all": "View All",
       "yes":    "Yes"
     },
 
@@ -2664,6 +2665,7 @@
     "institute_required": "Institute is mandatory",
     "list": "User Groups",
     "manage_groups": "Manage Groups",
+    "more_groups": "There are more user groups. Click \"View All\" to see all groups.",
     "multi_institute_users_na": "Users of multiple institutes cannot be added to the same group.",
     "name": "Name",
     "name_required": "Name is mandatory",

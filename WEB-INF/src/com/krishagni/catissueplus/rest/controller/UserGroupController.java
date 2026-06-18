@@ -47,6 +47,12 @@ public class UserGroupController {
 		@RequestParam(value = "institute", required = false, defaultValue = "")
 		String institute,
 
+		@RequestParam(value = "userId", required = false)
+		Long userId,
+
+		@RequestParam(value = "userEmail", required = false, defaultValue = "")
+		String userEmail,
+
 		@RequestParam(value = "listAll", required = false, defaultValue = "false")
 		boolean listAll,
 
@@ -63,6 +69,8 @@ public class UserGroupController {
 			.query(searchStr)
 			.institute(institute)
 			.site(site)
+			.userId(userId)
+			.userEmail(userEmail)
 			.listAll(listAll)
 			.includeStat(includeStats)
 			.startAt(startAt)
@@ -83,6 +91,12 @@ public class UserGroupController {
 		@RequestParam(value = "site", required = false, defaultValue = "")
 		String site,
 
+		@RequestParam(value = "userId", required = false)
+		Long userId,
+
+		@RequestParam(value = "userEmail", required = false, defaultValue = "")
+		String userEmail,
+
 		@RequestParam(value = "listAll", required = false, defaultValue = "false")
 		boolean listAll) {
 
@@ -90,6 +104,8 @@ public class UserGroupController {
 			.query(searchStr)
 			.institute(institute)
 			.site(site)
+			.userId(userId)
+			.userEmail(userEmail)
 			.listAll(listAll);
 
 		Long count = ResponseEvent.unwrap(groupSvc.getGroupsCount(RequestEvent.wrap(crit)));

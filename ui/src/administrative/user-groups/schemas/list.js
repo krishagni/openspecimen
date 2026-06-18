@@ -25,6 +25,19 @@ export default {
 
   filters: [
     {
+      name: 'userId',
+      type: 'user',
+      captionCode: 'users.singular',
+      selectProp: 'id',
+      listSource: {
+        queryParams: {
+          static: {
+            activityStatus: 'all'
+          }
+        }
+      }
+    },
+    {
       name: 'query',
       type: 'text',
       captionCode: 'user_groups.name'

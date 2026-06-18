@@ -10,6 +10,10 @@ public class UserGroupListCriteria extends AbstractListCriteria<UserGroupListCri
 
 	private String site;
 
+	private Long userId;
+
+	private String userEmail;
+
 	@Override
 	public UserGroupListCriteria self() {
 		return this;
@@ -39,6 +43,24 @@ public class UserGroupListCriteria extends AbstractListCriteria<UserGroupListCri
 
 	public UserGroupListCriteria site(String site) {
 		this.site = site;
+		return self();
+	}
+
+	public Long userId() {
+		return userId;
+	}
+
+	public UserGroupListCriteria userId(Long userId) {
+		this.userId = userId;
+		return self();
+	}
+
+	public String userEmail() {
+		return userEmail;
+	}
+
+	public UserGroupListCriteria userEmail(String userEmail) {
+		this.userEmail = userEmail;
 		return self();
 	}
 }
