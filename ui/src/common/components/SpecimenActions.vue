@@ -41,18 +41,7 @@
     </template>
   </os-overlay>
 
-  <os-dialog ref="retrieveSpmnsDialog">
-    <template #header>
-      <span v-t="'common.specimen_actions.retrieve'">Retrieve</span>
-    </template>
-    <template #content>
-      <os-form ref="pickSpmnsForm" :data="ctx.retrieveDetails" :schema="ctx.pickSpmnsFormSchema" />
-    </template>
-    <template #footer>
-      <os-button text    :label="$t('common.buttons.cancel')"   @click="closeRetrieveSpecimensDialog" />
-      <os-button primary :label="$t('common.specimen_actions.retrieve')" @click="retrieveSpecimens" />
-    </template>
-  </os-dialog>
+  <os-retrieve-specimens ref="retrieveSpmnsDialog" :specimens="specimens" @retrieved="reloadSpecimens" />
 
   <os-plugin-views ref="pluginViews" page="specimen-actions" view="menu"
     :viewProps="{cp: cp, cpr: cpr, visit: visit}" />
@@ -166,60 +155,6 @@ export default {
                     {caption: this.$t('common.no'),  value: false},
                   ],
                   optionsPerRow: 2
-                }
-              ]
-            }
-          ]
-        },
-
-        retrieveDetails: {},
-
-        pickSpmnsFormSchema: {
-          rows: [
-            {
-              fields: [
-                {
-                  type: 'user',
-                  labelCode: 'common.specimen_actions.transfer_user',
-                  name: 'transferUser',
-                  validations: {
-                    required: {
-                      messageCode: 'common.specimen_actions.transfer_user_req'
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              fields: [
-                {
-                  type: 'datePicker',
-                  labelCode: 'common.specimen_actions.transfer_time',
-                  showTime: true,
-                  name: 'transferTime',
-                  validations: {
-                    required: {
-                      messageCode: 'common.specimen_actions.transfer_time_req'
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              fields: [
-                {
-                  type: 'textarea',
-                  labelCode: 'common.comments',
-                  name: 'comments'
-                }
-              ]
-            },
-            {
-              fields: [
-                {
-                  type: 'booleanCheckbox',
-                  inlineLabelCode: 'common.specimen_actions.checkout',
-                  name: 'checkout'
                 }
               ]
             }
@@ -718,35 +653,11 @@ export default {
         return;
       }
 
-      this.ctx.retrieveDetails = { transferUser: this.$ui.currentUser, transferTime: Date.now() };
       this.$refs.retrieveSpmnsDialog.open();
     },
 
-    closeRetrieveSpecimensDialog: function() {
-      this.$refs.retrieveSpmnsDialog.close();
-    },
-
-    retrieveSpecimens: function() {
-      const input = this.ctx.retrieveDetails;
-      const spmns = this.specimens.map(
-        (spmn) => {
-          return {
-            id: spmn.id,
-            storageLocation: {},
-            transferUser: input.transferUser,
-            transferTime: input.transferTime,
-            transferComments: input.comments,
-            checkout: input.checkout
-          }
-        }
-      );
-
-      specimenSvc.bulkUpdate(spmns).then(
-        () => {
-          this.$emit('reloadSpecimens');
-          this.closeRetrieveSpecimensDialog();
-        }
-      );
+    reloadSpecimens: function() {
+      this.$emit('reloadSpecimens');
     },
 
     emitRouteChange: function(route) {

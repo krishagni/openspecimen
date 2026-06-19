@@ -1,9 +1,14 @@
 <template>
   <div>
-    <os-page-toolbar v-show-if-allowed="shipmentResources.updateOpts"
-      v-if="(!shipment.request || shipment.status != 'Pending') && shipment.type == 'SPECIMEN'">
-      <os-pick-lists-dropdown :cart="ctx.cart" @new-cart="createPickList" />
+    <os-page-toolbar v-show-if-allowed="shipmentResources.updateOpts" v-if="shipment.type == 'SPECIMEN'">
+      <os-button v-if="shipment.status == 'Requested'" left-icon="reply"
+        :label="$t('common.specimen_actions.retrieve')" @click="retrieveSpecimens" />
+      <os-pick-lists-dropdown v-if="!shipment.request || shipment.status != 'Pending'"
+        :cart="ctx.cart" @new-cart="createPickList" />
     </os-page-toolbar>
+
+    <os-retrieve-specimens ref="retrieveSpmnsDialog" :retrieve-fn="submitRetrieveSpecimens"
+      @retrieved="specimensRetrieved" />
 
     <os-grid>
       <os-grid-column width="12">
@@ -71,6 +76,18 @@ export default {
   },
 
   methods: {
+    retrieveSpecimens: function() {
+      this.$refs.retrieveSpmnsDialog.open();
+    },
+
+    submitRetrieveSpecimens: function(input) {
+      return shipmentSvc.retrieveSpecimens(this.shipment.id, input);
+    },
+
+    specimensRetrieved: function() {
+      this.loadSpecimens(this.ctx.startAt);
+    },
+
     loadSpecimens: async function(startAt) {
       const ctx = this.ctx;
       ctx.loading = true;

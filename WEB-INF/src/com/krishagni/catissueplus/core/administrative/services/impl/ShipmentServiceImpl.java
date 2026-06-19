@@ -37,7 +37,9 @@ import com.krishagni.catissueplus.core.administrative.events.ShipmentDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentItemsListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentSpecimenDetail;
+import com.krishagni.catissueplus.core.administrative.events.ShipmentSpecimensRetrieveDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
+import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.repository.ShipmentDao;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ShipmentService;
@@ -47,11 +49,13 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimensPickListDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenListService;
+import com.krishagni.catissueplus.core.biospecimen.services.SpecimenService;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
@@ -108,6 +112,8 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, Ini
 
 	private SpecimenListService spmnListSvc;
 
+	private SpecimenService specimenSvc;
+
 	private ExportService exportSvc;
 	
 	public void setDaoFactory(DaoFactory daoFactory) {
@@ -136,6 +142,10 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, Ini
 
 	public void setSpmnListSvc(SpecimenListService spmnListSvc) {
 		this.spmnListSvc = spmnListSvc;
+	}
+
+	public void setSpecimenSvc(SpecimenService specimenSvc) {
+		this.specimenSvc = specimenSvc;
 	}
 
 	public void setExportSvc(ExportService exportSvc) {
@@ -233,6 +243,44 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, Ini
 			Shipment shipment = getShipment(crit.shipmentId(), null);
 			AccessCtrlMgr.getInstance().ensureReadShipmentRights(shipment);
 			return ResponseEvent.response(ShipmentSpecimenDetail.from(getShipmentDao().getShipmentSpecimens(crit)));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Boolean> retrieveSpecimens(RequestEvent<ShipmentSpecimensRetrieveDetail> req) {
+		try {
+			ShipmentSpecimensRetrieveDetail input = req.getPayload();
+			Shipment shipment = getShipment(input.getShipmentId(), input.getShipmentName());
+			AccessCtrlMgr.getInstance().ensureUpdateShipmentRights(shipment);
+			if (!shipment.isSpecimenShipment()) {
+				return ResponseEvent.userError(ShipmentErrorCode.INVALID_TYPE);
+			} else if (!shipment.isRequested()) {
+				return ResponseEvent.userError(ShipmentErrorCode.INVALID_STATUS);
+			}
+
+			List<SpecimenDetail> specimens = new ArrayList<>();
+			for (ShipmentSpecimen shipmentSpecimen : shipment.getShipmentSpecimens()) {
+				if (!shipmentSpecimen.getSpecimen().isStored()) {
+					continue;
+				}
+
+				SpecimenDetail specimen = new SpecimenDetail();
+				specimen.setId(shipmentSpecimen.getSpecimen().getId());
+				specimen.setStorageLocation(new StorageLocationSummary());
+				specimen.setTransferUser(input.getTransferUser());
+				specimen.setTransferTime(input.getTransferTime());
+				specimen.setTransferComments(input.getComments());
+				specimen.setCheckout(input.getCheckout());
+				specimens.add(specimen);
+			}
+
+			ResponseEvent.unwrap(specimenSvc.updateSpecimens(RequestEvent.wrap(specimens)));
+			return ResponseEvent.response(true);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

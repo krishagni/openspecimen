@@ -1596,6 +1596,7 @@
   <bean id="shipmentSvc" class="com.krishagni.catissueplus.core.administrative.services.impl.ShipmentServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory" />
     <property name="shipmentFactory" ref="shipmentFactory" />
+    <property name="specimenSvc" ref="specimenSvc" />
     <property name="emailService" ref="emailService"/>
     <property name="querySvc" ref="querySvc"/>
     <property name="containerSvc" ref="storageContainerSvc"/>

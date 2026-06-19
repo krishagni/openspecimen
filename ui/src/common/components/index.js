@@ -85,6 +85,7 @@ import ProgressBar from './ProgressBar.vue';
 import PvDropdown from './PvDropdown.vue';
 import QueryListView from './QueryListView.vue';
 import RadioButton from './RadioButton.vue';
+import RetrieveSpecimens from './RetrieveSpecimens.vue';
 import ScanBox from './ScanBox.vue';
 import Screen from './Screen.vue';
 import ScreenPanel from './ScreenPanel.vue';
@@ -211,6 +212,7 @@ export default {
     app.component('os-progress-bar',     ProgressBar);
     app.component('os-pv-dropdown',      PvDropdown);
     app.component('os-radio-button',     RadioButton);
+    app.component('os-retrieve-specimens', RetrieveSpecimens);
     app.component('os-query-list-view',  QueryListView);
     app.component('os-screen',           Screen);
     app.component('os-screen-panel',     ScreenPanel);

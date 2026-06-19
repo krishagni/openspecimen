@@ -23,6 +23,7 @@ import com.krishagni.catissueplus.core.administrative.events.ShipmentDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentItemsListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentSpecimenDetail;
+import com.krishagni.catissueplus.core.administrative.events.ShipmentSpecimensRetrieveDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.administrative.services.ShipmentService;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimensPickListDetail;
@@ -184,6 +185,20 @@ public class ShipmentController {
 			.startAt(startAt)
 			.maxResults(maxResults);
 		return response(shipmentSvc.getShipmentSpecimens(request(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value="/{id}/specimens/retrieve")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public boolean retrieveShipmentSpecimens(
+		@PathVariable("id")
+		Long shipmentId,
+
+		@RequestBody
+		ShipmentSpecimensRetrieveDetail detail) {
+
+		detail.setShipmentId(shipmentId);
+		return response(shipmentSvc.retrieveSpecimens(request(detail)));
 	}
 
 	@RequestMapping(method = RequestMethod.POST)

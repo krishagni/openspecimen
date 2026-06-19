@@ -39,6 +39,10 @@ class Shipment {
     return http.get('shipments/' + shipmentId + '/specimens', params || {startAt: 0, maxResults: 25});
   }
 
+  async retrieveSpecimens(shipmentId, input) {
+    return http.put('shipments/' + shipmentId + '/specimens/retrieve', input);
+  }
+
   getSelectedSpecimens(spmnIds) {
     if (!spmnIds || spmnIds.length == 0) {
       return null;

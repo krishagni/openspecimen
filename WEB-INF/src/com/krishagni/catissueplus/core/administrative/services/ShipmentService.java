@@ -8,6 +8,7 @@ import com.krishagni.catissueplus.core.administrative.events.ShipmentDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentItemsListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentSpecimenDetail;
+import com.krishagni.catissueplus.core.administrative.events.ShipmentSpecimensRetrieveDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimensPickListDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -24,6 +25,8 @@ public interface ShipmentService {
 	ResponseEvent<List<ShipmentContainerDetail>> getShipmentContainers(RequestEvent<ShipmentItemsListCriteria> req);
 
 	ResponseEvent<List<ShipmentSpecimenDetail>> getShipmentSpecimens(RequestEvent<ShipmentItemsListCriteria> req);
+
+	ResponseEvent<Boolean> retrieveSpecimens(RequestEvent<ShipmentSpecimensRetrieveDetail> req);
 	
 	ResponseEvent<ShipmentDetail> createShipment(RequestEvent<ShipmentDetail> req);
 	
