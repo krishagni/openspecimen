@@ -1,24 +1,34 @@
 <template>
-  <os-accordion class="facets" @tab-opened="facets[$event.index].loadValues = true">
-    <os-accordion-tab class="facet" v-for="facet of facets" :key="facet.id">
-      <template #header>
-        <span class="facet-header">
-          <span class="label">{{facet.caption}}</span>
-          <os-button left-icon="times" size="small" @click="clearFacetValues($event, facet)"
-            v-if="selectedFacets[facet.id] && selectedFacets[facet.id].values" />
-        </span>
-      </template>
+  <div class="facets-panel">
+    <div class="facet-actions" v-if="hasPendingChanges">
+      <os-button-group>
+        <os-button primary :label="$t('common.buttons.apply')" @click="applyFacets" />
 
-      <template #content>
-        <RangeFacet :facet="facet" :selected="selectedFacets[facet.id]"
-          @range-selected="addRangeLimit($event)" v-if="facet.isRange" />
+        <os-button :label="$t('queries.discard_facet_changes')" @click="discardChanges" />
+      </os-button-group>
+    </div>
 
-        <EqualityFacet :query="this.query" :facet="facet" :selected="selectedFacets[facet.id]"
-          @values-added="addValues($event, true)" @values-selected="addValues($event)"
-          @values-unselected="removeValues($event)" v-else />
-      </template>
-    </os-accordion-tab>
-  </os-accordion>
+    <os-accordion class="facets" @tab-opened="facets[$event.index].loadValues = true">
+      <os-accordion-tab class="facet" v-for="facet of facets" :key="facet.id">
+        <template #header>
+          <span class="facet-header">
+            <span class="label">{{facet.caption}}</span>
+            <os-button left-icon="times" size="small" @click="clearFacetValues($event, facet)"
+              v-if="selectedFacets[facet.id] && selectedFacets[facet.id].values" />
+          </span>
+        </template>
+
+        <template #content>
+          <RangeFacet :facet="facet" :selected="selectedFacets[facet.id]"
+            @range-selected="addRangeLimit($event)" v-if="facet.isRange" />
+
+          <EqualityFacet :query="this.query" :facet="facet" :selected="selectedFacets[facet.id]"
+            @values-added="addValues($event, true)" @values-selected="addValues($event)"
+            @values-unselected="removeValues($event)" v-else />
+        </template>
+      </os-accordion-tab>
+    </os-accordion>
+  </div>
 </template>
 
 <script>
@@ -35,7 +45,7 @@ const RANGE_FACETED_OPS  = ['LT', 'LE', 'GT', 'GE', 'EQ', 'BETWEEN', 'EXISTS', '
 export default {
   props: ['query'],
 
-  emits: ['facets-loaded', 'facets-selected'],
+  emits: ['facets-loaded', 'facets-applied', 'facets-changed'],
 
   components: {
     EqualityFacet,
@@ -49,7 +59,11 @@ export default {
 
       facets: [],
 
-      selectedFacets: {}
+      selectedFacets: {},
+
+      appliedFacets: {},
+
+      selectionChanged: false
     }
   },
 
@@ -57,13 +71,26 @@ export default {
     this._loadFacets();
   },
 
+  computed: {
+    hasPendingChanges: function() {
+      return this.selectionChanged;
+    }
+  },
+
   methods: {
     hasFacets: function() {
       return this.facets && this.facets.length > 0;
     },
 
-    getSelectedFacets: function() {
-      return Object.values(this.selectedFacets);
+    discardChanges: function() {
+      this.selectedFacets = this._copyFacets(this.appliedFacets);
+      this._setSelectionChanged(false);
+    },
+
+    applyFacets: function() {
+      this.appliedFacets = this._copyFacets(this.selectedFacets);
+      this._setSelectionChanged(false);
+      this.$emit('facets-applied', Object.values(this.selectedFacets));
     },
 
     addRangeLimit: function({facet, range}) {
@@ -74,13 +101,13 @@ export default {
         delete this.selectedFacets[facet.id];
       }
 
-      this.$emit('facets-selected', Object.values(this.selectedFacets));
+      this._setSelectionChanged(true);
     },
 
     addValues: function({facet, values}, newList) {
       const selectedFacet = this.selectedFacets[facet.id] = (!newList && this.selectedFacets[facet.id]) || {facet, values: []};
       Array.prototype.push.apply(selectedFacet.values, values);
-      this.$emit('facets-selected', Object.values(this.selectedFacets));
+      this._setSelectionChanged(true);
     },
 
     removeValues: function({facet, values}) {
@@ -96,14 +123,31 @@ export default {
         delete this.selectedFacets[facet.id];
       }
 
-      this.$emit('facets-selected', Object.values(this.selectedFacets));
+      this._setSelectionChanged(true);
     },
 
     clearFacetValues: function(event, facet) {
       event.stopPropagation();
 
       delete this.selectedFacets[facet.id];
-      this.$emit('facets-selected', Object.values(this.selectedFacets));
+      this._setSelectionChanged(true);
+    },
+
+    _copyFacets: function(facets) {
+      const result = {};
+      for (const [id, {facet, values}] of Object.entries(facets)) {
+        result[id] = {
+          facet,
+          values: Array.isArray(values) ? [...values] : (values && typeof values == 'object' ? {...values} : values)
+        };
+      }
+
+      return result;
+    },
+
+    _setSelectionChanged: function(changed) {
+      this.selectionChanged = changed;
+      this.$emit('facets-changed', changed);
     },
 
     _loadFacets: function() {
@@ -261,8 +305,25 @@ export default {
 </script>
 
 <style scoped>
-.facets {
+.facets-panel {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.facet-actions {
+  padding-bottom: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.facet-actions :deep(button),
+.facet-actions :deep(.os-btn-group) {
+  flex: 1;
+}
+
+.facets {
+  flex: 1;
   overflow-y: auto;
 }
 

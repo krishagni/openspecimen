@@ -72,10 +72,15 @@
 
       <os-grid v-if="query.selectList && query.selectList.length > 0">
         <os-grid-column :width="3" v-show="ctx.hasFacets">
-          <Facets ref="facetsList" :query="query" @facets-loaded="onFacetsLoad" @facets-selected="onFacetsSelection" />
+          <Facets :query="query" @facets-loaded="onFacetsLoad"
+            @facets-applied="applyFacets" @facets-changed="onFacetsChange" />
         </os-grid-column>
 
         <os-grid-column class="results-panel" :width="ctx.hasFacets ? 9 : 12" :style="{'--ag-spacing': '6px'}">
+          <os-message type="warn" v-if="ctx.pendingFacetChanges">
+            <span v-t="'queries.pending_facet_changes'">Facet changes are pending. Click Apply to update the results.</span>
+          </os-message>
+
           <os-message type="info" v-if="ctx.loadingRecords">
             <span v-t="'queries.loading_records'">Loading records...</span>
           </os-message>
@@ -109,6 +114,18 @@
   <SaveQuery ref="saveQueryDialog" />
 
   <DefineView ref="defineViewDialog" />
+
+  <os-confirm ref="discardFacetChangesDialog"
+    :yes-button="$t('queries.discard_facet_changes')" :no-button="$t('common.buttons.cancel')">
+    <template #title>
+      <span v-t="'queries.discard_facet_changes_q'">Discard Facet Changes?</span>
+    </template>
+    <template #message>
+      <span v-t="'queries.discard_facet_changes_confirm'">
+        The pending facet changes have not been applied and will be discarded. Do you want to continue?
+      </span>
+    </template>
+  </os-confirm>
 </template>
 
 <script>
@@ -132,6 +149,14 @@ export default {
   props: ['query'],
 
   emits: ['query-saved'],
+
+  beforeRouteLeave() {
+    return this.confirmDiscardFacetChanges();
+  },
+
+  beforeRouteUpdate() {
+    return this.confirmDiscardFacetChanges();
+  },
 
   components: {
     AgGridVue,
@@ -170,19 +195,28 @@ export default {
 
         selectedRows: [],
 
-        hasFacets: false
+        hasFacets: false,
+
+        pendingFacetChanges: false,
+
+        appliedFacets: []
       }
     }
   },
 
   mounted() {
-    this._loadCounters();
+    window.addEventListener('beforeunload', this.onBeforeUnload);
+    this._loadCounters(this._getAppliedFacets());
 
     if (!this.query.selectList || this.query.selectList.length == 0) {
       this.showDefineViewDialog();
     } else {
-      this._loadRecords();
+      this._loadRecords(this._getAppliedFacets());
     }
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('beforeunload', this.onBeforeUnload);
   },
 
   computed: {
@@ -246,8 +280,9 @@ export default {
     },
 
     rerun: function() {
-      this._loadCounters();
-      this._loadRecords();
+      const facets = this._getAppliedFacets();
+      this._loadCounters(facets);
+      this._loadRecords(facets);
     },
 
     showDefineViewDialog: function() {
@@ -258,13 +293,13 @@ export default {
           }
 
           this.$emit('query-saved', {...this.query, ...resp});
-          setTimeout(() => this._loadRecords(this._getSelectedFacets())); // to allow the query to be updated
+          setTimeout(() => this._loadRecords(this._getAppliedFacets())); // to allow the query to be updated
         }
       );
     },
 
     exportQueryData: function() {
-      querySvc.exportData(this.query, this._getSelectedFacets());
+      querySvc.exportData(this.query, this._getAppliedFacets());
     },
 
     onGridReady: function({api}) {
@@ -291,10 +326,48 @@ export default {
       this.ctx.hasFacets = facets && facets.length > 0;
     },
 
-    onFacetsSelection: function(selectedFacets) {
-      const facets = selectedFacets.map(({facet, values}) => ({id: facet.id, type: facet.type, values}));
+    onFacetsChange: function(changed) {
+      this.ctx.pendingFacetChanges = changed;
+    },
+
+    applyFacets: function(selectedFacets) {
+      const facets = this.ctx.appliedFacets = selectedFacets.map(
+        ({facet, values}) => ({
+          id: facet.id,
+          type: facet.type,
+          values: this._copyFacetValues(values)
+        })
+      );
+
       this._loadCounters(facets);
       this._loadRecords(facets);
+    },
+
+    _copyFacetValues: function(values) {
+      if (Array.isArray(values)) {
+        return [...values];
+      } else if (values && typeof values == 'object') {
+        return {...values};
+      }
+
+      return values;
+    },
+
+    onBeforeUnload: function(event) {
+      if (!this.ctx.pendingFacetChanges) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = '';
+    },
+
+    confirmDiscardFacetChanges: function() {
+      if (!this.ctx.pendingFacetChanges) {
+        return true;
+      }
+
+      return this.$refs.discardFacetChangesDialog.open().then(resp => resp == 'proceed');
     },
 
     _loadCounters: async function(facets) {
@@ -429,9 +502,8 @@ export default {
       return value == null || value == undefined || value == '';
     },
 
-    _getSelectedFacets: function() {
-      const facets = this.ctx.hasFacets && this.$refs.facetsList ? this.$refs.facetsList.getSelectedFacets() : [];
-      return facets.map(({facet: {id, type}, values}) => ({id, type, values}));
+    _getAppliedFacets: function() {
+      return this.ctx.appliedFacets;
     }
   }
 }

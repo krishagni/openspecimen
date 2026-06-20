@@ -71,7 +71,8 @@
             :style="column.uiStyle" :sortable="column.sortable">
             <template #body="slotProps">
               <span v-if="column.href && column.href(slotProps.data, $route.query)">
-                <a :href="column.href(slotProps.data, $route.query)" :target="column.hrefTarget">
+                <a :href="column.href(slotProps.data, $route.query)" :target="column.hrefTarget"
+                  @click="hrefClick($event, slotProps.data, column)">
                   <span>{{columnValue(slotProps.data, column)}}</span>
                 </a>
               </span>
@@ -441,6 +442,20 @@ export default {
 
     clearSelection: function() {
       this.selectedRows = [];
+    },
+
+    hrefClick: function(event, row, column) {
+      if (!column.routeOnClick) {
+        return;
+      }
+
+      event.stopPropagation();
+      if (event.button != 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
+        return;
+      }
+
+      event.preventDefault();
+      this.$emit('rowClicked', row.rowObject);
     },
 
     rowClick: function(row) {

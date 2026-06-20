@@ -339,7 +339,7 @@ export default {
     },
 
     onQueryRowClick: function({query}) {
-      routerSvc.goto('QueryDetail.Results', {queryId: query.id});
+      routerSvc.goto('QueryDetail.Results', {queryId: query.id}, this.$route.query);
     },
 
     onQueriesSelection: function(selection) {

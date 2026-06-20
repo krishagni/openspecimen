@@ -1,5 +1,5 @@
 <template>
-  <os-dialog ref="dialogInstance">
+  <os-dialog ref="dialogInstance" :closable="false">
     <template #header>
       <slot name="title"></slot>
     </template>

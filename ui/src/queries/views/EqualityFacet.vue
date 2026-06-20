@@ -27,7 +27,7 @@ import util from '@/common/services/Util.js';
 export default {
   props: ['query', 'facet', 'selected'],
 
-  emits: ['values-selected', 'values-unselected'],
+  emits: ['values-added', 'values-selected', 'values-unselected'],
 
   data() {
     return {
@@ -45,6 +45,13 @@ export default {
   },
 
   watch: {
+    selected: function(selected) {
+      if (this.facet.hideOptions) {
+        const {values} = selected || {values: []};
+        this.list = [...values];
+      }
+    },
+
     'facet.loadValues': function(loadValues) {
       if (loadValues) {
         this._loadFacetValues();
@@ -67,6 +74,10 @@ export default {
 
     addConditions: function() {
       this.list = util.splitStr(this.searchTerm || '', /,|\t|\n/, false);
+      if (this.list.length == 0) {
+        return;
+      }
+
       this.searchTerm = null;
       this.$emit('values-added', {facet: this.facet, values: this.list});
     },
