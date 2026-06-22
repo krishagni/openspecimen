@@ -84,14 +84,13 @@ export default {
       "specimen": "sr",
       "entity": "sr",
       "measure": "concentration",
-      "showWhen": "sr.lineage != 'Aliquot'",
+      "showWhen": "sr.lineage != 'Aliquot'"
     },
     {
       "type": "number",
       "maxFractionDigits": "0",
       "name": "sr.sortOrder",
-      "labelCode": "cps.sort_order",
-      "showWhen": "sr.lineage != 'Aliquot'",
+      "labelCode": "cps.sort_order"
     },
     {
       "type": "radio",

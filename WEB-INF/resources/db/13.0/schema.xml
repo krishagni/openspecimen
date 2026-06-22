@@ -468,4 +468,10 @@
 
     <dropIndex tableName="OS_ORDER_CUST_FIELDS" indexName="OS_ORDER_CUST_FIELDS_IDX" />
   </changeSet>
+
+  <changeSet author="vpawar" id="CP event sort order">
+    <addColumn tableName="CATISSUE_COLL_PROT_EVENT">
+      <column name="SORT_ORDER" type="${int.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

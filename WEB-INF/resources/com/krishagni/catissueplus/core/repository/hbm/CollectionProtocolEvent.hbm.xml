@@ -26,6 +26,8 @@
       </type>
     </property>
 
+    <property name="sortOrder" column="SORT_ORDER"/>
+
     <many-to-one
       name="collectionProtocol"
       class="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol"

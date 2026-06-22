@@ -409,6 +409,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		req.setLabelPrintCopies(getLabelPrintCopies());
 		req.setParentSrId(parentSrId);
 		req.setQtyPerAliquot(getInitialQty());
+		req.setSortOrder(getSortOrder());
 		req.setStorageType(getStorageType());
 		req.setDefaultCustomFieldValues(getDefaultCustomFieldValues());
 		req.setPreBarcodedTube(isPreBarcodedTube());

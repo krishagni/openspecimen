@@ -37,6 +37,8 @@ public class CollectionProtocolEvent extends BaseEntity implements Comparable<Co
 
 	private IntervalUnit eventPointUnit;
 
+	private Integer sortOrder;
+
 	private CollectionProtocol collectionProtocol;
 	
 	private String code;
@@ -87,6 +89,14 @@ public class CollectionProtocolEvent extends BaseEntity implements Comparable<Co
 
 	public void setEventPointUnit(IntervalUnit eventPointUnit) {
 		this.eventPointUnit = eventPointUnit;
+	}
+
+	public Integer getSortOrder() {
+		return sortOrder;
+	}
+
+	public void setSortOrder(Integer sortOrder) {
+		this.sortOrder = sortOrder;
 	}
 
 	@NotAudited
@@ -235,6 +245,7 @@ public class CollectionProtocolEvent extends BaseEntity implements Comparable<Co
 
 		setEventPoint(other.getEventPoint());
 		setEventPointUnit(other.getEventPointUnit());
+		setSortOrder(other.getSortOrder());
 		setEventLabel(other.getEventLabel());
 		setCollectionProtocol(other.getCollectionProtocol());
 		setCode(other.getCode());
@@ -340,6 +351,10 @@ public class CollectionProtocolEvent extends BaseEntity implements Comparable<Co
 		Integer thisEventPoint  = Utility.getNoOfDays(getEventPoint(), getEventPointUnit());
 		Integer otherEventPoint = Utility.getNoOfDays(other.getEventPoint(), other.getEventPointUnit());
 		int result = ObjectUtils.compare(thisEventPoint, otherEventPoint, true);
+		if (result == 0) {
+			result = ObjectUtils.compare(getSortOrder(), other.getSortOrder(), true);
+		}
+
 		if (result == 0) {
 			result = ObjectUtils.compare(getId(), other.getId());
 		}

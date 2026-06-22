@@ -99,4 +99,11 @@
       <column name="rate_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP event sort order">
+    <addColumn tableName="CATISSUE_COLL_PROT_EVENT_AUD">
+      <column name="SORT_ORDER" type="${int.type}" />
+      <column name="sortOrder_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -285,6 +285,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 
 			aliquot.setLabelPrintCopies(req.getLabelPrintCopies());
 			aliquot.setInitialQuantity(req.getQtyPerAliquot());
+			aliquot.setSortOrder(req.getSortOrder());
 			aliquot.setParentSpecimenRequirement(parent);
 			aliquot.setDefaultCustomFieldValues(req.getDefaultCustomFieldValues());
 			aliquot.setPreBarcodedTube(req.isPreBarcodedTube());

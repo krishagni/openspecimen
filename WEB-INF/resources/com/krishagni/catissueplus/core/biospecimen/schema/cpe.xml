@@ -32,6 +32,11 @@
     </field>
 
     <field>
+      <caption>#getMessage("cpe_sort_order")</caption>
+      <attribute>sortOrder</attribute>
+    </field>
+
+    <field>
       <caption>#getMessage("cpe_label")</caption>
       <attribute>eventLabel</attribute>
     </field>

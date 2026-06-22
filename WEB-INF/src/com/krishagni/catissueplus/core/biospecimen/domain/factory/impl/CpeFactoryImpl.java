@@ -44,6 +44,7 @@ public class CpeFactoryImpl implements CpeFactory {
 		setEventLabel(detail, cpe, ose);
 		setEventPoint(detail, cpe, ose);
 		setEventPointUnit(detail, cpe, ose);
+		setSortOrder(detail, cpe, ose);
 		setCode(detail, cpe, ose);
 		setCp(detail, cpe, ose);
 		setDefaultSite(detail, cpe, ose);
@@ -82,6 +83,12 @@ public class CpeFactoryImpl implements CpeFactory {
 			// scenario: the source has no event point and unit
 			// this check ensures the copy has both event point and unit
 			ose.addError(CpeErrorCode.POINT_UNIT_REQUIRED);
+		}
+
+		if (detail.getSortOrder() != null) {
+			setSortOrder(detail, cpe, ose);
+		} else {
+			cpe.setSortOrder(existing.getSortOrder());
 		}
 		
 		cpe.setCollectionProtocol(existing.getCollectionProtocol());
@@ -156,6 +163,10 @@ public class CpeFactoryImpl implements CpeFactory {
 		} catch (IllegalArgumentException iae) {
 			ose.addError(CpeErrorCode.INVALID_POINT_UNIT, detail.getEventPointUnit());
 		}
+	}
+
+	private void setSortOrder(CollectionProtocolEventDetail detail, CollectionProtocolEvent cpe, OpenSpecimenException ose) {
+		cpe.setSortOrder(detail.getSortOrder());
 	}
 
 

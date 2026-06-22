@@ -26,6 +26,8 @@ public class CollectionProtocolEventDetail {
 
 	private String eventPointUnit;
 
+	private Integer sortOrder;
+
 	private Long cpId;
 	
 	private String collectionProtocol;
@@ -93,6 +95,14 @@ public class CollectionProtocolEventDetail {
 
 	public void setEventPointUnit(String eventPointUnit) {
 		this.eventPointUnit = eventPointUnit;
+	}
+
+	public Integer getSortOrder() {
+		return sortOrder;
+	}
+
+	public void setSortOrder(Integer sortOrder) {
+		this.sortOrder = sortOrder;
 	}
 
 	public Long getCpId() {
@@ -203,6 +213,7 @@ public class CollectionProtocolEventDetail {
 		detail.setEventLabel(event.getEventLabel());
 		detail.setEventPoint(event.getEventPoint());
 		detail.setEventPointUnit(event.getEventPointUnit() != null ? event.getEventPointUnit().name(): null);
+		detail.setSortOrder(event.getSortOrder());
 		detail.setClinicalDiagnosis(PermissibleValue.getValue(event.getClinicalDiagnosis()));
 		detail.setClinicalStatus(PermissibleValue.getValue(event.getClinicalStatus()));
 		detail.setCpId(event.getCollectionProtocol().getId());

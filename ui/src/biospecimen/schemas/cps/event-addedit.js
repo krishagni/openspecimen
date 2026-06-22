@@ -40,6 +40,16 @@ export default {
       {
         fields: [
           {
+            type: "number",
+            labelCode: "cps.sort_order",
+            name: "cpe.sortOrder",
+            maxFractionDigits: 0
+          }
+        ]
+      },
+      {
+        fields: [
+          {
             type: "text",
             labelCode: "cps.event_label",
             name: "cpe.eventLabel",
