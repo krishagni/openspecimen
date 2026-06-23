@@ -16,6 +16,7 @@
         <options>
           <sql>select short_title from catissue_distribution_protocol where activity_status != 'Disabled' order by short_title</sql>
         </options>
+        <recordUrl>#/object-state-params-resolver?stateName=DpDetail.Overview&amp;objectName=distribution_protocol&amp;key=shortTitle&amp;value={{$value}}</recordUrl>
       </dropDown>
     </row>
 

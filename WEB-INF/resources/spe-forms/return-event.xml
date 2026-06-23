@@ -15,6 +15,7 @@
         <caption>#getMessage("return_event_order")</caption>
         <column>NAME</column>
         <mandatory>true</mandatory>
+        <recordUrl>#/object-state-params-resolver?stateName=OrderDetail.Overview&amp;objectName=distribution_order&amp;key=name&amp;value={{$value}}</recordUrl>
       </textField>
     </row>
 
@@ -35,6 +36,7 @@
         <udn>container</udn>
         <caption>#getMessage("return_event_container")</caption>
         <column>RETURNING_CONTAINER</column>
+        <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Overview&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
       </storageContainer>
     </row>
 

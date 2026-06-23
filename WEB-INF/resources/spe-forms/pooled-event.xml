@@ -45,12 +45,14 @@
             <udn>label</udn>
             <caption>#getMessage("pooled_event_label")</caption>
             <column>LABEL</column>
+            <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=label&amp;value={{$value}}</recordUrl>
           </textField>
           <textField>
             <name>barcode</name>
             <udn>barcode</udn>
             <caption>#getMessage("pooled_event_barcode")</caption>
             <column>BARCODE</column>
+            <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=barcode&amp;value={{$value}}</recordUrl>
           </textField>
           <pvField>
             <name>type</name>

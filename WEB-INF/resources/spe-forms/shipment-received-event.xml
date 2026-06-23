@@ -14,6 +14,7 @@
         <caption>#getMessage("shipment_name")</caption>
         <column>NAME</column>
         <height>2</height>
+        <recordUrl>#/object-state-params-resolver?stateName=ShipmentDetail.Overview&amp;objectName=shipment&amp;key=name&amp;value={{$value}}</recordUrl>
       </textField>
     </row>
 
