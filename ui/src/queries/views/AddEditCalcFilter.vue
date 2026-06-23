@@ -147,19 +147,21 @@ export default {
       const result = [];
       for (const form of forms) {
         const fields = await formsCache.getFields(form, this.ctx.cpId, this.ctx.cpGroupId);
-        Array.prototype.push.apply(result, this._flattenFields(form.name + '.', fields));
+        Array.prototype.push.apply(result, this._flattenFields(form.name + '.', form.caption, null, fields));
       }
 
       this.ctx.fields = result;
     },
 
-    _flattenFields: function(prefix, fields) {
+    _flattenFields: function(prefix, formCaption, sfCaption, fields) {
       const result = [];
+      const parentForm = formCaption + ' / ' + (sfCaption ? (sfCaption + ' / ') : '');
       for (let field of fields) {
-        if (field.type == 'SUBFORM') {
-          Array.prototype.push.apply(result, this._flattenFields(prefix + field.name + '.', field.subFields));
-        } else if (field.type == 'INTEGER' || field.type == 'FLOAT' || field.type == 'DATE') {
-          result.push({id: prefix + field.name, caption: field.caption});
+        const {type, name, caption, subFields} = field;
+        if (type == 'SUBFORM') {
+          Array.prototype.push.apply(result, this._flattenFields(prefix + name + '.', formCaption, caption, subFields));
+        } else if (type == 'INTEGER' || type == 'FLOAT' || type == 'DATE') {
+          result.push({id: prefix + name, caption: parentForm + caption});
         }
       }
 
