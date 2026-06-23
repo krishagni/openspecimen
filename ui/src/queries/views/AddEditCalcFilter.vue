@@ -97,8 +97,7 @@ export default {
   methods: {
     open: function(event, cpId, cpGroupId, filter) {
       const self = this;
-      this.ctx.filter = util.clone(filter || {});
-      this.ctx.fields = [];
+      Object.assign(this.ctx, {cpId, cpGroupId, filter: util.clone(filter || {}), fields: []});
       return new Promise((resolve) => {
         self.ctx.resolve = resolve;
         self.$refs.addEditDialog.open();

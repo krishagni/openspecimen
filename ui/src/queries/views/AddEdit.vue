@@ -340,7 +340,8 @@ export default {
     },
 
     showAddCalcFilter: function(event) {
-      this.$refs.addEditCalcFilterOverlay.open(event).then(
+      const {cpId, cpGroupId} = this.ctx.query;
+      this.$refs.addEditCalcFilterOverlay.open(event, cpId, cpGroupId).then(
         filter => this._addFilter(filter)
       );
     },
