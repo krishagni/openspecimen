@@ -80,7 +80,14 @@ export default {
   },
 
   created() {
-    this.loadContainers();
+    this._loadContainers();
+  },
+
+  beforeUnmount() {
+    if (this.searchTimer) {
+      clearTimeout(this.searchTimer);
+      this.searchTimer = null;
+    }
   },
 
   watch: {
@@ -89,13 +96,13 @@ export default {
         clearTimeout(this.searchTimer);
       }
 
-      this.searchTimer = setTimeout(() => this.loadContainers(null), 500);
+      this.searchTimer = setTimeout(() => this._loadContainers(null), 500);
     }
   },
 
   computed: {
     containerTree: function() {
-      let tree = (this.ctx.containers || []).filter(container => this.isContainerNodeVisible(container));
+      let tree = (this.ctx.containers || []).filter(container => this._isContainerNodeVisible(container));
       tree.forEach(
         (cont) => {
           cont.canStore = this.entityType == 'storage_container' ||
@@ -112,7 +119,24 @@ export default {
   },
 
   methods: {
-    loadContainers: function(parentContainerId) {
+    toggleContainerNode: function(container) {
+      container.isOpened = !container.isOpened;
+      if (container.isOpened) {
+        this._loadChildren(container);
+      }
+    },
+
+    toggleContainerSelection: function(cont) {
+      if (this.ctx.selectedContainer && this.ctx.selectedContainer.id == cont.id) {
+        this.ctx.selectedContainer = null;
+      } else {
+        this.ctx.selectedContainer = cont;
+      }
+
+      this.$emit('container-selected', {container: this.ctx.selectedContainer});
+    },
+
+    _loadContainers: function(parentContainerId) {
       let hierarchical = true;
       if (this.ctx.name) {
         hierarchical = false;
@@ -125,9 +149,15 @@ export default {
         hierarchical: hierarchical
       };
 
+      const requestId = this._loadContainersRequestId = (this._loadContainersRequestId || 0) + 1;
       this.ctx.loading = true;
       http.get('storage-containers', qp).then(
         (containers) => {
+          // Ignore stale responses so slower earlier loads don't overwrite newer search results.
+          if (requestId != this._loadContainersRequestId) {
+            return;
+          }
+
           this.ctx.loading = false;
           this.ctx.containers = containers;
           containers.forEach(
@@ -141,14 +171,7 @@ export default {
       );
     },
 
-    toggleContainerNode: function(container) {
-      container.isOpened = !container.isOpened;
-      if (container.isOpened) {
-        this.loadChildren(container);
-      }
-    },
-
-    isContainerNodeVisible: function(container) {
+    _isContainerNodeVisible: function(container) {
       if (container.depth == 0) {
         return true;
       }
@@ -166,17 +189,23 @@ export default {
       return show;
     },
 
-    loadChildren: function(container) {
+    _loadChildren: function(container) {
       if (container.childrenLoaded) {
         return;
       }
 
+      const containers = this.ctx.containers;
       const parentIdx = this.ctx.containers.indexOf(container);
       this.ctx.containers.splice(parentIdx + 1, 0, {id: -container.id, name: 'Loading...', depth: container.depth + 1});
 
       let qp = {...this.criteria, hierarchical: true, parentContainerId: container.id};
       http.get('storage-containers', qp).then(
         (children) => {
+          // Ignore stale child responses when a newer search has already replaced the container list.
+          if (containers != this.ctx.containers) {
+            return;
+          }
+
           container.childrenLoaded = true;
           container.hasChildren = children.length > 0;
           children.forEach(
@@ -191,16 +220,6 @@ export default {
           this.ctx.containers.splice(parentIdx + 1, 1, ...children);
         }
       );
-    },
-
-    toggleContainerSelection: function(cont) {
-      if (this.ctx.selectedContainer && this.ctx.selectedContainer.id == cont.id) {
-        this.ctx.selectedContainer = null;
-      } else {
-        this.ctx.selectedContainer = cont;
-      }
-
-      this.$emit('container-selected', {container: this.ctx.selectedContainer});
     }
   }
 }
