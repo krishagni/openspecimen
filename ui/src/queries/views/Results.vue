@@ -78,7 +78,7 @@
 
         <os-grid-column class="results-panel" :width="ctx.hasFacets ? 9 : 12" :style="{'--ag-spacing': '6px'}">
           <os-message type="warn" v-if="ctx.pendingFacetChanges">
-            <span v-t="'queries.pending_facet_changes'">Facet changes are pending. Click Apply to update the results.</span>
+            <span v-t="'queries.pending_facet_changes'">Filter changes are pending. Click Apply to update the results.</span>
           </os-message>
 
           <os-message type="info" v-if="ctx.loadingRecords">
@@ -118,11 +118,11 @@
   <os-confirm ref="discardFacetChangesDialog"
     :yes-button="$t('queries.discard_facet_changes')" :no-button="$t('common.buttons.cancel')">
     <template #title>
-      <span v-t="'queries.discard_facet_changes_q'">Discard Facet Changes?</span>
+      <span v-t="'queries.discard_facet_changes_q'">Discard Filter Changes?</span>
     </template>
     <template #message>
       <span v-t="'queries.discard_facet_changes_confirm'">
-        The pending facet changes have not been applied and will be discarded. Do you want to continue?
+        The pending filter changes have not been applied and will be discarded. Do you want to continue?
       </span>
     </template>
   </os-confirm>
