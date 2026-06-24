@@ -340,7 +340,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public void deletePickListItems(Long cartId, Collection<Long> specimenIds) {
-		getCurrentSession().createMutationQuery(DEL_PICK_LIST_ITEMS_BY_CART_N_SPMNS)
+		getCurrentSession().createNamedMutationQuery(DEL_PICK_LIST_ITEMS_BY_CART_N_SPMNS)
 			.setParameter("cartId", cartId)
 			.setParameterList("specimenIds", specimenIds)
 			.executeUpdate();
