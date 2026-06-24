@@ -402,4 +402,19 @@
       <param name="constraintName" value="OS_SPECIMEN_STATS_UQ" />
     </customChange>
   </changeSet>
+
+  <changeSet author="vpawar" id="Unique default specimen cart per user" dbms="mysql">
+    <addUniqueConstraint constraintName="OS_SPMN_LIST_DEF_CART_UQ"
+      tableName="CATISSUE_SPECIMENLIST_TAGS" columnNames="DEFAULT_CART_USER_ID" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique default specimen cart per user" dbms="oracle">
+    <sql>
+      create unique index
+        OS_SPMN_LIST_DEF_CART_UQ
+      on CATISSUE_SPECIMENLIST_TAGS(
+        case when DEFAULT_CART = 1 and DELETED_ON is null then USER_ID else null end
+      )
+    </sql>
+  </changeSet>
 </databaseChangeLog>

@@ -9,7 +9,7 @@ export default {
           "messageCode": "carts.name_required"
         }
       },
-      "showWhen": "!defaultCart",
+      "disableWhen": "cart.defaultList",
       "dataEntry": true
     },
     {

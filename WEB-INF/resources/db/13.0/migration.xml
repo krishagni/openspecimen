@@ -389,4 +389,84 @@
           s.unit_key = u.unit_key
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Validate default specimen carts migration">
+    <preConditions onFail="HALT">
+      <sqlCheck expectedResult="0">
+        select
+          count(*)
+        from
+          catissue_user usr
+          inner join catissue_specimenlist_tags existing_cart on
+            lower(existing_cart.tag_label) = lower(
+              concat(
+                trim(concat(coalesce(usr.first_name, ''), concat(' ', coalesce(usr.last_name, '')))),
+                concat('''s Default Cart (', concat(usr.identifier, ')'))
+              )
+            )
+      </sqlCheck>
+
+      <sqlCheck expectedResult="0">
+        select
+          count(*)
+        from
+          catissue_specimenlist_tags default_cart
+          inner join catissue_user usr on usr.identifier = default_cart.user_id
+        where
+          default_cart.tag_label = concat('$$$$user_', usr.identifier) and
+          length(
+            concat(
+              trim(concat(coalesce(usr.first_name, ''), concat(' ', coalesce(usr.last_name, '')))),
+              concat('''s Default Cart (', concat(usr.identifier, ')'))
+            )
+          ) > 255
+      </sqlCheck>
+    </preConditions>
+
+    <sql>
+      select count(*) from catissue_specimenlist_tags where 1 = 0
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Migrate default specimen carts" dbms="mysql">
+    <sql>
+      update
+        catissue_specimenlist_tags cart
+        inner join catissue_user usr on usr.identifier = cart.user_id
+      set
+        cart.default_cart = 1,
+        cart.tag_label = concat(
+          trim(concat(coalesce(usr.first_name, ''), concat(' ', coalesce(usr.last_name, '')))),
+          concat('''s Default Cart (', concat(usr.identifier, ')'))
+        )
+      where
+        cart.tag_label = concat('$$$$user_', cart.user_id)
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Migrate default specimen carts" dbms="oracle">
+    <sql>
+      merge into
+        catissue_specimenlist_tags cart
+      using (
+        select
+          default_cart.identifier,
+          concat(
+            trim(concat(coalesce(usr.first_name, ''), concat(' ', coalesce(usr.last_name, '')))),
+            concat('''s Default Cart (', concat(usr.identifier, ')'))
+          ) as cart_name
+        from
+          catissue_specimenlist_tags default_cart
+          inner join catissue_user usr on usr.identifier = default_cart.user_id
+        where
+          default_cart.tag_label = concat('$$$$user_', default_cart.user_id)
+      ) migrated_cart
+      on
+        (migrated_cart.identifier = cart.identifier)
+      when matched then
+        update set
+          cart.default_cart = 1,
+          cart.tag_label = migrated_cart.cart_name
+    </sql>
+  </changeSet>
 </databaseChangeLog>

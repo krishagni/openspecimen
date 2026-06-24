@@ -1,7 +1,6 @@
 import http     from '@/common/services/HttpClient.js';
 import formUtil from '@/common/services/FormUtil.js';
 import util     from '@/common/services/Util.js';
-import ui       from '@/global.js';
 
 import cartSchema from '@/biospecimen/schemas/carts/cart.js';
 import addEditLayout from '@/biospecimen/schemas/carts/addedit.js';
@@ -116,30 +115,11 @@ class SpecimenCart {
   }
 
   isDefaultCart(cart) {
-    return cart.name && cart.name.indexOf('$$$$user_') == 0;
+    return !!cart.defaultList;
   }
 
   getDisplayName(cart) {
-    if (!cart.name || cart.name.indexOf('$$$$user_') != 0) {
-      return cart.name;
-    }
-
-    const {owner} = cart;
-    if (owner.id == ui.currentUser.id) {
-      return 'My Default Cart';
-    } else {
-      let displayName = owner.firstName || '';
-      if (owner.lastName) {
-        if (displayName) {
-          displayName += ' ';
-        }
-
-        displayName += owner.lastName;
-      }
-
-      displayName += (displayName && '\'s ') || '';
-      return displayName + 'Default Cart';
-    }
+    return cart.name;
   }
 
   getDict() {

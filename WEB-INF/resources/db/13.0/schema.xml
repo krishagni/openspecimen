@@ -474,4 +474,24 @@
       <column name="SORT_ORDER" type="${int.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Default specimen cart flag">
+    <addColumn tableName="CATISSUE_SPECIMENLIST_TAGS">
+      <column name="DEFAULT_CART" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Default specimen cart user ID" dbms="mysql">
+    <sql>
+      alter table
+        CATISSUE_SPECIMENLIST_TAGS
+      add
+        DEFAULT_CART_USER_ID bigint
+      as
+        (case when DEFAULT_CART = 1 and DELETED_ON is null then USER_ID else null end)
+      virtual
+    </sql>
+  </changeSet>
 </databaseChangeLog>

@@ -49,7 +49,7 @@ public class SpecimenListDetail extends SpecimenListSummary {
 		details.setOwner(UserSummary.from(list.getOwner()));
 		details.setSharedWith(UserSummary.from(list.getSharedWith()));
 		details.setSharedWithGroups(UserGroupSummary.from(list.getSharedWithGroups()));
-		details.setDefaultList(list.isDefaultList());
+		details.setDefaultList(list.isDefaultCart());
 		details.setSendDigestNotifs(list.getSendDigestNotifs());
 		return details;
 	}

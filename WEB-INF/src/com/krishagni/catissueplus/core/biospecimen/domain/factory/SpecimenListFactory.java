@@ -11,4 +11,3 @@ public interface SpecimenListFactory {
 
 	public SpecimenList createDefaultSpecimenList(User user);
 }
-

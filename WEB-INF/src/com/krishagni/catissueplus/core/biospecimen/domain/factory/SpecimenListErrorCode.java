@@ -10,6 +10,8 @@ public enum SpecimenListErrorCode implements ErrorCode {
 	NAME_REQUIRED,
 	
 	DUP_NAME,
+
+	DEF_LIST_RENAME_NA,
 	
 	OWNER_REQUIRED,
 	

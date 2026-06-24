@@ -74,7 +74,6 @@ export default {
       cartSvc.getCart(props.cartId).then(
         cart => {
           dataCtx.cart        = cart;
-          dataCtx.defaultCart = cartSvc.isDefaultCart(cart);
           ctx.cartDisplayName = cartSvc.getDisplayName(cart)
         }
       );
@@ -90,7 +89,7 @@ export default {
   computed: {
     deleteAllowed: function() {
       const { cart } = this.dataCtx;
-      return cart.id > 0 && cart.name.indexOf('$$$$user_') != 0 &&
+      return cart.id > 0 && !cart.defaultList &&
         (cart.owner.id == this.$ui.currentUser.id || this.$ui.currentUser.admin);
     }
   },

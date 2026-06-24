@@ -90,7 +90,12 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public SpecimenList getDefaultSpecimenList(Long userId) {
-		return getSpecimenListByName(SpecimenList.getDefaultListName(userId));
+		Criteria<SpecimenList> query = createCriteria(SpecimenList.class, "list");
+		return query.join("list.owner", "owner")
+			.add(query.eq("owner.id", userId))
+			.add(query.eq("list.defaultCart", true))
+			.add(query.isNull("list.deletedOn"))
+			.uniqueResult();
 	}
 
 	@Override

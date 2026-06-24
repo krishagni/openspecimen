@@ -31,6 +31,8 @@ public class SpecimenList extends BaseEntity {
 	
 	private User owner;
 
+	private boolean defaultCart;
+
 	private String description;
 
 	private Date createdOn;
@@ -74,6 +76,14 @@ public class SpecimenList extends BaseEntity {
 
 	public void setOwner(User owner) {
 		this.owner = owner;
+	}
+
+	public boolean isDefaultCart() {
+		return defaultCart;
+	}
+
+	public void setDefaultCart(boolean defaultCart) {
+		this.defaultCart = defaultCart;
 	}
 
 	public String getDescription() {
@@ -202,7 +212,10 @@ public class SpecimenList extends BaseEntity {
 	}
 	
 	public void update(SpecimenList specimenList) {
-		setName(specimenList.getName());
+		if (!isDefaultCart()) {
+			setName(specimenList.getName());
+		}
+
 		setDescription(specimenList.getDescription());
 		updateSharedUsers(specimenList.getSharedWith());
 		updateSharedGroups(specimenList.getSharedWithGroups());
@@ -220,28 +233,12 @@ public class SpecimenList extends BaseEntity {
 		return specimens.size();
 	}
 
-	public boolean isDefaultList(User user) {
-		return getDefaultListName(user).equals(getName());
-	}
-
-	public boolean isDefaultList() {
-		return isDefaultList(getOwner());
-	}
-
 	public String getDisplayName() {
-		if (isDefaultList()) {
-			return getOwner().formattedName() + " Default Cart";
-		}
-
 		return getName();
 	}
 
 	public static String getDefaultListName(User user) {
-		return getDefaultListName(user.getId());
-	}
-
-	public static String getDefaultListName(Long userId) {
-		return String.format("$$$$user_%d", userId);
+		return user.formattedName() + "'s Default Cart (" + user.getId() + ")";
 	}
 
 	public static List<Specimen> groupByAncestors(Collection<Specimen> spmns) {

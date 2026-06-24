@@ -83,7 +83,7 @@ export default {
             searchTerm = searchTerm.toLowerCase();
             this.carts = this.defCarts.filter(cart => cart.name.toLowerCase().indexOf(searchTerm) != -1);
           } else {
-            this.getCarts(searchTerm).then(
+            this._getCarts(searchTerm).then(
               carts => {
                 this.carts = carts;
                 if (!searchTerm) {
@@ -97,39 +97,14 @@ export default {
       );
     },
 
-    getCarts: function(searchTerm) {
-      return http.get('specimen-lists', {name: searchTerm}).then(
-        (carts) => {
-          const myDefCart = '$$$$user_' + this.$ui.currentUser.id;
-          carts = carts.filter(cart => cart.name != myDefCart)
-          carts.forEach(cart => cart.displayName = this.getDisplayName(cart));
-          return carts;
-        }
-      );
-    },
-
-    getDisplayName: function(cart) {
-      let displayName = cart.name;
-      if (cart.name.indexOf('$$$$user_') == 0) {
-        displayName = cart.owner.firstName || '';
-        if (displayName) {
-          displayName += ' ';
-        }
-
-        displayName += cart.owner.lastName + '\'s Default Cart';
-      }
-
-      return displayName;
-    },
-
     addToMyDefaultCart: function() {
       const cart = {
         id: 0,
-        name: '$$$$user_' + this.$ui.currentUser.id,
+        defaultList: true,
+        displayName: this.$t('common.add_to_cart.my_default_cart'),
         owner: this.$ui.currentUser
       };
 
-      cart.displayName = this.getDisplayName(cart);
       this.addToCart(null, cart);
     },
 
@@ -171,6 +146,18 @@ export default {
 
     viewCarts: function() {
       routerSvc.goto('SpecimenCartsList', {cartId: -1});
+    },
+
+    _getCarts: function(searchTerm) {
+      return http.get('specimen-lists', {name: searchTerm}).then(
+        (carts) => {
+          carts = carts.filter(
+            cart => !cart.defaultList || cart.owner.id != this.$ui.currentUser.id
+          );
+          carts.forEach(cart => cart.displayName = cartsSvc.getDisplayName(cart));
+          return carts;
+        }
+      );
     }
   }
 }

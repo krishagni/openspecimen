@@ -23,6 +23,8 @@
 
     <many-to-one name="owner" column="USER_ID"/>
 
+    <property name="defaultCart" column="DEFAULT_CART" />
+
     <property name="sendDigestNotifs" column="SEND_DIGEST_NOTIFS" />
 
     <property name="sourceEntityType" column="SOURCE_ENTITY_TYPE" />

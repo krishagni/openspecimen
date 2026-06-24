@@ -160,7 +160,7 @@ export default {
       }
 
       if (newCartId >= 0) {
-        let selectedRow = this.findCart(this.ctx.carts, newCartId);
+        let selectedRow = this._findCart(this.ctx.carts, newCartId);
         if (!selectedRow) {
           selectedRow = {cart: {id: newCartId}};
         }
@@ -199,18 +199,13 @@ export default {
       if (this.cartId < 0) {
         routerSvc.goto('SpecimenCartsList', {cartId: -1}, {filters: uriEncoding, folderId: this.folderId});
       } else {
-        let selectedRow = this.findCart(carts, this.cartId);
+        let selectedRow = this._findCart(carts, this.cartId);
         if (!selectedRow) {
           selectedRow = {cart: {id: this.cartId}};
         }
 
         this.showDetails(selectedRow);
       }
-    },
-
-    findCart: function(carts, cartId) {
-      const defCartName = '$$$$user_' + this.$ui.currentUser.id;
-      return carts.find(({cart}) => cart.id == cartId || (cartId == 0 && cart.name == defCartName));
     },
 
     reloadCarts: async function() {
@@ -284,6 +279,14 @@ export default {
             this.$refs.listView.reload();
           }
         }
+      );
+    },
+
+    _findCart: function(carts, cartId) {
+      const {currentUser} = this.$ui;
+      return carts.find(
+        ({cart}) => cart.id == cartId ||
+          (cartId == 0 && cart.defaultList && cart.owner.id == currentUser.id)
       );
     }
   }

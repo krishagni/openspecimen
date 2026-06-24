@@ -25,10 +25,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationListener;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.UserSavedEvent;
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.BoxDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
@@ -101,11 +103,12 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 import edu.common.dynamicextensions.query.WideRowMode;
 
 
-public class SpecimenListServiceImpl implements SpecimenListService, InitializingBean, ObjectAccessor {
+public class SpecimenListServiceImpl
+	implements SpecimenListService, InitializingBean, ObjectAccessor, ApplicationListener<UserSavedEvent> {
 
 	private static final LogUtil logger = LogUtil.getLogger(SpecimenListServiceImpl.class);
 
-	private static final Pattern DEF_LIST_NAME_PATTERN = Pattern.compile("\\$\\$\\$\\$user_\\d+");
+	private static final Pattern DEF_LIST_NAME_PATTERN = Pattern.compile(".+'s Default Cart \\(\\d+\\)", Pattern.CASE_INSENSITIVE);
 
 	private SpecimenListFactory specimenListFactory;
 	
@@ -993,6 +996,21 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		getSpecimenList(cartId, null);
 	}
 
+	@Override
+	public void onApplicationEvent(UserSavedEvent event) {
+		if (event.getOperation() == UserSavedEvent.Operation.CREATE) {
+			return;
+		}
+
+		User user = event.getEventData();
+		boolean nameChanged =
+			!Objects.equals(event.prop("prevFirstName"), user.getFirstName()) ||
+				!Objects.equals(event.prop("prevLastName"), user.getLastName());
+		if (nameChanged) {
+			updateDefaultSpecimenListName(user);
+		}
+	}
+
 	private SpecimenListsCriteria addSpecimenListsCriteria(SpecimenListsCriteria crit) {
 		if (!AuthUtil.isAdmin()) {
 			crit.userId(AuthUtil.getCurrentUser().getId());
@@ -1055,6 +1073,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 				specimenList = specimenListFactory.createSpecimenList(listDetails);
 			}
 			
+			ensureDefaultCartNameUnchanged(existing, specimenList);
 			ensureUniqueName(existing, specimenList);
 			ensureValidSpecimensAndUsers(listDetails, specimenList, null);
 
@@ -1190,6 +1209,27 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		}
 	}
 	
+	private void ensureDefaultCartNameUnchanged(SpecimenList existingList, SpecimenList newList) {
+		if (existingList.isDefaultCart() && !StringUtils.equals(existingList.getName(), newList.getName())) {
+			throw OpenSpecimenException.userError(SpecimenListErrorCode.DEF_LIST_RENAME_NA);
+		}
+	}
+
+	private void updateDefaultSpecimenListName(User user) {
+		SpecimenList defaultList = daoFactory.getSpecimenListDao().getDefaultSpecimenList(user.getId());
+		if (defaultList == null) {
+			return;
+		}
+
+		String newName = SpecimenList.getDefaultListName(user);
+		SpecimenList existingList = daoFactory.getSpecimenListDao().getSpecimenListByName(newName);
+		if (existingList != null && !existingList.equals(defaultList)) {
+			throw OpenSpecimenException.userError(SpecimenListErrorCode.DUP_NAME, newName);
+		}
+
+		defaultList.setName(newName);
+	}
+
 	private void ensureUniqueName(SpecimenList existingList, SpecimenList newList) {
 		if (existingList != null && existingList.getName().equals(newList.getName())) {
 			return;
@@ -1267,7 +1307,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			@Override
 			public void headers(OutputStream out) {
 				Map<String, String> headers = new LinkedHashMap<>() {{
-					put(msg(LIST_NAME), list.isDefaultList() ? msg("specimen_list_default_list", list.getOwner().formattedName()) : list.getName());
+					put(msg(LIST_NAME), list.getName());
 					put(msg(LIST_DESC), StringUtils.isNotBlank(list.getDescription()) ? list.getDescription() : msg("common_not_specified"));
 				}};
 

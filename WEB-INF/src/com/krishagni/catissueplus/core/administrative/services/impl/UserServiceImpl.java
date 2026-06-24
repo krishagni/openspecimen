@@ -24,6 +24,7 @@ import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserEvent;
+import com.krishagni.catissueplus.core.administrative.domain.UserSavedEvent;
 import com.krishagni.catissueplus.core.administrative.domain.UserUiState;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserFactory;
@@ -261,7 +262,6 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			ose.checkAndThrow();
 
 			daoFactory.getUserDao().saveOrUpdate(user);
-			
 			if (user.isInstituteAdmin()) {
 				addDefaultSiteAdminRole(user, "CREATE");
 			}
@@ -281,6 +281,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 				notifyUserUpdated(user, "created");
 			}
 
+			EventPublisher.getInstance().publish(new UserSavedEvent(user, UserSavedEvent.Operation.CREATE));
 			return ResponseEvent.response(UserDetail.from(user));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -312,6 +313,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			}
 			
 			String currentStatus = user.getActivityStatus();
+			String currentEmailId = user.getEmailAddress();
 			String newStatus = detail.getActivityStatus();
 			if (currentStatus.equals(newStatus)) {
 				return ResponseEvent.response(UserDetail.from(user));
@@ -336,6 +338,14 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 				user.close();
 			}
 
+			EventPublisher.getInstance().publish(
+				new UserSavedEvent(user, UserSavedEvent.Operation.STATUS_UPDATE)
+					.prop("prevFirstName", user.getFirstName())
+					.prop("prevLastName", user.getLastName())
+					.prop("prevStatus", currentStatus)
+					.prop("prevEmailId", currentEmailId)
+					.prop("prevInstitute", user.getInstitute())
+			);
 			return ResponseEvent.response(UserDetail.from(user));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -389,6 +399,14 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 				notifyUserUpdated(user, "deleted");
 			}
 
+			EventPublisher.getInstance().publish(
+				new UserSavedEvent(existing, UserSavedEvent.Operation.DELETE)
+					.prop("prevFirstName", user.getFirstName())
+					.prop("prevLastName", user.getLastName())
+					.prop("prevStatus", user.getActivityStatus())
+					.prop("prevEmailId", user.getEmailAddress())
+					.prop("prevInstitute", user.getInstitute())
+			);
 			return ResponseEvent.response(UserDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -790,6 +808,9 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		String prevStatus = existingUser.getActivityStatus();
 		Institute prevInstitute = existingUser.getInstitute();
 		String prevEmailId = existingUser.getEmailAddress();
+		String prevFirstName = existingUser.getFirstName();
+		String prevLastName = existingUser.getLastName();
+
 		existingUser.update(user);
 		ensureApiUserUpdateByAdmin(existingUser, null);
 
@@ -817,6 +838,15 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 				}
 			}
 		}
+
+		EventPublisher.getInstance().publish(
+			new UserSavedEvent(existingUser, UserSavedEvent.Operation.UPDATE)
+				.prop("prevFirstName", prevFirstName)
+				.prop("prevLastName", prevLastName)
+				.prop("prevStatus", prevStatus)
+				.prop("prevEmailId", prevEmailId)
+				.prop("prevInstitute", prevInstitute)
+		);
 
 		if (isActivated(prevStatus, user.getActivityStatus())) {
 			onAccountActivation(user, prevStatus);

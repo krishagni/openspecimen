@@ -106,4 +106,11 @@
       <column name="sortOrder_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Default specimen cart flag">
+    <addColumn tableName="CATISSUE_SPECIMENLIST_TAGS_AUD">
+      <column name="DEFAULT_CART" type="${boolean.type}" />
+      <column name="defaultCart_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

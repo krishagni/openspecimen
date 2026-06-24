@@ -125,6 +125,7 @@
     "add_to_cart": {
       "create_new": "Create New",
       "manage_carts": "Manage Carts",
+      "my_default_cart": "My Default Cart",
       "no_carts": "No carts to show.",
       "no_specimens_added": "No specimens added to the cart: {name}",
       "search_cart": "Search Cart",

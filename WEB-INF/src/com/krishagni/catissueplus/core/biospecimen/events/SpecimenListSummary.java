@@ -140,7 +140,7 @@ public class SpecimenListSummary extends AttributeModifiedSupport {
 		listSummary.setCreatedOn(list.getCreatedOn());
 		listSummary.setLastUpdatedOn(list.getLastUpdatedOn());
 		listSummary.setOwner(UserSummary.from(list.getOwner()));
-		listSummary.setDefaultList(list.isDefaultList());
+		listSummary.setDefaultList(list.isDefaultCart());
 		listSummary.setSendDigestNotifs(list.getSendDigestNotifs());
 		listSummary.setSourceEntityType(list.getSourceEntityType());
 		listSummary.setSourceEntityId(list.getSourceEntityId());
