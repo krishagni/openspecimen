@@ -133,7 +133,8 @@ public class AbstractDao<T> implements Dao<T> {
 	@Override
 	public T getById(Long id) {
 		try {
-			return (T) getCurrentSession().find(getType(), id);
+			Criteria<?> query = createCriteria(getType(), "t");
+			return (T) query.add(query.eq("t.id", id)).uniqueResult();
 		} catch (Exception e) {
 			logger.error("Error obtaining the object of type " + getType().getName() + " and ID = " + id, e);
 		}
