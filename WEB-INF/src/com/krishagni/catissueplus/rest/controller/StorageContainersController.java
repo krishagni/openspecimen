@@ -373,6 +373,30 @@ public class StorageContainersController {
 		return resp.getPayload();
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value="/utilisation")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<StorageContainerSummary> getTopLevelContainersUtilisation(
+		@RequestParam(value = "name", required = false)
+		String name,
+
+		@RequestParam(value = "site", required = false)
+		String siteName,
+
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "20")
+		int maxResults) {
+
+		StorageContainerListCriteria crit = new StorageContainerListCriteria()
+			.query(name)
+			.siteName(siteName)
+			.startAt(startAt)
+			.maxResults(maxResults);
+		return ResponseEvent.unwrap(storageContainerSvc.getTopLevelContainersUtilisation(RequestEvent.wrap(crit)));
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value="{id}/utilisation-map")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

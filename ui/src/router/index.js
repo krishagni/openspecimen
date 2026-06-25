@@ -961,6 +961,12 @@ const routes = [
         props: (route) => ({filters: route.query.filters, showStats: route.query.showStats}),
       },
       {
+        path: 'containers/utilisation',
+        name: 'ContainersUtilisation',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/UtilisationHeatmap.vue'),
+        props: (route) => ({filters: route.query.filters})
+      },
+      {
         path: 'containers/:containerId/detail',
         name: 'ContainerDetail',
         component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Detail.vue'),

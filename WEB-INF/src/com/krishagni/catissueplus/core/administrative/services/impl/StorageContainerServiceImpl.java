@@ -345,6 +345,40 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<List<StorageContainerSummary>> getTopLevelContainersUtilisation(RequestEvent<StorageContainerListCriteria> req) {
+		try {
+			StorageContainerListCriteria crit = addContainerListCriteria(req.getPayload().topLevelContainers(true));
+			List<StorageContainer> containers = daoFactory.getStorageContainerDao().getStorageContainers(crit);
+			Map<Long, int[]> stats = daoFactory.getStorageContainerDao().getUtilisationStats(
+				containers.stream()
+					.filter(container -> !container.isDimensionless())
+					.map(StorageContainer::getId)
+					.collect(Collectors.toList())
+			);
+
+			List<StorageContainerSummary> result = new ArrayList<>();
+			for (StorageContainer container : containers) {
+				StorageContainerSummary summary = StorageContainerSummary.from(container);
+
+				int[] stat = stats.get(container.getId());
+				int occupiedSlots = stat != null ? stat[0] : 0;
+				int freeSlots = stat != null ? stat[1] : 0;
+				summary.setUsedPositions(occupiedSlots);
+				summary.setFreePositions(freeSlots);
+				summary.setTotalPositions(occupiedSlots + freeSlots);
+				result.add(summary);
+			}
+
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<List<StorageContainerSummary>> getUtilisationMap(RequestEvent<Long> req) {
 		try {
 			StorageContainer container = getContainer(req.getPayload(), null);

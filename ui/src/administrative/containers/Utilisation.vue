@@ -8,21 +8,12 @@
         <os-button-link left-icon="chart-pie" :label="$t('containers.specimens_by_type')"
           :url="specimensCountUrl" />
 
-        <os-button left-icon="palette" :label="$t('containers.view_utilisation_legend')" @click="toggleLegend"
-          v-if="!isDimensionless && hasChildContainers" />
+        <os-container-utilisation-legend v-if="!isDimensionless && hasChildContainers" />
 
         <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportUtilisationMap"
           v-if="!isDimensionless && hasChildContainers" />
       </span>
 
-      <os-overlay ref="legendOverlay">
-        <ul class="os-utilisation-legend">
-          <li class="legend-item" v-for="item of legend" :key="item.key">
-            <span :class="['legend-swatch', item.key]" />
-            <span class="legend-label">{{item.range}}, {{item.label}}</span>
-          </li>
-        </ul>
-      </os-overlay>
     </template>
   </os-page-toolbar>
 
@@ -42,24 +33,16 @@
       </os-message>
     </div>
 
-    <Layout class="map" :container="ctx.container" :occupants="ctx.occupants" v-else-if="!isDimensionless && hasChildContainers">
+    <os-container-layout class="map" :container="ctx.container" :occupants="ctx.occupants"
+      v-else-if="!isDimensionless && hasChildContainers">
       <template #occupant_container="slotProps">
-        <a :href="utilisationUrl(slotProps.occupant)"
-          :class="['utilisation-cell', getUtilisationClass(slotProps.occupant)]"
-          v-os-tooltip="getTooltip(slotProps.occupant)"
-          @click.stop>
-          <span class="container-name">{{getDisplayName(slotProps.occupant)}}</span>
-          <span class="utilisation-value">{{slotProps.occupant.utilisation}}%</span>
-          <span class="utilisation-counts">
-            {{getOccupiedSlots(slotProps.occupant)}} / {{slotProps.occupant.totalSlots}}
-          </span>
-        </a>
+        <os-container-utilisation-tile :container="slotProps.occupant" :fill="true" @click.stop />
       </template>
 
       <template #empty>
         <span />
       </template>
-    </Layout>
+    </os-container-layout>
 
     <div v-else-if="isDimensionless">
       <os-message type="info">
@@ -82,8 +65,6 @@ import boxUtil      from '@/common/services/BoxUtil.js';
 import containerSvc from '@/administrative/services/Container.js';
 import alertsSvc    from '@/common/services/Alerts.js';
 import routerSvc    from '@/common/services/Router.js';
-
-import Layout from './Layout.vue';
 
 const specimenPctPlugin = {
   id: 'specimenPctPlugin',
@@ -123,10 +104,6 @@ const specimenPctPlugin = {
 
 export default {
   props: ['container', 'view'],
-
-  components: {
-    Layout
-  },
 
   setup() {
     const ctx = reactive({
@@ -197,16 +174,6 @@ export default {
 
     specimensCountUrl: function() {
       return this._viewUrl('specimensCount');
-    },
-
-    legend: function() {
-      return [
-        {key: 'full',   range: '100%',  label: this.$t('containers.utilisation_full')},
-        {key: 'high',   range: '> 80%', label: this.$t('containers.utilisation_high_label')},
-        {key: 'medium', range: '51-80%', label: this.$t('containers.utilisation_medium_label')},
-        {key: 'low',    range: '1-50%', label: this.$t('containers.utilisation_low_label')},
-        {key: 'empty',  range: '0%',    label: this.$t('containers.utilisation_empty_label')}
-      ];
     }
   },
 
@@ -270,10 +237,6 @@ export default {
       this.ctx.spmnCountsLoaded = true;
     },
 
-    toggleLegend: function(event) {
-      this.$refs.legendOverlay.toggle(event);
-    },
-
     exportUtilisationMap: async function() {
       alertsSvc.info({code: 'containers.generating_utilisation_map_report'});
       const resp = await containerSvc.exportUtilisationMap(this.ctx.container);
@@ -283,54 +246,6 @@ export default {
       } else {
         alertsSvc.info({code: 'containers.utilisation_map_report_by_email'});
       }
-    },
-
-    getUtilisationClass: function(occupant) {
-      const utilisation = occupant.utilisation || 0;
-      if (utilisation >= 100) {
-        return 'full';
-      } else if (utilisation > 80) {
-        return 'high';
-      } else if (utilisation > 50) {
-        return 'medium';
-      } else if (utilisation > 0) {
-        return 'low';
-      }
-
-      return 'empty';
-    },
-
-    getTooltip: function(occupant) {
-      return this.$t(
-        'containers.utilisation_cell_tooltip',
-        {
-          name: this.getDisplayName(occupant),
-          utilisation: occupant.utilisation,
-          occupied: this.getOccupiedSlots(occupant),
-          total: occupant.totalSlots
-        }
-      );
-    },
-
-    utilisationUrl: function(occupant) {
-      const containerId = occupant.id;
-      if (containerId) {
-        return routerSvc.getUrl('ContainerDetail.Utilisation', {containerId});
-      }
-
-      return null;
-    },
-
-    getDisplayName: function(occupant) {
-      if (occupant.emptySlot) {
-        return this.$t('containers.empty_container_slot', {type: occupant.typeName});
-      }
-
-      return occupant.displayName || occupant.occupyingEntityName || occupant.name;
-    },
-
-    getOccupiedSlots: function(occupant) {
-      return (occupant.totalSlots || 0) - (occupant.freeSlots || 0);
     },
 
     _setupView: async function() {
@@ -381,8 +296,6 @@ export default {
         nr: this.ctx.container.noOfRows,
         nc: this.ctx.container.noOfColumns
       });
-      const totalSlots = occupant.totalPositions || 0;
-      const usedSlots  = occupant.usedPositions || 0;
       return {
         ...occupant,
         emptySlot: !occupant.id,
@@ -392,10 +305,7 @@ export default {
         posTwo: location.positionY,
         posOne: location.positionX,
         posTwoOrdinal: row,
-        posOneOrdinal: column,
-        freeSlots: occupant.freePositions || 0,
-        totalSlots: totalSlots,
-        utilisation: totalSlots > 0 ? Math.round(usedSlots * 100 / totalSlots) : 0
+        posOneOrdinal: column
       };
     },
 
@@ -466,99 +376,4 @@ export default {
   padding: 0;
 }
 
-.os-utilisation-legend {
-  margin: -0.75rem -1rem;
-  padding: 0.5rem 0;
-  min-width: 12rem;
-  list-style: none;
-}
-
-.os-utilisation-legend .legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  white-space: nowrap;
-}
-
-.os-utilisation-legend .legend-swatch {
-  display: inline-block;
-  width: 0.9rem;
-  height: 0.9rem;
-  border-radius: 2px;
-  border: 1px solid rgba(0, 0, 0, 0.16);
-}
-
-.os-utilisation-legend .legend-label {
-  font-size: 0.875rem;
-}
-
-.utilisation-cell {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  position: absolute;
-  inset: 2px;
-  padding: 1.5rem 0.45rem 0.35rem;
-  color: #fff;
-  text-align: center;
-  text-decoration: none;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.utilisation-cell:hover {
-  color: #fff;
-  filter: brightness(0.96);
-}
-
-.utilisation-cell .container-name,
-.utilisation-cell .utilisation-counts {
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.utilisation-cell .container-name {
-  font-weight: 600;
-  min-height: 1.2rem;
-}
-
-.utilisation-cell .utilisation-value {
-  font-size: 1.15rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-top: auto;
-}
-
-.utilisation-cell .utilisation-counts {
-  font-size: 0.8rem;
-}
-
-.full,
-.legend-swatch.full {
-  background: #b91c1c;
-}
-
-.high,
-.legend-swatch.high {
-  background: #dc5f57;
-}
-
-.medium,
-.legend-swatch.medium {
-  background: #d97706;
-}
-
-.low,
-.legend-swatch.low {
-  background: #2e7d32;
-}
-
-.empty,
-.legend-swatch.empty {
-  background: #2f80a7;
-}
 </style>

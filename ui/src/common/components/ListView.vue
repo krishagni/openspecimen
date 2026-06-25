@@ -46,7 +46,9 @@
 
   <div class="os-list os-list-hover" :class="{'show-filters': showFilters}" v-else-if="!summaryView">
     <div class="results">
-      <div class="info" v-if="loading || list.length == 0">
+      <slot name="results" v-if="filtersOnly"></slot>
+
+      <div class="info" v-else-if="loading || list.length == 0">
         <div v-show="loading">
           <os-message type="info">
             <span v-t="'common.lists.loading'">Loading records, please wait for a moment...</span>
@@ -269,6 +271,7 @@ export default {
     'rowClass',
     'idFilter',
     'hidePageSizeSelector',
+    'filtersOnly',
     'splitView',
     'detailView',
     'splitViewTitle'

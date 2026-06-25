@@ -258,12 +258,25 @@ export default {
         actionOpts.push({divider: true});
       }
 
+      actionOpts.push({
+        icon: 'th',
+        caption: this.$t('containers.view_utilisation'),
+        url: routerSvc.getUrl('ContainersUtilisation')
+      });
+
+      /**
+       *
+       * Will be removed in the next release
+       * Testing the waters...
+       *
       const showStats = util.isTrue(this.showStats);
       actionOpts.push({
         icon: 'poll',
         caption: this.$t(showStats ? 'containers.hide_stats' : 'containers.view_stats'),
         onSelect: () => this.toggleViewStats()
       });
+       *
+       **/
 
       return actionOpts;
     }

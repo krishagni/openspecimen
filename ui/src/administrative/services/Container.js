@@ -88,6 +88,10 @@ class Container {
     return http.get('storage-containers/' + container.id + '/occupied-positions');
   }
 
+  async getTopLevelContainersUtilisation(filterOpts) {
+    return http.get('storage-containers/utilisation', filterOpts || {});
+  }
+
   async getUtilisationMap(container) {
     return http.get('storage-containers/' + container.id + '/utilisation-map');
   }

@@ -47,6 +47,8 @@ public interface StorageContainerService {
 	
 	ResponseEvent<List<StorageContainerPositionDetail>> getOccupiedPositions(RequestEvent<Long> req);
 
+	ResponseEvent<List<StorageContainerSummary>> getTopLevelContainersUtilisation(RequestEvent<StorageContainerListCriteria> req);
+
 	ResponseEvent<List<StorageContainerSummary>> getUtilisationMap(RequestEvent<Long> req);
 
 	ResponseEvent<List<SpecimenInfo>> getSpecimens(RequestEvent<SpecimenListCriteria> req);

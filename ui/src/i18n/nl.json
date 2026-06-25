@@ -90,6 +90,7 @@
       "search": "Zoeken",
       "send":   "Verzenden",
       "update": "Bijwerken",
+      "view_more": "Meer bekijken",
       "yes":    "Ja"
     },
 
@@ -278,6 +279,7 @@
     "locations": "Locaties",
     "log_activity": "Log een activiteit",
     "list": "Containers",
+    "loading_utilisation_map": "Gebruiksoverzicht laden. Even geduld",
     "maintenance": "Onderhoud",
     "map": "Overzicht",
     "map_will_be_emailed": "Het genereren van een overzicht van de container duurt langer dan verwacht. De link om het overzicht te downloaden zal u per e-mail worden toegestuurd.",
@@ -396,6 +398,8 @@
     "utilisation_low_label": "Laag",
     "utilisation_medium": "51-80%",
     "utilisation_medium_label": "Gemiddeld",
+    "utilisation_not_available": "Niet beschikbaar",
+    "utilisation_not_available_tooltip": "{name}: gebruik is niet beschikbaar voor dimensieloze containers",
     "utilisation_map_report_by_email": "Genereren van een gebruikskaartrapport duurt langer dan verwacht. De link om het rapport te downloaden zal u per e-mail worden toegestuurd.",
     "utilisation_report_by_email": "Genereren van een gebruiksrapport duurt langer dan verwacht. De link om het rapport te downloaden zal u per e-mail worden toegestuurd.",
     "vacate_existing_specimens": "Bestaande materialen ontruimen",
