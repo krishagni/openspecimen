@@ -131,6 +131,9 @@ public class CollectionProtocolsController {
 			@RequestParam(value = "includePi", required = false, defaultValue = "false")
 			boolean includePi,
 
+			@RequestParam(value = "includeWfInheritance", required = false, defaultValue = "false")
+			boolean includeWfInheritance,
+
 			@RequestParam(value = "includeStats", required = false, defaultValue = "false")
 			boolean includeStats,
 
@@ -151,6 +154,7 @@ public class CollectionProtocolsController {
 			.repositoryName(repositoryName)
 			.instituteId(instituteId)
 			.includePi(includePi || detailedList)
+			.includeWfInheritance(includeWfInheritance)
 			.includeStat(includeStats || detailedList)
 			.orderByStarred(orderByStarred)
 			.onlyParticipantConsentCps(onlyParticipantConsentCps)
@@ -574,6 +578,13 @@ public class CollectionProtocolsController {
 	@ResponseBody
 	public CpWorkflowCfgDetail patchWorkflowCfg(@PathVariable("id") Long cpId, @RequestBody List<WorkflowDetail> workflows) {
 		return saveWorkflows(cpId, workflows, true);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value="/{id}/workflows/inherit")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public CpWorkflowCfgDetail inheritGroupWorkflowCfg(@PathVariable("id") Long cpId) {
+		return response(cpSvc.inheritGroupWorkflows(request(cpId)));
 	}
 
 	//

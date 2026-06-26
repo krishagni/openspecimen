@@ -14,6 +14,8 @@
     </id>
 	
     <one-to-one name="cp" constrained="true"/>
+
+    <property name="groupWorkflowsInherited" column="GROUP_WORKFLOWS_INHERITED"/>
     
     <property name="workflowsJson" column="WORKFLOWS"/>
   </class>

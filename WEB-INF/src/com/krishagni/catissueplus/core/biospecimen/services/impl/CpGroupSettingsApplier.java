@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 
 import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
+import com.krishagni.catissueplus.core.biospecimen.WorkflowConfigUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSavedEvent;
@@ -21,12 +23,11 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig.Workflow;
 import com.krishagni.catissueplus.core.biospecimen.domain.RequestManagerGroup;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
-import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
+import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.FormContextDetail;
 import com.krishagni.catissueplus.core.de.events.FormSummary;
 import com.krishagni.catissueplus.core.de.services.FormService;
@@ -51,7 +52,7 @@ public class CpGroupSettingsApplier {
 
 		addFormContexts(group, cps);
 		boolean rmgApplied = applyRequestManagerGroup(group.getRequestManagerGroup(), cps, false);
-		boolean workflowsApplied = applyWorkflows(group.getWorkflows().values(), cps, false);
+		boolean workflowsApplied = applyWorkflowsOnJoin(group.getWorkflows(), cps);
 		if (rmgApplied || workflowsApplied) {
 			publishCpSavedEvents(cps);
 		}
@@ -65,14 +66,22 @@ public class CpGroupSettingsApplier {
 		return removeRequestManagerGroup(oldRmg, cps, true);
 	}
 
-
-
-	public boolean applyWorkflows(Map<String, WorkflowDetail> workflows, Set<CollectionProtocol> cps) {
-		return applyWorkflows(workflows, cps, true);
+	public boolean applyWorkflows(Collection<Workflow> workflows, Set<CollectionProtocol> cps, boolean force) {
+		return applyWorkflows(workflows, cps, force, true);
 	}
 
-	public boolean applyWorkflows(Collection<CpWorkflowConfig.Workflow> workflows, Set<CollectionProtocol> cps) {
-		return applyWorkflows(workflows, cps, true);
+	public void removeWorkflowsInheritance(Collection<CollectionProtocol> cps) {
+		if (CollectionUtils.isEmpty(cps)) {
+			return;
+		}
+
+		for (CollectionProtocol cp : cps) {
+			CpWorkflowConfig cfg = daoFactory.getCollectionProtocolDao().getCpWorkflows(cp.getId());
+			if (cfg != null && cfg.getGroupWorkflowsInherited() != null) {
+				cfg.setGroupWorkflowsInherited(null);
+				daoFactory.getCollectionProtocolDao().saveCpWorkflows(cfg);
+			}
+		}
 	}
 
 	//
@@ -211,54 +220,90 @@ public class CpGroupSettingsApplier {
 			!level.equals("SpecimenExtension");
 	}
 
-	private boolean applyWorkflows(Map<String, WorkflowDetail> workflows, Set<CollectionProtocol> cps, boolean publish) {
-		if (workflows == null || CollectionUtils.isEmpty(cps)) {
+	private boolean applyWorkflows(Collection<Workflow> workflows, Set<CollectionProtocol> cps, boolean force, boolean publish) {
+		Collection<Workflow> workflowsToApply = workflows != null ? workflows : Collections.emptyList();
+		return updateWorkflows(cps, publish, cp -> applyWorkflows(workflowsToApply, cp, force));
+	}
+
+	private boolean applyWorkflows(Collection<Workflow> workflows, CollectionProtocol cp, boolean force) {
+		CpWorkflowConfig cfg = daoFactory.getCollectionProtocolDao().getCpWorkflows(cp.getId());
+		if (!force && cfg != null && !Boolean.TRUE.equals(cfg.getGroupWorkflowsInherited())) {
 			return false;
 		}
 
-		for (CollectionProtocol cp : cps) {
-			CpWorkflowCfgDetail cpWfs = new CpWorkflowCfgDetail();
-			cpWfs.setCpId(cp.getId());
-			cpWfs.setWorkflows(workflows);
-			saveWorkflows(cp, cpWfs);
+		if (cfg == null) {
+			cfg = newWorkflowConfig(cp);
 		}
 
-		if (publish) {
-			publishCpSavedEvents(cps);
-		}
-
+		saveWorkflows(workflows, cfg);
 		return true;
 	}
 
-	private boolean applyWorkflows(Collection<CpWorkflowConfig.Workflow> workflows, Set<CollectionProtocol> cps, boolean publish) {
-		if (CollectionUtils.isEmpty(workflows)) {
+	private boolean applyWorkflowsOnJoin(Map<String, Workflow> groupWorkflows, Set<CollectionProtocol> cps) {
+		Map<String, Workflow> workflowsToApply = groupWorkflows != null ? groupWorkflows : Collections.emptyMap();
+		return updateWorkflows(cps, false, cp -> applyWorkflowsOnJoin(workflowsToApply, cp));
+	}
+
+	private boolean applyWorkflowsOnJoin(Map<String, Workflow> groupWorkflows, CollectionProtocol cp) {
+		CpWorkflowConfig cfg = daoFactory.getCollectionProtocolDao().getCpWorkflows(cp.getId());
+		if (cfg == null) {
+			cfg = newWorkflowConfig(cp);
+			saveWorkflows(groupWorkflows.values(), cfg);
+			return true;
+		}
+
+		boolean inherited = WorkflowConfigUtil.areSame(cfg.getWorkflows(), groupWorkflows);
+		if (Objects.equals(cfg.getGroupWorkflowsInherited(), inherited)) {
 			return false;
 		}
 
-		return applyWorkflows(WorkflowDetail.from(workflows), cps, publish);
+		cfg.setGroupWorkflowsInherited(inherited);
+		daoFactory.getCollectionProtocolDao().saveCpWorkflows(cfg);
+		return true;
 	}
 
-	private CpWorkflowConfig saveWorkflows(CollectionProtocol cp, CpWorkflowCfgDetail input) {
-		CpWorkflowConfig cfg = daoFactory.getCollectionProtocolDao().getCpWorkflows(cp.getId());
-		if (cfg == null) {
-			cfg = new CpWorkflowConfig();
-			cfg.setCp(cp);
+	private boolean updateWorkflows(Set<CollectionProtocol> cps, boolean publish, Function<CollectionProtocol, Boolean> updater) {
+		if (CollectionUtils.isEmpty(cps)) {
+			return false;
 		}
 
-		if (!input.isPatch()) {
-			cfg.getWorkflows().clear();
+		Set<CollectionProtocol> updatedCps = cps.stream()
+			.filter(cp -> Boolean.TRUE.equals(updater.apply(cp)))
+			.collect(Collectors.toSet());
+		if (publish && CollectionUtils.isNotEmpty(updatedCps)) {
+			publishCpSavedEvents(updatedCps);
 		}
 
-		if (input.getWorkflows() != null) {
-			for (WorkflowDetail detail : input.getWorkflows().values()) {
-				Workflow wf = new Workflow();
-				BeanUtils.copyProperties(detail, wf);
-				cfg.getWorkflows().put(wf.getName(), wf);
+		return CollectionUtils.isNotEmpty(updatedCps);
+	}
+
+	private CpWorkflowConfig newWorkflowConfig(CollectionProtocol cp) {
+		CpWorkflowConfig cfg = new CpWorkflowConfig();
+		cfg.setCp(cp);
+		return cfg;
+	}
+
+	private CpWorkflowConfig saveWorkflows(Collection<Workflow> workflows, CpWorkflowConfig cfg) {
+		cfg.getWorkflows().clear();
+		if (workflows != null) {
+			for (Workflow workflow : workflows) {
+				cfg.getWorkflows().put(workflow.getName(), copyWorkflow(workflow));
 			}
 		}
 
+		cfg.setGroupWorkflowsInherited(true);
 		daoFactory.getCollectionProtocolDao().saveCpWorkflows(cfg);
 		return cfg;
+	}
+
+	private Workflow copyWorkflow(Workflow input) {
+		Workflow result = new Workflow();
+		BeanUtils.copyProperties(input, result, "data");
+		if (input.getData() != null) {
+			result.setData(Utility.objectToMap(input.getData()));
+		}
+
+		return result;
 	}
 
 	private void publishCpSavedEvents(Set<CollectionProtocol> cps) {

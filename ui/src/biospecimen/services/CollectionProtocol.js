@@ -376,6 +376,16 @@ class CollectionProtocol {
     return workflow[wfName];
   }
 
+  async getWorkflowConfig(cpId) {
+    return http.get('collection-protocols/' + cpId + '/workflows');
+  }
+
+  async inheritGroupWorkflows(cpId) {
+    const config = await http.post('collection-protocols/' + cpId + '/workflows/inherit');
+    this.workflows[cpId] = config.workflows;
+    return config;
+  }
+
   async getSpecimenTreeCfg(cpId) {
     return this.getWorkflow(-1, 'specimenTree').then(
       (sysTreeCfg) => {

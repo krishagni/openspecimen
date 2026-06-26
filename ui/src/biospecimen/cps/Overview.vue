@@ -59,6 +59,17 @@
       </template>
     </os-confirm>
 
+    <os-confirm ref="inheritGroupWorkflowsConfirmDialog">
+      <template #title>
+        <span v-t="'cps.inherit_group_workflows'">Use Group Workflows?</span>
+      </template>
+      <template #message>
+        <span v-t="'cps.confirm_inherit_group_workflows'">
+          The collection protocol workflows will be replaced with the group workflows. Subsequent group workflow updates will be propagated to this collection protocol.
+        </span>
+      </template>
+    </os-confirm>
+
     <os-delete-object ref="deleteCpDialog" :input="ctx.deleteOpts" />
 
     <os-dialog ref="importerDialog">
@@ -124,7 +135,11 @@ export default {
 
         publishSchema: {rows: []},
 
-        moreOptions: []
+        moreOptions: [],
+
+        workflowCfg: null,
+
+        workflowSource: null
       },
 
       cpResources
@@ -320,7 +335,25 @@ export default {
       this.$refs.wfJsonUploader.upload().then(
         () => {
           alertSvc.success({code: 'cps.workflows_imported', args: this.cp});
-          this.hideImportWorkflowsDialog()
+          this.hideImportWorkflowsDialog();
+          this._loadMoreMenuOptions();
+        }
+      );
+    },
+
+    inheritGroupWorkflows: function() {
+      this.$refs.inheritGroupWorkflowsConfirmDialog.open().then(
+        resp => {
+          if (resp != 'proceed') {
+            return;
+          }
+
+          cpSvc.inheritGroupWorkflows(this.cp.id).then(
+            () => {
+              alertSvc.success({code: 'cps.group_workflows_inherited', args: this.cp});
+              this._loadMoreMenuOptions();
+            }
+          );
         }
       );
     },
@@ -329,7 +362,9 @@ export default {
       this.$refs.auditTrailDialog.open();
     },
 
-    _loadMoreMenuOptions: function() {
+    _loadMoreMenuOptions: async function() {
+      const workflowCfg = await this._loadWorkflowInheritance();
+
       const moreOptions = [];
       if (authSvc.isAllowed(cpResources.importOpts)) {
         if (authSvc.isAllowed(cpResources.updateOpts)) {
@@ -356,6 +391,14 @@ export default {
 
         moreOptions.push({icon: 'file-code', caption: this.$t('cps.export_workflows'), onSelect: this.exportWorkflows});
         moreOptions.push({icon: 'file-code', caption: this.$t('cps.import_workflows'), onSelect: this.showImportWorkflowsDialog});
+
+        if (workflowCfg && workflowCfg.groupWorkflowsInherited === false) {
+          moreOptions.push({
+            icon: 'sync',
+            caption: this.$t('cps.inherit_group_workflows'),
+            onSelect: this.inheritGroupWorkflows
+          });
+        }
       }
 
       const ctxt = {...this.ctx, cp: this.cp};
@@ -375,6 +418,23 @@ export default {
             this.ctx.moreOptions = moreOptions;
           }
         );
+    },
+
+    _loadWorkflowInheritance: async function() {
+      if (!this.cp.cpg || this.cp.cpg.id <= 0) {
+        this.ctx.workflowCfg = null;
+        this.ctx.workflowSource = null;
+        return null;
+      }
+
+      const {groupWorkflowsInherited: wfInherited} = this.ctx.workflowCfg = await cpSvc.getWorkflowConfig(this.cp.id);
+      if (wfInherited == null) {
+        this.ctx.workflowSource = null;
+      } else {
+        this.ctx.workflowSource = this.$t(wfInherited ? 'cps.workflows_inherited' : 'cps.workflows_customised');
+      }
+
+      return this.ctx.workflowCfg;
     }
   }
 }

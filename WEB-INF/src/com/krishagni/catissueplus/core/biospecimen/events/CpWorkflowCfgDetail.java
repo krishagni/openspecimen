@@ -11,6 +11,8 @@ public class CpWorkflowCfgDetail {
 	private Long cpId;
 	
 	private String shortTitle;
+
+	private Boolean groupWorkflowsInherited;
 	
 	private Map<String, WorkflowDetail> workflows = new HashMap<>();
 
@@ -33,6 +35,14 @@ public class CpWorkflowCfgDetail {
 		this.shortTitle = shortTitle;
 	}
 
+	public Boolean getGroupWorkflowsInherited() {
+		return groupWorkflowsInherited;
+	}
+
+	public void setGroupWorkflowsInherited(Boolean groupWorkflowsInherited) {
+		this.groupWorkflowsInherited = groupWorkflowsInherited;
+	}
+
 	public Map<String, WorkflowDetail> getWorkflows() {
 		return workflows;
 	}
@@ -52,6 +62,7 @@ public class CpWorkflowCfgDetail {
 
 	public static CpWorkflowCfgDetail from(CpWorkflowConfig cfg) {
 		CpWorkflowCfgDetail result = new CpWorkflowCfgDetail();
+		result.setGroupWorkflowsInherited(cfg.getGroupWorkflowsInherited());
 		result.setWorkflows(WorkflowDetail.from(cfg.getWorkflows().values()));
 		if (cfg.getCp() != null) {
 			result.setCpId(cfg.getCp().getId());

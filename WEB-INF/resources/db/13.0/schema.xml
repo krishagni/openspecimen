@@ -494,4 +494,10 @@
       virtual
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Track whether CP workflows are inherited from the CP group">
+    <addColumn tableName="OS_CP_WORKFLOWS">
+      <column name="GROUP_WORKFLOWS_INHERITED" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -70,7 +70,12 @@
           :row-class="getRowClass" @row-click="rowClick($event)" @sort="sort($event)">
           <column class="os-selection-cb" v-if="allowSelection" selectionMode="multiple"></column>
           <column v-for="column of schema.columns" :header="caption(column)" :key="column.name" :field="column.name"
+            :headerClass="column.tooltipCode ? 'os-column-with-help' : null"
             :style="column.uiStyle" :sortable="column.sortable">
+            <template #header v-if="column.tooltipCode">
+              <os-icon class="os-column-help" name="question-circle"
+                v-os-tooltip.bottom="$t(column.tooltipCode)" />
+            </template>
             <template #body="slotProps">
               <span v-if="column.href && column.href(slotProps.data, $route.query)">
                 <a :href="column.href(slotProps.data, $route.query)" :target="column.hrefTarget"
@@ -1217,6 +1222,28 @@ export default {
 
 .os-list-shadowed-rows.os-list .results .results-inner {
   padding-right: 0rem;
+}
+
+.os-list :deep(.os-column-with-help .p-column-header-content) {
+  align-items: center;
+  display: inline-flex;
+}
+
+.os-list :deep(.os-column-with-help .p-column-title) {
+  order: 1;
+}
+
+.os-list :deep(.os-column-with-help .p-sortable-column-icon) {
+  order: 3;
+}
+
+.os-list :deep(.os-column-help) {
+  cursor: help;
+  display: inline-flex;
+  font-size: 0.85rem;
+  margin-left: 0.35rem;
+  opacity: 0.75;
+  order: 2;
 }
 
 .os-list-shadowed-rows :deep(table.p-datatable-table) {

@@ -113,4 +113,11 @@
       <column name="defaultCart_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit whether CP workflows are inherited from the CP group">
+    <addColumn tableName="OS_CP_WORKFLOWS_AUD">
+      <column name="GROUP_WORKFLOWS_INHERITED" type="${boolean.type}" />
+      <column name="groupWorkflowsInherited_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

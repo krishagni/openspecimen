@@ -25,6 +25,8 @@ public class CpListCriteria extends AbstractListCriteria<CpListCriteria> {
 	
 	private boolean includePi;
 
+	private boolean includeWfInheritance;
+
 	private boolean onlyParticipantConsentCps;
 
 	private Set<SiteCpPair> siteCps;
@@ -103,6 +105,15 @@ public class CpListCriteria extends AbstractListCriteria<CpListCriteria> {
 	
 	public CpListCriteria includePi(boolean includePi) {
 		this.includePi = includePi;
+		return self();
+	}
+
+	public boolean includeWfInheritance() {
+		return includeWfInheritance;
+	}
+
+	public CpListCriteria includeWfInheritance(boolean includeWfInheritance) {
+		this.includeWfInheritance = includeWfInheritance;
 		return self();
 	}
 

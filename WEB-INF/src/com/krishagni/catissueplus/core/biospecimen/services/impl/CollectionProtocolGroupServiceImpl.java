@@ -225,6 +225,9 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 
 			ensureUpdateCpRights(inputCps, new HashSet<>(existingCpIds));
 			daoFactory.getCpGroupDao().removeCpsFromGroup(group.getId(), existingCpIds);
+			cpGroupSettingsApplier.removeWorkflowsInheritance(
+				inputCps.stream().filter(cp -> existingCpIds.contains(cp.getId())).collect(Collectors.toSet())
+			);
 			return ResponseEvent.response(existingCpIds.size());
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -263,7 +266,12 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		}
 
 		groups.forEach(this::ensureUpdateAccess);
-		groups.forEach(group -> group.delete(req.getPayload().getReason()));
+		groups.forEach(
+			group -> {
+				cpGroupSettingsApplier.removeWorkflowsInheritance(group.getCps());
+				group.delete(req.getPayload().getReason());
+			}
+		);
 
 		BulkDeleteEntityResp<CollectionProtocolGroupSummary> resp = new BulkDeleteEntityResp<>();
 		resp.setCompleted(true);
@@ -400,18 +408,18 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			CollectionProtocolGroup group = getGroup(input.getGroupId(), input.getGroupName());
 			ensureUpdateAccess(group);
 
-			cpGroupSettingsApplier.applyWorkflows(input.getWorkflows(), group.getCps());
+			Map<String, WorkflowDetail> workflows = input.getWorkflows() != null ?
+				input.getWorkflows() : Collections.emptyMap();
 
-			if (input.getWorkflows() != null) {
-				Map<String, CpWorkflowConfig.Workflow> wfMap = new HashMap<>();
-				for (WorkflowDetail detail : input.getWorkflows().values()) {
-					CpWorkflowConfig.Workflow wf = new CpWorkflowConfig.Workflow();
-					BeanUtils.copyProperties(detail, wf);
-					wfMap.put(wf.getName(), wf);
-				}
-
-				group.setWorkflows(wfMap);
+			Map<String, CpWorkflowConfig.Workflow> wfMap = new HashMap<>();
+			for (WorkflowDetail detail : workflows.values()) {
+				CpWorkflowConfig.Workflow wf = new CpWorkflowConfig.Workflow();
+				BeanUtils.copyProperties(detail, wf);
+				wfMap.put(wf.getName(), wf);
 			}
+
+			cpGroupSettingsApplier.applyWorkflows(wfMap.values(), group.getCps(), false);
+			group.setWorkflows(wfMap);
 
 			daoFactory.getCpGroupDao().saveOrUpdate(group);
 			if (Boolean.TRUE.equals(input.getImportWfs())) {

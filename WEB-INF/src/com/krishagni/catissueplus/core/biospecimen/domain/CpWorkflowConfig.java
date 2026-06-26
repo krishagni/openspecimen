@@ -15,6 +15,8 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 @Audited
 public class CpWorkflowConfig extends BaseEntity {
 	private CollectionProtocol cp;
+
+	private Boolean groupWorkflowsInherited;
 	
 	private Map<String, Workflow> workflows = new HashMap<>();
 		
@@ -24,6 +26,14 @@ public class CpWorkflowConfig extends BaseEntity {
 
 	public void setCp(CollectionProtocol cp) {
 		this.cp = cp;
+	}
+
+	public Boolean getGroupWorkflowsInherited() {
+		return groupWorkflowsInherited;
+	}
+
+	public void setGroupWorkflowsInherited(Boolean groupWorkflowsInherited) {
+		this.groupWorkflowsInherited = groupWorkflowsInherited;
 	}
 
 	public Map<String, Workflow> getWorkflows() {
@@ -55,7 +65,7 @@ public class CpWorkflowConfig extends BaseEntity {
 	}
 
 	protected Set<String> getAuditStringInclusionProps() {
-		return Arrays.stream(new String[] { "cp", "workflowsJson" }).collect(Collectors.toSet());
+		return Arrays.stream(new String[] { "cp", "groupWorkflowsInherited", "workflowsJson" }).collect(Collectors.toSet());
 	}
 
 	private ObjectMapper getReadMapper() {

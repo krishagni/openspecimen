@@ -148,6 +148,8 @@ public interface CollectionProtocolService {
 
 	public CpWorkflowConfig saveWorkflows(CollectionProtocol cp, CpWorkflowCfgDetail input);
 
+	public ResponseEvent<CpWorkflowCfgDetail> inheritGroupWorkflows(RequestEvent<Long> req);
+
 	//
 	// Publish APIs
 	//

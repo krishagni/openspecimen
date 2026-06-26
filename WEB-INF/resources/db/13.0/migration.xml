@@ -469,4 +469,8 @@
           cart.tag_label = migrated_cart.cart_name
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Initialize CP group workflows inheritance">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.InitializeCpGroupWorkflowsInheritance" />
+  </changeSet>
 </databaseChangeLog>

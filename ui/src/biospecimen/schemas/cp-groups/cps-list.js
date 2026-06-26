@@ -1,3 +1,4 @@
+import i18n      from '@/common/services/I18n.js';
 import routerSvc from '@/common/services/Router.js';
 
 export default {
@@ -24,6 +25,18 @@ export default {
       name: "cp.startDate",
       captionCode: "cps.start_date",
       type: "date"
+    },
+    {
+      name: "cp.groupWorkflowsInherited",
+      captionCode: "cps.workflows_source",
+      tooltipCode: "cps.workflows_source_help",
+      value: ({cp}) => {
+        if (cp.groupWorkflowsInherited == null) {
+          return '';
+        }
+
+        return i18n.msg(cp.groupWorkflowsInherited ? 'cps.workflows_inherited' : 'cps.workflows_customised');
+      }
     }
   ],
 

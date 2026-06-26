@@ -19,6 +19,8 @@ public enum CpGroupErrorCode implements ErrorCode {
 
 	CP_NOT_IN_GRP,
 
+	CP_NOT_IN_ANY_GRP,
+
 	CP_UPDATE_REQ;
 
 	@Override

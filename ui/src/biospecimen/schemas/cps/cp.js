@@ -15,6 +15,14 @@ export default {
       }
     },
     {
+      "type": "span",
+      "labelCode": "cps.workflows_source",
+      "name": "workflowSource",
+      "dataEntry": false,
+      "value": ({workflowSource}) => workflowSource,
+      "showInOverviewWhen": "cp.cpg && cp.cpg.id > 0"
+    },
+    {
       "type": "site",
       "multiple": true,
       "labelCode": "cps.sites",

@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -63,6 +64,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpReportSettings;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig.Workflow;
+import com.krishagni.catissueplus.core.biospecimen.WorkflowConfigUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.DerivedSpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
@@ -72,6 +74,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ConsentStatementErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpReportSettingsFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeFactory;
@@ -1399,6 +1402,64 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	}
 
 	@Override
+	public CpWorkflowConfig saveWorkflows(CollectionProtocol cp, CpWorkflowCfgDetail input) {
+		CpWorkflowConfig cfg = daoFactory.getCollectionProtocolDao().getCpWorkflows(cp.getId());
+		if (cfg == null) {
+			cfg = new CpWorkflowConfig();
+			cfg.setCp(cp);
+		}
+
+		if (!input.isPatch()) {
+			cfg.getWorkflows().clear();
+		}
+
+		if (input.getWorkflows() != null) {
+			for (WorkflowDetail detail : input.getWorkflows().values()) {
+				Workflow wf = new Workflow();
+				BeanUtils.copyProperties(detail, wf);
+				cfg.getWorkflows().put(wf.getName(), wf);
+			}
+		}
+
+		CollectionProtocolGroup cpg = cp.getCpGroup();
+		if (cpg == null) {
+			cfg.setGroupWorkflowsInherited(null);
+		} else {
+			boolean inherited = WorkflowConfigUtil.areSame(cfg.getWorkflows(), cpg.getWorkflows());
+			cfg.setGroupWorkflowsInherited(inherited);
+		}
+
+		daoFactory.getCollectionProtocolDao().saveCpWorkflows(cfg);
+		EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(cp));
+		return cfg;
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<CpWorkflowCfgDetail> inheritGroupWorkflows(RequestEvent<Long> req) {
+		try {
+			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(req.getPayload());
+			if (cp == null) {
+				return ResponseEvent.userError(CpErrorCode.NOT_FOUND);
+			} else if (cp.getCpGroup() == null) {
+				return ResponseEvent.userError(CpGroupErrorCode.CP_NOT_IN_ANY_GRP, cp.getId());
+			}
+
+			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
+			Collection<Workflow> workflows = cp.getCpGroup().getWorkflows() != null ?
+				cp.getCpGroup().getWorkflows().values() : Collections.emptyList();
+			cpGroupSettingsApplier.applyWorkflows(workflows, Collections.singleton(cp), true);
+
+			CpWorkflowConfig cfg = daoFactory.getCollectionProtocolDao().getCpWorkflows(cp.getId());
+			return ResponseEvent.response(CpWorkflowCfgDetail.from(cfg));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
 	@PlusTransactional
 	public ResponseEvent<List<CollectionProtocolSummary>> getRegisterEnabledCps(
 			List<String> siteNames, String searchTitle, int maxResults) {
@@ -1505,32 +1566,6 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		exportSvc.registerObjectsGenerator("cp", this::getCpsGenerator);
 		exportSvc.registerObjectsGenerator("cpe", this::getEventsGenerator);
 		exportSvc.registerObjectsGenerator("sr", this::getSpecimenRequirementsGenerator);
-	}
-
-
-	@Override
-	public CpWorkflowConfig saveWorkflows(CollectionProtocol cp, CpWorkflowCfgDetail input) {
-		CpWorkflowConfig cfg = daoFactory.getCollectionProtocolDao().getCpWorkflows(cp.getId());
-		if (cfg == null) {
-			cfg = new CpWorkflowConfig();
-			cfg.setCp(cp);
-		}
-
-		if (!input.isPatch()) {
-			cfg.getWorkflows().clear();
-		}
-
-		if (input.getWorkflows() != null) {
-			for (WorkflowDetail detail : input.getWorkflows().values()) {
-				Workflow wf = new Workflow();
-				BeanUtils.copyProperties(detail, wf);
-				cfg.getWorkflows().put(wf.getName(), wf);
-			}
-		}
-
-		daoFactory.getCollectionProtocolDao().saveCpWorkflows(cfg);
-		EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(cp));
-		return cfg;
 	}
 
 	//
@@ -1687,13 +1722,15 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	private void applyCpGroupSettings(CollectionProtocol cp) {
 		if (cp.getCpGroup() != null) {
 			cpGroupSettingsApplier.apply(cp.getCpGroup(), Collections.singleton(cp));
+		} else {
+			cpGroupSettingsApplier.removeWorkflowsInheritance(Collections.singleton(cp));
 		}
 	}
 
 	private boolean isCpGroupChanged(CollectionProtocolGroup oldGroup, CollectionProtocolGroup newGroup) {
 		Long oldGroupId = oldGroup != null ? oldGroup.getId() : null;
 		Long newGroupId = newGroup != null ? newGroup.getId() : null;
-		return oldGroupId == null ? newGroupId != null : !oldGroupId.equals(newGroupId);
+		return !Objects.equals(oldGroupId, newGroupId);
 	}
 
 	private void ensureUsersBelongtoCpSites(CollectionProtocol cp) {

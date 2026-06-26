@@ -69,6 +69,10 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 				cp.setSpecimenCount((Long)row[2]);			
 			}			
 		}
+
+		if (crit.includeWfInheritance() && CollectionUtils.isNotEmpty(cpList)) {
+			setWorkflowInheritance(cpList);
+		}
 				
 		return cpList;
 	}
@@ -510,6 +514,23 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 		}
 
 		return cp;
+	}
+
+	private void setWorkflowInheritance(List<CollectionProtocolSummary> cps) {
+		Map<Long, CollectionProtocolSummary> cpMap = cps.stream()
+			.collect(Collectors.toMap(CollectionProtocolSummary::getId, cp -> cp));
+
+		Criteria<Object[]> query = createCriteria(CpWorkflowConfig.class, Object[].class, "wf");
+		List<Object[]> rows = query.select("wf.id", "wf.groupWorkflowsInherited")
+			.add(query.in("wf.id", cpMap.keySet()))
+			.list();
+
+		for (Object[] row : rows) {
+			CollectionProtocolSummary cp = cpMap.get((Long)row[0]);
+			if (cp != null) {
+				cp.setGroupWorkflowsInherited((Boolean)row[1]);
+			}
+		}
 	}
 
 	private void addSiteCpsCond(AbstractCriteria<?, ?> query, Collection<SiteCpPair> siteCps) {

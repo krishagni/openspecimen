@@ -35,6 +35,9 @@
               v-os-tooltip.bottom="$t('cps.view_specimens')" />
             <os-button-link left-icon="table" :url="catalogUrl(rowObject.cp)"
               v-os-tooltip.bottom="$t('cps.view_catalog')" v-if="rowObject.cp.catalogId > 0" />
+            <os-button left-icon="file-code" v-os-tooltip.bottom="$t('cps.inherit_group_workflows')"
+              @click="inheritGroupWorkflows(rowObject.cp)"
+              v-if="rowObject.updateAllowed && rowObject.cp.groupWorkflowsInherited === false" />
             <os-button left-icon="times" v-os-tooltip.bottom="$t('common.buttons.remove')"
               @click="removeCp(rowObject.cp)" v-if="rowObject.updateAllowed" />
           </os-button-group>
@@ -65,6 +68,17 @@
     <template #message>
       <span v-if="ctx.toRemoveCps.length > 1" v-t="'cpgs.confirm_remove_cps'">Are you sure you want to remove the selected collection protocols from the group?</span>
       <span v-else v-t="{path: 'cpgs.confirm_remove_cp', args: {cp: ctx.toRemoveCps[0].shortTitle}}">Are you sure you want to remove the collection protocol from the group?</span>
+    </template>
+  </os-confirm>
+
+  <os-confirm ref="inheritGroupWorkflowsConfirmDialog">
+    <template #title>
+      <span v-t="'cps.inherit_group_workflows'">Use Group Workflows?</span>
+    </template>
+    <template #message>
+      <span v-t="'cps.confirm_inherit_group_workflows'">
+        The collection protocol workflows will be replaced with the group workflows. Subsequent group workflow updates will be propagated to this collection protocol.
+      </span>
     </template>
   </os-confirm>
 
@@ -338,6 +352,23 @@ export default {
       this._confirmRemoveCps([cp]);
     },
 
+    inheritGroupWorkflows: function(cp) {
+      this.$refs.inheritGroupWorkflowsConfirmDialog.open().then(
+        resp => {
+          if (resp != 'proceed') {
+            return;
+          }
+
+          cpSvc.inheritGroupWorkflows(cp.id).then(
+            () => {
+              cp.groupWorkflowsInherited = true;
+              alertSvc.success({code: 'cps.group_workflows_inherited', args: cp});
+            }
+          );
+        }
+      );
+    },
+
     _confirmRemoveCps: function(cps) {
       if (!cps || cps.length == 0) {
         return;
@@ -372,7 +403,14 @@ export default {
       ctx.loading = true;
 
       const filters = ctx.filterValues || {};
-      const cps = await cpSvc.getCps({groupId: this.cpg.id, includePi: true, startAt, maxResults: pageSize, ...filters});
+      const cps = await cpSvc.getCps({
+        groupId: this.cpg.id,
+        includePi: true,
+        includeWfInheritance: true,
+        startAt,
+        maxResults: pageSize,
+        ...filters
+      });
       if (cps.length == pageSize) {
         ctx.haveMoreCps = true;
         cps.splice(cps.length - 1, 1);

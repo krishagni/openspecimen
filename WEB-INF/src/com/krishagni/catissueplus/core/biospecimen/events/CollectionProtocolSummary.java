@@ -43,6 +43,8 @@ public class CollectionProtocolSummary extends AttributeModifiedSupport implemen
 
 	private boolean draftMode;
 
+	private Boolean groupWorkflowsInherited;
+
 	public Long getId() {
 		return id;
 	}
@@ -161,6 +163,14 @@ public class CollectionProtocolSummary extends AttributeModifiedSupport implemen
 
 	public void setDraftMode(boolean draftMode) {
 		this.draftMode = draftMode;
+	}
+
+	public Boolean getGroupWorkflowsInherited() {
+		return groupWorkflowsInherited;
+	}
+
+	public void setGroupWorkflowsInherited(Boolean groupWorkflowsInherited) {
+		this.groupWorkflowsInherited = groupWorkflowsInherited;
 	}
 
 	@Override
