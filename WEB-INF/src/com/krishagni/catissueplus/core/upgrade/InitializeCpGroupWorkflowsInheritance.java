@@ -76,7 +76,7 @@ public class InitializeCpGroupWorkflowsInheritance implements CustomTaskChange {
 	private void updateInheritance(PreparedStatement statement, long cpId, Boolean inherited)
 	throws Exception {
 		if (inherited == null) {
-			statement.setNull(1, Types.BOOLEAN);
+			statement.setNull(1, Types.NUMERIC);
 		} else {
 			statement.setBoolean(1, inherited);
 		}
