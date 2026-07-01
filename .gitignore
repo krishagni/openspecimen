@@ -231,3 +231,19 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 .env
+
+#############
+## Docker & Dev environment
+#############
+.gradle/
+volumes/
+logs/
+mysql-conf/
+config/
+Dockerfile
+Dockerfile.dev
+docker-compose.yml
+docker-compose.dev.yml
+docker-dev-entrypoint.sh
+rebuild.sh
+SETUP.md
