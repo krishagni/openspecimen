@@ -49,7 +49,7 @@ public class AppServletContextListener implements ServletContextListener {
 				System.err.println(" Instead consider using a regular user account.");
 				System.err.println(" Exiting");
 				System.err.println(" ***************************************************");
-				System.exit(1);
+				// // System.exit(1); // SGS-DEV // SGS-DEV: disabled for Docker
 			}
 
 			String rootDir = sce.getServletContext().getResource("/").getPath();
@@ -69,7 +69,7 @@ public class AppServletContextListener implements ServletContextListener {
 				System.err.println(" Consider using -Xmx2048m option when starting Tomcat");
 				System.err.println(" Exiting");
 				System.err.println(" ***************************************************");
-				System.exit(1);
+				// // System.exit(1); // SGS-DEV // SGS-DEV: disabled for Docker
 			}
 
 			initLogging(props);
