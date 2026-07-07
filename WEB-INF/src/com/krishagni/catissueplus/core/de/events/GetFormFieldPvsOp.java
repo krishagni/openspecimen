@@ -12,6 +12,8 @@ public class GetFormFieldPvsOp {
 	private List<String> queries;
 
 	private boolean useUdn;
+
+	private boolean exactMatch;
 	
 	private int maxResults;
 
@@ -53,6 +55,14 @@ public class GetFormFieldPvsOp {
 
 	public void setUseUdn(boolean useUdn) {
 		this.useUdn = useUdn;
+	}
+
+	public boolean isExactMatch() {
+		return exactMatch;
+	}
+
+	public void setExactMatch(boolean exactMatch) {
+		this.exactMatch = exactMatch;
 	}
 
 	public int getMaxResults() {

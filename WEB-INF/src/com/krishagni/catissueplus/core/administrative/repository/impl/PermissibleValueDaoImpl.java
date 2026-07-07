@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.administrative.repository.impl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -239,14 +240,33 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 		}
 
 		if (StringUtils.isNotBlank(crit.query())) {
-			query.add(
-				query.or(
-					query.ilike("pv.value", crit.query()),
-					query.ilike("pv.conceptCode", crit.query())
-				)
-			);
+			if (crit.exactMatch()) {
+				if (isMySQL()) {
+					query.add(
+						query.or(
+							query.eq("pv.value", crit.query()),
+							query.eq("pv.conceptCode", crit.query())
+						)
+					);
+				} else {
+					String input = crit.query().toLowerCase(Locale.ROOT);
+					query.add(
+						query.or(
+							query.eq(query.lower("pv.value"), input),
+							query.eq(query.lower("pv.conceptCode"), input)
+						)
+					);
+				}
+			} else {
+				query.add(
+					query.or(
+						query.ilike("pv.value", crit.query()),
+						query.ilike("pv.conceptCode", crit.query())
+					)
+				);
 
-			query.addOrder(query.asc(query.ilocate("pv.value", crit.query())));
+				query.addOrder(query.asc(query.ilocate("pv.value", crit.query())));
+			}
 		}
 
 		return query.addOrder(query.asc("pv.sortOrder")).addOrder(query.asc("pv.value"));

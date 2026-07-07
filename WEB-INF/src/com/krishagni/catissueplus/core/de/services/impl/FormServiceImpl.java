@@ -113,6 +113,7 @@ import edu.common.dynamicextensions.domain.nui.Label;
 import edu.common.dynamicextensions.domain.nui.LookupControl;
 import edu.common.dynamicextensions.domain.nui.PageBreak;
 import edu.common.dynamicextensions.domain.nui.PermissibleValue;
+import edu.common.dynamicextensions.domain.nui.PvDataSource;
 import edu.common.dynamicextensions.domain.nui.SelectControl;
 import edu.common.dynamicextensions.domain.nui.SubFormControl;
 import edu.common.dynamicextensions.domain.nui.UserContext;
@@ -952,9 +953,11 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				return ResponseEvent.userError(FormErrorCode.NOT_SELECT_CONTROL, controlName);
 			}
 
-			SelectControl selectCtrl = (SelectControl) control;
+			PvDataSource pvDataSource = ((SelectControl) control).getPvDataSource();
 			int maxPvs = input.getMaxResults() <= 0 ? 100 : input.getMaxResults();
-			List<PermissibleValue> pvs = selectCtrl.getPvDataSource().getPermissibleValues(input.getQueries(), maxPvs);
+			List<PermissibleValue> pvs = input.isExactMatch()
+				? pvDataSource.getExactPermissibleValues(input.getQueries(), maxPvs)
+				: pvDataSource.getPermissibleValues(input.getQueries(), maxPvs);
 			return ResponseEvent.response(pvs);
 		} catch (IllegalArgumentException iae) {
 			return ResponseEvent.error(OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, iae.getMessage()));

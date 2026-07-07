@@ -890,8 +890,12 @@ public class Utility {
 	}
 
 	public static Map<String, Object> toMap(InputStream in) {
+		return toMap(in, new TypeReference<Map<String, Object>>() {});
+	}
+
+	public static <T> T toMap(InputStream in, TypeReference<T> typeRef) {
 		try {
-			return om.get().readValue(in, new TypeReference<HashMap<String, Object>>() {});
+			return om.get().readValue(in, typeRef);
 		} catch (Exception e) {
 			throw new RuntimeException("Error parsing input stream JSON to map:", e);
 		}
