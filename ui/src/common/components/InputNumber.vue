@@ -3,14 +3,14 @@
   <div class="os-input-number" :class="$attrs['md-type'] && 'md-type'" tabindex="-1">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
       <InputNumber v-model="inputValue" :mode="'decimal'" :tabindex="tabOrder"
-        :input-props="{disabled}" :minFractionDigits="maxFractionDigits"
+        :input-props="{disabled}" :min="min" :max="max" :minFractionDigits="maxFractionDigits"
         :maxFractionDigits="maxFractionDigits" @input="handleInput" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
       <InputNumber v-model="inputValue" :placeholder="$attrs.placeholder" :tabindex="tabOrder"
-        :mode="'decimal'" :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits"
-        :input-props="{disabled}" />
+        :mode="'decimal'" :min="min" :max="max" :minFractionDigits="maxFractionDigits"
+        :maxFractionDigits="maxFractionDigits" :input-props="{disabled}" />
     </div>
     <div class="unit" v-if="unitText">
       <span>{{unitText}}</span>
@@ -22,7 +22,7 @@
 import InputNumber from 'primevue/inputnumber';
 
 export default {
-  props: ['modelValue', 'maxFractionDigits', 'tabOrder', 'disabled', 'unit', 'form'],
+  props: ['modelValue', 'min', 'max', 'maxFractionDigits', 'tabOrder', 'disabled', 'unit', 'form'],
 
   components: {
     InputNumber
