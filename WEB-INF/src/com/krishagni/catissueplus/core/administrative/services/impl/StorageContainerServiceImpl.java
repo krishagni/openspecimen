@@ -1970,9 +1970,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			StorageContainerPositionDetail pos,
 			boolean vacateOccupant) {
 
-
 		Specimen specimen = getSpecimen(pos);
-		if (!specimen.isActive() || specimen.isReserved()) {
+		if (!specimen.isActive()) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.STORE_NOT_ALLOWED, specimen.getLabel());
 		}
 

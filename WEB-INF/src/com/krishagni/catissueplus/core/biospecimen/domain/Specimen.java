@@ -1105,6 +1105,10 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void disable(boolean checkChildSpecimens) {
+		if (isReserved()) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.RESV_EDIT_NOT_ALLOWED, getLabel());
+		}
+
 		if (isStoredInAutoFreezer()) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.STORED_IN_AF_DELETE_NA, getLabel(), getPosition().toString());
 		}
@@ -1325,6 +1329,10 @@ public class Specimen extends BaseExtensionEntity {
 			return;
 		}
 
+		if (isReserved()) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.RESV_EDIT_NOT_ALLOWED, getLabel());
+		}
+
 		if (isStoredInAutoFreezer()) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.STORED_IN_AF_CLOSE_NA, getLabel(), getPosition().toString());
 		}
@@ -1501,12 +1509,12 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void updateStatus(String activityStatus, User user, Date date, String reason, String comments, boolean isForceDelete) {
-		if (isReserved()) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.RESV_EDIT_NOT_ALLOWED, getLabel());
-		}
-
 		if (this.activityStatus != null && this.activityStatus.equals(activityStatus)) {
 			return;
+		}
+
+		if (isReserved()) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.RESV_EDIT_NOT_ALLOWED, getLabel());
 		}
 		
 		if (Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(activityStatus)) {

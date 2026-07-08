@@ -24,7 +24,7 @@
 
             <os-menu left-icon="plus" :label="$t('specimens.add_event')" :options="ctx.eventForms"
               :lazy-load="true" @menu-toggled="loadEventForms"
-              v-if="specimen.availabilityStatus == 'Available' && isUpdateAllowed" />
+              v-if="isEventUpdateAllowed" />
 
             <os-menu :label="$t('common.buttons.more')" :options="moreOptions" v-if="moreOptions.length > 0"/>
           </span>
@@ -230,11 +230,11 @@ export default {
           options.push({icon: 'check', caption: this.$t('common.buttons.reopen'), onSelect: this.reopenSpecimen});
         }
 
-        if (!reserved && activityStatus == 'Active' && storageLocation && storageLocation.id > 0) {
+        if (activityStatus == 'Active' && storageLocation && storageLocation.id > 0) {
           options.push({icon: 'sign-out-alt', caption: this.$t('specimens.checkout'), onSelect: this.checkoutSpecimen});
         }
 
-        if (!reserved && activityStatus == 'Active' && checkoutPosition && checkoutPosition.id > 0) {
+        if (activityStatus == 'Active' && checkoutPosition && checkoutPosition.id > 0) {
           options.push({icon: 'sign-in-alt', caption: this.$t('specimens.checkin'), onSelect: this.checkinSpecimen});
         }
       }
@@ -269,10 +269,15 @@ export default {
       return this.isAnyUserUpdateAllowed && this.notCoordinatOrStoreAllowed;
     },
 
+    isEventUpdateAllowed: function() {
+      const {availabilityStatus} = this.ctx.specimen;
+      return ['Available', 'Reserved'].indexOf(availabilityStatus) >= 0 && this.isUpdateAllowed;
+    },
+
     isDeleteAllowed: function() {
       const vc = this.cpViewCtx;
-      const {specimen: {lineage}} = this.ctx;
-      return lineage == 'New' ? vc.isDeleteSpecimenAllowed(this.cpr) : vc.isDeleteAllSpecimenAllowed(this.cpr);
+      const {specimen: {lineage, reserved}} = this.ctx;
+      return !reserved && (lineage == 'New' ? vc.isDeleteSpecimenAllowed(this.cpr) : vc.isDeleteAllSpecimenAllowed(this.cpr));
     },
 
     isPrintAllowed: function() {

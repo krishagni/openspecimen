@@ -1096,12 +1096,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		);
 	}
 
-	private void ensureEditAllowed(Specimen existing) {
-		if (existing != null && existing.isReserved()) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.RESV_EDIT_NOT_ALLOWED, existing.getLabel());
-		}
-	}
-
 	private void ensureValidAndUniqueLabel(Specimen existing, Specimen specimen, OpenSpecimenException ose) {
 		if (existing != null && 
 			StringUtils.isNotBlank(existing.getLabel()) &&
@@ -1266,11 +1260,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 	private Specimen saveOrUpdate(SpecimenDetail detail, Specimen specimen, Specimen existing, Specimen parent) {
 		if (specimen == null) {
-			ensureEditAllowed(existing);
-
 			specimen = specimenFactory.createSpecimen(existing, detail, parent);
-		} else {
-			ensureEditAllowed(existing);
 		}
 
 		AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen);
