@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider;
 import org.springframework.security.saml2.provider.service.metadata.OpenSaml5MetadataResolver;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
@@ -42,6 +43,9 @@ public class SamlSecurityConfig {
 	@Bean(name = "saml2Filter")
 	public SecurityFilterChain filterChain(HttpSecurity http, Saml2MetadataFilter saml2MetadataFilter, LegacySamlEndpointHandler legacySamlEndpointHandler, SamlAuthenticationHandler authHandler)
 	throws Exception {
+		OpenSaml5AuthenticationProvider authenticationProvider = new OpenSaml5AuthenticationProvider();
+		authenticationProvider.setResponseAuthenticationConverter(new SamlFriendlyNameAuthenticationConverter());
+
 		http.authorizeHttpRequests(
 			authorize -> authorize
 				.requestMatchers(
@@ -63,6 +67,7 @@ public class SamlSecurityConfig {
 					.successHandler(authHandler)
 					.failureHandler(authHandler)
 			)
+			.authenticationProvider(authenticationProvider)
 			.saml2Logout(Customizer.withDefaults())
 			.addFilterBefore(legacySamlEndpointHandler, Saml2WebSsoAuthenticationRequestFilter.class)
 			.addFilterBefore(saml2MetadataFilter, Saml2WebSsoAuthenticationFilter.class);
