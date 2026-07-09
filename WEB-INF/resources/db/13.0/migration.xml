@@ -473,4 +473,111 @@
   <changeSet author="vpawar" id="Initialize CP group workflows inheritance">
     <customChange class="com.krishagni.catissueplus.core.upgrade.InitializeCpGroupWorkflowsInheritance" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Soft delete redundant specimen disposal events">
+    <sql>
+      update
+        catissue_form_record_entry
+      set
+        activity_status = 'CLOSED'
+      where
+        identifier in (
+          select
+            identifier
+          from
+            (
+              select
+                re.identifier
+              from
+                catissue_form_record_entry re
+                inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+                inner join catissue_disposal_event_param d on d.identifier = re.record_id
+                inner join catissue_specimen s on s.identifier = re.object_id
+                inner join dyextn_containers f on f.identifier = fc.container_id
+              where
+                f.name = 'SpecimenDisposalEvent' and
+                re.activity_status = 'ACTIVE' and
+                (
+                  (s.activity_status is null or s.activity_status != 'Closed') or
+                  exists (
+                    select
+                      1
+                    from
+                      catissue_disposal_event_param latest
+                      inner join catissue_form_record_entry latest_re on latest_re.record_id = latest.identifier
+                      inner join catissue_form_context latest_fc on latest_fc.identifier = latest_re.form_ctxt_id
+                      inner join dyextn_containers latest_f on latest_f.identifier = latest_fc.container_id
+                    where
+                      latest_f.name = 'SpecimenDisposalEvent' and
+                      latest_re.object_id = re.object_id and
+                      (
+                        latest.event_timestamp > d.event_timestamp or
+                        (d.event_timestamp is null and latest.event_timestamp is not null) or
+                        (
+                          (
+                            latest.event_timestamp = d.event_timestamp or
+                            (latest.event_timestamp is null and d.event_timestamp is null)
+                          ) and
+                          latest.identifier > d.identifier
+                        )
+                      )
+                  )
+                )
+            ) records_to_update
+        )
+    </sql>
+
+    <sql>
+      update
+        catissue_form_record_entry
+      set
+        activity_status = 'ACTIVE'
+      where
+        identifier in (
+          select
+            identifier
+          from
+            (
+              select
+                re.identifier
+              from
+                catissue_form_record_entry re
+                inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+                inner join dyextn_containers f on f.identifier = fc.container_id
+                inner join catissue_disposal_event_param d on d.identifier = re.record_id
+                inner join catissue_specimen s on s.identifier = re.object_id
+              where
+                f.name = 'SpecimenDisposalEvent' and
+                s.activity_status = 'Closed' and
+                not exists (
+                  select
+                    1
+                  from
+                    catissue_disposal_event_param latest
+                    inner join catissue_form_record_entry latest_re on latest_re.record_id = latest.identifier
+                    inner join catissue_form_context latest_fc on latest_fc.identifier = latest_re.form_ctxt_id
+                    inner join dyextn_containers latest_f on latest_f.identifier = latest_fc.container_id
+                  where
+                    latest_f.name = 'SpecimenDisposalEvent' and
+                    latest_re.object_id = re.object_id and
+                    (
+                      latest.event_timestamp > d.event_timestamp or
+                      (d.event_timestamp is null and latest.event_timestamp is not null) or
+                      (
+                        (
+                          latest.event_timestamp = d.event_timestamp or
+                          (latest.event_timestamp is null and d.event_timestamp is null)
+                        ) and
+                        latest.identifier > d.identifier
+                      )
+                    )
+                )
+            ) records_to_update
+        )
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Report disposed specimens without disposal events">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.ReportDisposedSpecimensWithoutDisposalEvent" />
+  </changeSet>
 </databaseChangeLog>

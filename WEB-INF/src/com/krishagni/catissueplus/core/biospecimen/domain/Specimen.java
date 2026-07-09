@@ -1352,7 +1352,8 @@ public class Specimen extends BaseExtensionEntity {
 		if (getActivityStatus().equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus())) {
 			return;
 		}
-		
+
+		deleteDisposalEvents();
 		setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 		updateAvailableStatus();
 	}
@@ -1971,6 +1972,19 @@ public class Specimen extends BaseExtensionEntity {
 		event.setComments(comments);
 		event.saveOrUpdate();
 		zeroOutAvailableQty();
+	}
+
+	private void deleteDisposalEvents() {
+		SpecimenDisposalEvent event = new SpecimenDisposalEvent(this);
+		List<Long> eventIds = event.getRecordIds();
+		if (eventIds == null) {
+			return;
+		}
+
+		for (Long eventId : eventIds) {
+			event.setId(eventId);
+			event.delete();
+		}
 	}
 
 	private void zeroOutAvailableQty() {

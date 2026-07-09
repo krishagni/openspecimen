@@ -438,6 +438,7 @@ export default {
           specimenSvc.clearSpecimens(this.visit);
           this.specimen.activityStatus = 'Active';
           this.specimen.availabilityStatus = saved.availabilityStatus;
+          this._loadEvents(this.specimen);
         }
       );
     },
@@ -586,6 +587,8 @@ export default {
             this.ctx.events = events
           }
         );
+      } else {
+        this.ctx.events = [];
       }
     },
 
