@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
@@ -45,6 +46,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConcurrentLruCache;
@@ -55,7 +57,11 @@ import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
-public class UserAuthenticationServiceImpl implements UserAuthenticationService {
+public class UserAuthenticationServiceImpl implements UserAuthenticationService, InitializingBean {
+	private static final String AUTH_MOD = "auth";
+
+	private static final String OS_DOMAIN_API_ONLY = "opsmn_domain_api_only";
+
 	private static final String ACCOUNT_LOCKED_NOTIF_TMPL = "account_locked_notification";
 
 	private static final String FAILED_LOGIN_USER_NOTIF_TMPL = "failed_login_user";
@@ -76,6 +82,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 	
 	private AuditService auditService;
 
+	private ConfigurationService cfgSvc;
+
 	private ConcurrentLruCache<String, Date> tokenAccessTimes = new ConcurrentLruCache<>(100);
 
 	public void setDaoFactory(DaoFactory daoFactory) {
@@ -88,6 +96,10 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 
 	public void setAuditService(AuditService auditService) {
 		this.auditService = auditService;
+	}
+
+	public void setCfgSvc(ConfigurationService cfgSvc) {
+		this.cfgSvc = cfgSvc;
 	}
 
 	@Override
@@ -104,6 +116,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			if (!user.getAuthDomain().isAllowLogins()) {
 				return ResponseEvent.userError(AuthErrorCode.DOMAIN_LOGIN_DISABLED, user.getAuthDomain().getName());
 			}
+
+			ensureUserCanUseApi(user);
 
 			if (!user.isAllowedAccessFrom(loginDetail.getIpAddress())) {
 				throw OpenSpecimenException.userError(AuthErrorCode.NA_IP_ADDRESS, loginDetail.getIpAddress());
@@ -186,6 +200,11 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			}
 
 			User user = authToken.getUser();
+			LoginAuditLog loginAuditLog = authToken.getLoginAuditLog();
+			if (loginAuditLog.getImpersonatedBy() == null) {
+				ensureUserCanUseApi(user);
+			}
+
 			if (!user.isAllowedAccessFrom(tokenDetail.getIpAddress())) {
 				throw OpenSpecimenException.userError(AuthErrorCode.NA_IP_ADDRESS, tokenDetail.getIpAddress());
 			}
@@ -195,7 +214,6 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			}
 
 			long now = System.currentTimeMillis();
-			LoginAuditLog loginAuditLog = authToken.getLoginAuditLog();
 			if (loginAuditLog.getImpersonatedBy() != null) {
 				long endTime = loginAuditLog.getLoginTime().getTime() + ONE_HOUR_IN_MS;
 				if (endTime < now) {
@@ -362,6 +380,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 				return ResponseEvent.response(true);
 			}
 
+			ensureUserCanUseApi(user);
+
 			if (!user.isAllowedAccessFrom(loginDetail.getIpAddress())) {
 				throw OpenSpecimenException.userError(AuthErrorCode.NA_IP_ADDRESS, loginDetail.getIpAddress());
 			}
@@ -431,13 +451,11 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 				return ResponseEvent.userError(AuthErrorCode.OTP_EXPIRED);
 			}
 
-			//
-			// touch to initialise the user object proxy
-			//
-			loginOtp.getUser().getFirstName();
+			User user = loginOtp.getUser();
+			ensureUserCanUseApi(user);
 
 			Map<String, Object> authDetail = new HashMap<>();
-			authDetail.put("user", loginOtp.getUser());
+			authDetail.put("user", user);
 
 			AuthToken token = createToken(loginOtp.getUser(), loginDetail, null);
 			authDetail.put("token", AuthUtil.encodeToken(token.getToken()));
@@ -467,6 +485,17 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 	public String generateToken(User user, LoginDetail loginDetail) {
 		AuthToken token = createToken(user, loginDetail, null);
 		return token != null ? AuthUtil.encodeToken(token.getToken()) : null;
+	}
+
+	@Override
+	public void afterPropertiesSet() {
+		cfgSvc.registerChangeListener(AUTH_MOD, (name, value) -> {
+			if (!OS_DOMAIN_API_ONLY.equals(name)) {
+				return;
+			}
+
+			ConfigUtil.notifyChange(OS_DOMAIN_API_ONLY, value);
+		});
 	}
 
 	private AuthToken createToken(User user, LoginDetail loginDetail, User impersonatedBy) {
@@ -540,6 +569,12 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 
 		toDelete.forEach(token -> tokenAccessTimes.remove(token));
 		return deleted;
+	}
+
+	private void ensureUserCanUseApi(User user) {
+		if (AuthUtil.isRestrictedOpenSpecimenDomainUser(user)) {
+			throw OpenSpecimenException.userError(AuthErrorCode.OS_DOMAIN_API_ONLY);
+		}
 	}
 
 	private LoginAuditLog insertLoginAudit(User user, String ipAddress, User impersonatedBy, boolean loginSuccessful) {

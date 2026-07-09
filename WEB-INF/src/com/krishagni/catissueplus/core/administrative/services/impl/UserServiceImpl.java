@@ -259,6 +259,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			ensureUniqueLoginNameInDomain(user.getLoginName(), user.getAuthDomain().getName(), ose);
 			ensureUniqueEmailAddress(user.getEmailAddress(), ose);
 			ensureApiUserUpdateByAdmin(user, ose);
+			ensureOpenSpecimenDomainApiOnly(user, ose);
 			ose.checkAndThrow();
 
 			daoFactory.getUserDao().saveOrUpdate(user);
@@ -802,6 +803,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		ensureUniqueEmail(existingUser, user, ose);
 		ensureUniqueLoginName(existingUser, user, ose);
+		ensureOpenSpecimenDomainApiOnly(user, ose);
 		ose.checkAndThrow();
 
 		boolean wasInstituteAdmin = existingUser.isInstituteAdmin();
@@ -1134,6 +1136,12 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			} else {
 				ose.addError(RbacErrorCode.ADMIN_RIGHTS_REQUIRED);
 			}
+		}
+	}
+
+	private void ensureOpenSpecimenDomainApiOnly(User user, OpenSpecimenException ose) {
+		if (AuthUtil.isRestrictedOpenSpecimenDomainUser(user)) {
+			ose.addError(UserErrorCode.OS_DOMAIN_API_ONLY);
 		}
 	}
 

@@ -63,7 +63,8 @@ export default {
 
     this._getDomains().then(
       domains => {
-        this.domains = domains.filter(domain => domain.allowLogins);
+        this.domains = domains;
+        this._ensureValidDomainSelected();
         this._toggleExternalAuthSelected();
       }
     );
@@ -122,7 +123,19 @@ export default {
     },
 
     _getDomains: function() {
-      return loginSvc.getAuthDomains();
+      const {global: {appProps}} = this.ui;
+      return loginSvc.getAuthDomains().then(
+        domains => domains.filter(d => d.allowLogins && (!appProps.osDomainApiOnly || d.name != 'openspecimen'))
+      );
+    },
+
+    _ensureValidDomainSelected: function() {
+      const {loginDetail} = this.ctx;
+      if (this.domains.find(domain => domain.name == loginDetail.domainName)) {
+        return;
+      }
+
+      loginDetail.domainName = null;
     },
 
     _gotoPostLoginView: function() {

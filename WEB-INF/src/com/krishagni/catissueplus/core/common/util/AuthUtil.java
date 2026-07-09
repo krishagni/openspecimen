@@ -34,6 +34,10 @@ public class AuthUtil {
 
 	private static final String DEF_SESSION_COOKIE_NAME = "JSESSIONID";
 
+	private static final String AUTH_MODULE = "auth";
+
+	private static final String OS_DOMAIN_API_ONLY = "opsmn_domain_api_only";
+
 	public static Authentication getAuth() {
 		return SecurityContextHolder.getContext().getAuthentication();
 	}
@@ -97,6 +101,14 @@ public class AuthUtil {
 		}
 
 		return false;
+	}
+
+	public static boolean isOpenSpecimenDomainApiOnly() {
+		return ConfigUtil.getInstance().getBoolSetting(AUTH_MODULE, OS_DOMAIN_API_ONLY, false);
+	}
+
+	public static boolean isRestrictedOpenSpecimenDomainUser(User user) {
+		return user != null && user.isOpenSpecimenUser() && !user.isApiUser() && isOpenSpecimenDomainApiOnly();
 	}
 
 	public static void setCurrentUser(User user) {

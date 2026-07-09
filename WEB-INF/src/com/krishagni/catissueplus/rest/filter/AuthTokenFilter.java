@@ -281,6 +281,14 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 			}
 		}
 
+		if (impersonatedUser == null && AuthUtil.isRestrictedOpenSpecimenDomainUser(user)) {
+			logger.info("Non-API users in the OpenSpecimen domain are not allowed to access the API. URL = " + httpReq.getRequestURI());
+			AuthUtil.clearTokenCookie(httpReq, httpResp);
+			httpResp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Only API users are allowed to access the API using the OpenSpecimen domain");
+			teardownReqDataProviders(httpReq, httpResp);
+			return;
+		}
+
 		AuthUtil.setCurrentUser(
 			impersonatedUser != null ? impersonatedUser : user,
 			impUserToken != null ? impUserToken : authToken,

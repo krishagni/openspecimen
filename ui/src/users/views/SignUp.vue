@@ -37,6 +37,8 @@ import signUpSchema from '@/users/schemas/sign-up.js';
 import FormCard from './FormCard.vue';
 
 export default {
+  inject: ['ui'],
+
   components: {
     FormCard
   },
@@ -52,7 +54,7 @@ export default {
   },
 
   mounted() {
-    this._getDomains().then(domains => this.domains = domains.filter(domain => domain.allowLogins));
+    this._getDomains().then(domains => this.domains = domains);
   },
 
   computed: {
@@ -80,7 +82,10 @@ export default {
     },
 
     _getDomains: function() {
-      return loginSvc.getAuthDomains();
+      const {global: {appProps}} = this.ui;
+      return loginSvc.getAuthDomains().then(
+        domains => domains.filter(d => d.allowLogins && (!appProps.osDomainApiOnly || d.name != 'openspecimen'))
+      );
     }
   }
 }

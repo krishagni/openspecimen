@@ -71,7 +71,9 @@ public enum UserErrorCode implements ErrorCode {
 
 	LOCAL_ACC_SIGNUP_NA,
 
-	EMAIL_SELF_UPDATE_NA;
+	EMAIL_SELF_UPDATE_NA,
+
+	OS_DOMAIN_API_ONLY;
 	
 	public String code() {
 		return "USER_" + this.name();

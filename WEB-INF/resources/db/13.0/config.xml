@@ -64,4 +64,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="OpenSpecimen domain API only setting">
+    <sql>
+      call add_cfg_prop(
+        'auth', 'opsmn_domain_api_only',
+        'opsmn_domain_api_only', 'opsmn_domain_api_only_desc',
+        'BOOLEAN', 'false'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

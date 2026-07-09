@@ -55,6 +55,8 @@ public class UserSummary implements Serializable {
 
 	private Boolean downloadLabelsPrintFile;
 
+	private Boolean apiUser;
+
 	private int cpCount;
 
 	private Date creationDate;
@@ -201,6 +203,14 @@ public class UserSummary implements Serializable {
 		this.downloadLabelsPrintFile = downloadLabelsPrintFile;
 	}
 
+	public Boolean getApiUser() {
+		return apiUser;
+	}
+
+	public void setApiUser(Boolean apiUser) {
+		this.apiUser = apiUser;
+	}
+
 	public int getCpCount() {
 		return cpCount;
 	}
@@ -281,6 +291,7 @@ public class UserSummary implements Serializable {
 		result.setActivityStatus(user.getActivityStatus());
 		result.setImpersonated(user.isImpersonated());
 		result.setDownloadLabelsPrintFile(user.isDownloadLabelsPrintFile());
+		result.setApiUser(user.isApiUser());
 
 		if (user.getInstitute() != null) {
 			result.setInstituteId(user.getInstitute().getId());

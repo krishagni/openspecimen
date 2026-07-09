@@ -1,22 +1,33 @@
 package com.krishagni.catissueplus.core.common.util;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
+import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 
 @Configurable
 public class ConfigUtil {
+	private static final String SETTING_CHANGED_TMPL = "config_setting_changed";
+
 	private static ConfigUtil instance = null;
 	
 	@Autowired
 	private ConfigurationService cfgSvc;
+
+	@Autowired
+	private DaoFactory daoFactory;
 		
 	public static ConfigUtil getInstance() {
-		if (instance == null || instance.cfgSvc == null) {
+		if (instance == null || instance.cfgSvc == null || instance.daoFactory == null) {
 			//
 			// instance.cfgSvc == null is defensive check added, which is useful
 			// when app is incorrectly wired
@@ -25,6 +36,14 @@ public class ConfigUtil {
 		}
 		
 		return instance;
+	}
+
+	public static void notifyChange(String setting) {
+		notifyChange(setting, null);
+	}
+
+	public static void notifyChange(String setting, String value) {
+		getInstance().notifySettingChange(setting, value);
 	}
 	
 	public String getAppUrl() {
@@ -116,5 +135,24 @@ public class ConfigUtil {
 
 	public boolean isOracle() {
 		return cfgSvc.isOracle();
+	}
+
+	private void notifySettingChange(String setting, String value) {
+		List<User> admins = daoFactory.getUserDao().getSuperAndInstituteAdmins(null);
+		if (admins == null || admins.isEmpty()) {
+			return;
+		}
+
+		Map<String, Object> props = new HashMap<>();
+		User currentUser = AuthUtil.getCurrentUser();
+		props.put("setting", setting);
+		props.put("value", value);
+		props.put("changedByName", currentUser != null ? currentUser.formattedName() : "System");
+		props.put("changedOn", Calendar.getInstance().getTime());
+		props.put("$subject", new String[] { setting });
+
+		for (User admin : admins) {
+			EmailUtil.getInstance().sendEmail(SETTING_CHANGED_TMPL, new String[] { admin.getEmailAddress() }, null, props);
+		}
 	}
 }

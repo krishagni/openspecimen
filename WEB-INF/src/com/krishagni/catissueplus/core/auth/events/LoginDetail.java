@@ -22,7 +22,7 @@ public class LoginDetail {
 	private String requestMethod;
 
 	private String deviceDetails;
-	
+
 	private Map<String, String> props = new HashMap<>();
 
 	public String getEmailAddress() {

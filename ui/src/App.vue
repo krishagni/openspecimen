@@ -40,6 +40,7 @@ import Navbar from '@/common/components/Navbar.vue';
 
 import authSvc from '@/common/services/Authorization.js';
 import homePageSvc from '@/common/services/HomePageService.js';
+import loginSvc from '@/common/services/Login.js';
 import routerSvc from '@/common/services/Router.js';
 import settingSvc from '@/common/services/Setting.js';
 import urlResolver from '@/common/services/UrlResolver.js';
@@ -90,15 +91,27 @@ export default {
   },
 
   created() {
-    let currUserQ  = userSvc.getCurrentUser();
-    let usrStateQ  = userSvc.getUiState();
-    let usrRightsQ = authSvc.loadUserRights();
-    let spmnPropsQ = util.loadSpecimenTypeProps();
-    let spmnUnitsQ = util.loadSpecimenUnits();
-    Promise.all([currUserQ, usrStateQ, usrRightsQ, spmnPropsQ, spmnUnitsQ]).then(
+    userSvc.getCurrentUser().then(
+      (currentUser) => {
+        this.$ui.currentUser = currentUser;
+        if (currentUser.apiUser) {
+          this._denyUiAccess();
+          return;
+        }
+
+        let usrStateQ  = userSvc.getUiState();
+        let usrRightsQ = authSvc.loadUserRights();
+        let spmnPropsQ = util.loadSpecimenTypeProps();
+        let spmnUnitsQ = util.loadSpecimenUnits();
+        return Promise.all([usrStateQ, usrRightsQ, spmnPropsQ, spmnUnitsQ]);
+      }
+    ).then(
       (resps) => {
-        this.$ui.currentUser = resps[0];
-        const state = this.$ui.global.state = resps[1] || {};
+        if (!resps) {
+          return;
+        }
+
+        const state = this.$ui.global.state = resps[0] || {};
         if (!state.widgets) {
           state.widgets = [];
         }
@@ -277,6 +290,14 @@ export default {
 
     logout: function(logoutUrl) {
       this._setLogoutUrl(logoutUrl);
+    },
+
+    _denyUiAccess: function() {
+      delete this.$ui.currentUser;
+      loginSvc.logout().then(
+        () => routerSvc.goto('UserApiLoginError'),
+        () => routerSvc.goto('UserApiLoginError')
+      );
     },
 
     _setLogoutUrl: function(logoutUrl) {

@@ -1854,6 +1854,11 @@ const routes = [
         props: (route) => ({message: route.query.message})
       },
       {
+        path: 'api-user-login-error',
+        name: 'UserApiLoginError',
+        component: () => import(/* webpackChunkName: "login" */ '../users/views/ApiLoginError.vue')
+      },
+      {
         path: 'forgot-password',
         name: 'UserForgotPassword',
         component: () => import(/* webpackChunkName: "login" */ '../users/views/ForgotPassword.vue')

@@ -27,6 +27,8 @@ public enum AuthErrorCode implements ErrorCode {
 
 	DOMAIN_LOGIN_DISABLED,
 
+	OS_DOMAIN_API_ONLY,
+
 	JWT_PARSE_ERROR,
 
 	JWT_UNKNOWN_ISSUER,

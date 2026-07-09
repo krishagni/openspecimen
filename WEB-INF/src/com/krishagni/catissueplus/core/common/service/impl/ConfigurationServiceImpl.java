@@ -599,6 +599,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		props.put("auditEnabled",            appProps.getProperty("app.audit_enabled"));
 		props.put("localAccountSignups",     getBoolSetting("administrative", "local_account_signups", true));
 		props.put("caseInsensitiveSearch",   !Utility.isMySQL());
+		props.put("osDomainApiOnly",         AuthUtil.isOpenSpecimenDomainApiOnly());
 		return props;
 	}
 
@@ -767,7 +768,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 
 		toNotifyListeners.forEach(listener -> listener.onConfigChange(property, setting));
 	}
-	
+
 	private void setLocale() {
 		Locale existingLocale = Locale.getDefault();
 		String setting = getStrSetting("common", "locale", existingLocale.toString());

@@ -379,6 +379,7 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="deDaoFactory" ref="deDaoFactory"/>
     <property name="auditService" ref="auditService"/>
+    <property name="cfgSvc" ref="cfgSvc"/>
   </bean>
 
   <bean id="specimenResolver" class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenResolverImpl">
