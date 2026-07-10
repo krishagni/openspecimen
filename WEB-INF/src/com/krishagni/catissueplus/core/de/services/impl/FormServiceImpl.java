@@ -2230,14 +2230,12 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					(cprFormValueMap) -> {
 						CollectionProtocolRegistration cpr = (CollectionProtocolRegistration) cprFormValueMap.first();
 						Map<String, Object> valueMap = cprFormValueMap.second();
-						Map<String, Object> appData = (Map<String, Object>) valueMap.get("appData");
 
 						Map<String, Object> formData = new HashMap<>();
 						formData.put("recordId", valueMap.get("id"));
 						formData.put("cpShortTitle", cpr.getCollectionProtocol().getShortTitle());
 						formData.put("ppid", cpr.getPpid());
-						formData.put("fdeStatus", appData != null ? appData.get("formStatus") : "N/A");
-						formData.put("activityStatus", "ACTIVE");
+						addStatus(valueMap, formData);
 						formData.put("formValueMap", valueMap);
 						return formData;
 					}
@@ -2260,6 +2258,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 						formData.put("recordId", valueMap.get("id"));
 						formData.put("cpShortTitle", visit.getCollectionProtocol().getShortTitle());
 						formData.put("visitName", visit.getName());
+						addStatus(valueMap, formData);
 						formData.put("formValueMap", valueMap);
 						return formData;
 					}
@@ -2287,6 +2286,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 						formData.put("cpShortTitle", specimen.getCollectionProtocol().getShortTitle());
 						formData.put("specimenLabel", specimen.getLabel());
 						formData.put("barcode", specimen.getBarcode());
+						addStatus(valueMap, formData);
 						formData.put("formValueMap", valueMap);
 						return formData;
 					}
@@ -2319,6 +2319,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 						Map<String, Object> formData = new HashMap<>();
 						formData.put("recordId", valueMap.get("id"));
 						formData.put("emailAddress", user.getEmailAddress());
+						addStatus(valueMap, formData);
 						formData.put("formValueMap", valueMap);
 						return formData;
 					}
@@ -2415,6 +2416,12 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 			private boolean isAccessDeniedError(OpenSpecimenException ose) {
 				return ose.containsError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			private void addStatus(Map<String, Object> valueMap, Map<String, Object> formData) {
+				Map<String, Object> appData = (Map<String, Object>) valueMap.get("appData");
+				formData.put("fdeStatus", appData != null ? appData.get("formStatus") : "N/A");
+				formData.put("activityStatus", "Active");
 			}
 		};
 	}

@@ -248,6 +248,20 @@ public class AbstractDao<T> implements Dao<T> {
 		return Query.createNativeQuery(getCurrentSession(), sql, returnType);
 	}
 
+	protected String getNamedNativeSql(String queryName) {
+		var memento = getCurrentSession().getSessionFactory()
+			.unwrap(org.hibernate.engine.spi.SessionFactoryImplementor.class)
+			.getQueryEngine()
+			.getNamedObjectRepository()
+			.getNativeQueryMemento(queryName);
+
+		if (memento == null) {
+			throw new IllegalArgumentException("No named native query found: " + queryName);
+		}
+
+		return memento.getSqlString();
+	}
+
 	private String getDbType() {
 		return AppProperties.getInstance().getProperties()
 			.getProperty("database.type", "mysql").toLowerCase();

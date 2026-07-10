@@ -313,7 +313,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
 	@Override
 	public List<Map<String, Object>> getFormRecords(String entityType, Long instituteId, Long formId, List<String> emailIds, int startAt, int maxResults) {
-		String sql = getCurrentSession().createNamedQuery(GET_FORM_RECS, Object[].class).getQueryString();
+		String sql = getNamedNativeSql(GET_FORM_RECS);
 		if (CollectionUtils.isNotEmpty(emailIds)) {
 			int orderByIdx = sql.lastIndexOf("order by");
 			sql = sql.substring(0, orderByIdx) + " and usr.email_address in (:emailIds) " + sql.substring(orderByIdx);
@@ -343,6 +343,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 					record.put("userId", ((Number) row[++idx]).longValue());
 					record.put("emailAddress", row[++idx]);
 					record.put("recordId", ((Number) row[++idx]).longValue());
+					record.put("formStatus", (String) row[++idx]);
 					return record;
 				}
 			)
