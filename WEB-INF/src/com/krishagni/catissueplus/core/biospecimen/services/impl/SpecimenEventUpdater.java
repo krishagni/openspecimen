@@ -9,12 +9,14 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.MutationQuery;
 import org.hibernate.type.StandardBasicTypes;
 
+import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
+import com.krishagni.catissueplus.core.common.PvAttributes;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -68,7 +70,10 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 		Map<String, Object> params = new HashMap<>();
 
 		if (event.isAttrModified("reason")) {
-			params.put("REASON", event.getReason());
+			Long reasonId = getReasonId(event.getReason());
+			if (reasonId != null) {
+				params.put("REASON_ID", reasonId);
+			}
 		}
 
 		if (event.isAttrModified("comments")) {
@@ -253,6 +258,19 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 		}
 
 		return user.getId();
+	}
+
+	private Long getReasonId(String reason) {
+		if (StringUtils.isBlank(reason)) {
+			return null;
+		}
+
+		PermissibleValue pv = daoFactory.getPermissibleValueDao().getByValue(PvAttributes.SPECIMEN_DISPOSE_REASON, reason);
+		if (pv == null) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.INV_DISPOSE_REASON, reason);
+		}
+
+		return pv.getId();
 	}
 
 //	private static final String GET_SPMN_ID_SQL =
