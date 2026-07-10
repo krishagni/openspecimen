@@ -7,7 +7,7 @@
     <name>com.krishagni.catissueplus.core.biospecimen.events.SpecimenEventDetail</name>
 
     <field>
-      <caption>#getMessage("specimen_event_id")</caption>
+      <caption>#getMessage("container_transfer_event_id")</caption>
       <attribute>id</attribute>
     </field>
 
