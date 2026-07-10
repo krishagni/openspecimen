@@ -69,7 +69,9 @@ import LoginForm         from '@/users/views/LoginForm.vue';
 import cpgRoutes   from '@/biospecimen/cp-groups/routes.js';
 import queryRoutes from '@/queries/routes.js';
 
-import Layout from '@/administrative/containers/Layout.vue';
+import Layout            from '@/administrative/containers/Layout.vue';
+import UtilisationLegend from '@/administrative/containers/UtilisationLegend.vue';
+import UtilisationTile   from '@/administrative/containers/UtilisationTile.vue';
 
 window['Vue'] = Vue;
 const app = createApp(Root)
@@ -94,6 +96,8 @@ app.directive('os-tooltip', Tooltip);
 app.directive('os-badge', BadgeDirective);
 
 app.component('os-container-layout', Layout);
+app.component('os-container-utilisation-legend', UtilisationLegend);
+app.component('os-container-utilisation-tile', UtilisationTile);
 app.component('os-no-login-app', NoLoginApp);
 app.component('os-login-form', LoginForm);
 
