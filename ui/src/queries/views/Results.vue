@@ -107,7 +107,6 @@
         </os-message>
       </div>
 
-      <os-column-url />
     </os-page-body>
   </os-page>
 
@@ -140,10 +139,9 @@ import routerSvc from '@/common/services/Router.js';
 
 import queryResources from './Resources.js';
 
-import ColumnUrl from './ColumnUrl.vue';
 import DefineView from './DefineView.vue';
-import Facets from './Facets.vue';
-import SaveQuery from './SaveQuery.vue';
+import Facets     from './Facets.vue';
+import SaveQuery  from './SaveQuery.vue';
 
 export default {
   props: ['query'],
@@ -160,8 +158,6 @@ export default {
 
   components: {
     AgGridVue,
-
-    'os-column-url': ColumnUrl,
 
     Facets,
 
@@ -413,9 +409,11 @@ export default {
           }
 
           if (columnUrls[idx]) {
-            column.cellRenderer = 'os-column-url';
+            column.cellRenderer = 'os-query-column-url';
           } else if (columnTypes[idx] == 'DATE') {
             column.valueFormatter = this._formatDate;
+          } else if (columnTypes[idx] == 'STRING') {
+            column.cellRenderer = 'os-query-column-text';
           }
 
           return column;
