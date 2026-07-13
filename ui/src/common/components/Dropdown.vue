@@ -17,6 +17,8 @@
         @change="onChange"
         @focus="loadOptions"
         @filter="filterOptions($event)"
+        @show="onShow"
+        @hide="onHide"
       />
       <label>{{$attrs.placeholder}}</label>
     </div>
@@ -36,6 +38,8 @@
         @change="onChange"
         @focus="loadOptions"
         @filter="filterOptions($event)"
+        @show="onShow"
+        @hide="onHide"
       />
     </div>
   </div>
@@ -50,7 +54,11 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder', 'dataKey', 'optional', 'unique'],
+  props: [
+    'modelValue', 'listSource', 'form', 'disabled', 'context',
+    'tabOrder', 'dataKey', 'optional', 'unique',
+    'keepOpenOnFilterEnter'
+  ],
 
   emits: ['update:modelValue'],
 
@@ -69,6 +77,14 @@ export default {
   },
 
   methods: {
+    onShow: function() {
+      this._bindFilterKeyListener();
+    },
+
+    onHide: function() {
+      this._unbindFilterKeyListener();
+    },
+
     async filterOptions(event) {
       if (this.filterTimeout) {
         clearTimeout(this.filterTimeout);
@@ -307,6 +323,43 @@ export default {
       }
 
       return result;
+    },
+
+    _bindFilterKeyListener: function() {
+      if (!this.keepOpenOnFilterEnter) {
+        return;
+      }
+
+      this.$nextTick(
+        () => {
+          const {$refs: {filterInput}} = this.$refs.selectWidget || {$refs: {}};
+          if (!filterInput || filterInput == this.filterInput) {
+            return;
+          }
+
+          this._unbindFilterKeyListener();
+          this.filterInput = filterInput;
+          filterInput.addEventListener('keydown', this._filterKeyHandler, true);
+        }
+      );
+    },
+
+    _unbindFilterKeyListener: function() {
+      if (this.filterInput) {
+        this.filterInput.removeEventListener('keydown', this._filterKeyHandler, true);
+      }
+
+      this.filterInput = null;
+    },
+
+    _filterKeyHandler: function(event) {
+      if (event.key != 'Enter' && event.code != 'Enter' && event.code != 'NumpadEnter') {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
     }
   },
 
@@ -359,6 +412,10 @@ export default {
     if (this.modelValue) {
       this.selectedValue().then(val => this.ctx.options = val);
     }
+  },
+
+  beforeUnmount() {
+    this._unbindFilterKeyListener();
   }
 }
 </script>

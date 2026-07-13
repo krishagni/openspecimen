@@ -3,7 +3,8 @@
   <div class="os-storage-position" :class="$attrs['md-type'] && 'md-type'">
     <div class="container">
       <os-dropdown :md-type="$attrs['md-type']" v-model="position.name" :form="context"
-        :tab-order="tabOrder" :list-source="containersLs" @update:model-value="handlePositionInput(true)" />
+        :tab-order="tabOrder" :list-source="containersLs" :keep-open-on-filter-enter="true"
+        @update:model-value="handlePositionInput(true)" />
     </div>
 
     <div class="position" v-if="!position.mode || position.mode == 'TWO_D'">
