@@ -101,6 +101,32 @@
     </row>
     <row>
       <subForm>
+        <name>cpGroup</name>
+        <udn>cpGroup</udn>
+        <caption>#getMessage("cp_group")</caption>
+        <table>OS_CP_GROUPS</table>
+        <foreignKey>IDENTIFIER</foreignKey>
+        <parentKey>CP_GROUP_ID</parentKey>
+        <row>
+          <numberField>
+            <name>id</name>
+            <udn>id</udn>
+            <caption>#getMessage("cp_group_id")</caption>
+            <column>IDENTIFIER</column>
+          </numberField>
+        </row>
+        <row>
+          <textField>
+            <name>name</name>
+            <udn>name</udn>
+            <caption>#getMessage("cp_group_name")</caption>
+            <column>NAME</column>
+          </textField>
+        </row>
+      </subForm>
+    </row>
+    <row>
+      <subForm>
         <name>principalInvestigator</name>
         <udn>principalInvestigator</udn>
         <caption>#getMessage("cp_pi")</caption>
