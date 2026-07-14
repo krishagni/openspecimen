@@ -9,7 +9,7 @@
         <os-step :title="$t('queries.select_fields')">
           <div class="fields-selection">
             <os-tree-select-panel :items="ctx.fieldsTree" :selected="ctx.selectedFields"
-              :expand-selected="false" @selected-items="onFieldsSelection" />
+              :expand-selected="false" :searchable="true" @selected-items="onFieldsSelection" />
 
             <div class="settings">
               <os-boolean-checkbox v-model="ctx.query.wideRowEnabled" :inlineLabel="$t('queries.enable_wide_rows')" />

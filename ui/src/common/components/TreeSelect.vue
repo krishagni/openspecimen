@@ -1,7 +1,7 @@
 <template>
   <div class="os-tree">
-    <draggable v-model="nodes" tag="ul" handle=".node-grip" @update:model-value="orderChanged">
-      <li class="node-grip" v-for="node of nodes" :key="node.id">
+    <draggable v-model="nodes" tag="ul" handle=".node-grip" :disabled="disableOrdering" @update:model-value="orderChanged">
+      <li class="node-grip" :class="{'ordering-disabled': disableOrdering}" v-for="node of nodes" :key="node.id">
         <div class="node">
           <span v-if="node.children && node.children.length > 0">
             <os-icon class="expand"   name="plus"  @click="expandNode(node)"   v-if="!node.expanded" />
@@ -12,7 +12,8 @@
           <span> {{node.label}} </span>
         </div>
 
-        <os-tree-select v-model="node.children" @selection-changed="selectionChanged" @order-changed="orderChanged"
+        <os-tree-select v-model="node.children" :disable-ordering="disableOrdering"
+          @selection-changed="selectionChanged" @order-changed="orderChanged"
           v-show="node.expanded && node.children.length > 0" />
       </li>
     </draggable>
@@ -23,7 +24,7 @@
 import { VueDraggableNext } from "vue-draggable-next";
 
 export default {
-  props: ['modelValue'],
+  props: ['modelValue', 'disableOrdering'],
 
   emits: ['selection-changed', 'order-changed'],
 
@@ -130,6 +131,10 @@ export default {
 
 .os-tree ul li.node-grip {
   cursor: grab;
+}
+
+.os-tree ul li.node-grip.ordering-disabled {
+  cursor: default;
 }
 
 .os-tree .node {

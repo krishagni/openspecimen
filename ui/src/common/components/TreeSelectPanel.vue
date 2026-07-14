@@ -1,35 +1,63 @@
 <template>
-  <os-tree-select v-model="ctx.nodes"
-    @selection-changed="handleSelections" @order-changed="handleSelections" />
+  <div class="os-tree-select-panel">
+    <div class="search" v-if="searchable">
+      <os-input-text v-model="ctx.searchTerm" :placeholder="$t('common.buttons.search')" />
+    </div>
+
+    <os-tree-select v-model="ctx.nodes" :disable-ordering="expandFiltered"
+      @selection-changed="handleSelections" @order-changed="handleSelections" />
+  </div>
 </template>
 
 <script>
 export default {
-  props: ['items', 'selected', 'expand-selected'],
+  props: ['items', 'selected', 'expand-selected', 'searchable'],
 
   emits: ['selected-items'],
 
   data() {
     return {
       ctx: {
-        nodes: []
+        nodes: [],
+
+        searchTerm: null
       }
     };
   },
 
   created() {
-    this.ctx.nodes = this._getSortedNodes(this.items, this.selected || []);
+    this.ctx.nodes = this._getSortedNodes(this.filteredItems, this.selected || []);
   },
 
   watch: {
     hierarchyKey: function() {
-      this.ctx.nodes = this._getSortedNodes(this.items, this.selected || []);
+      this.ctx.nodes = this._getSortedNodes(this.filteredItems, this.selected || []);
     }
   },
 
   computed: {
+    searchTerm: function() {
+      return (this.ctx.searchTerm || '').trim().toLowerCase();
+    },
+
+    filteredItems: function() {
+      if (!this.searchTerm) {
+        return this.items;
+      }
+
+      return this._filterItems(this.items, this.searchTerm);
+    },
+
+    expandFiltered: function() {
+      return !!this.searchTerm;
+    },
+
     hierarchyKey: function() {
-      return (this.items || []).map(({id}) => id).join('_');
+      return [
+        this.expandSelected,
+        this.expandFiltered,
+        this._getHierarchyKey(this.filteredItems || [])
+      ].join(':');
     }
   },
 
@@ -50,7 +78,13 @@ export default {
         }
       }
 
-      this.$emit('selected-items', selected);
+      let result = selected;
+      if (this.searchTerm) {
+        const visibleItems = this._getItemsMap(this.filteredItems, {});
+        result = (this.selected || []).filter(item => !visibleItems[item.id]).concat(selected);
+      }
+
+      this.$emit('selected-items', result);
     },
 
     _getSortedNodes: function(items, selected) {
@@ -66,17 +100,57 @@ export default {
       const nodes = [];
       for (const item of items) {
         const {id, label} = item;
-        const node = {id, label, item, expanded: false, selected: false, parent};
+        const node = {id, label, item, expanded: this.expandFiltered, selected: false, parent};
         node.children = this._getNodes(node, item.children || [], selected);
         if (this._isSelected(node, selected)) {
           node.selected = true;
-          node.expanded = this.expandSelected;
+          node.expanded = node.expanded || this.expandSelected;
         }
 
         nodes.push(node);
       }
 
       return nodes;
+    },
+
+    _filterItems: function(items, searchTerm) {
+      const result = [];
+      for (let item of items || []) {
+        const itemMatches = this._matchesSearchTerm(item, searchTerm);
+        const children = itemMatches ? (item.children || []) : this._filterItems(item.children || [], searchTerm);
+        if (children.length > 0 || itemMatches) {
+          const copy = {...item};
+          if (children.length > 0) {
+            copy.children = children;
+          } else {
+            delete copy.children;
+          }
+
+          result.push(copy);
+        }
+      }
+
+      return result;
+    },
+
+    _matchesSearchTerm: function({id, label}, searchTerm) {
+      return (id || '').toLowerCase().indexOf(searchTerm) >= 0 ||
+        (label || '').toLowerCase().indexOf(searchTerm) >= 0;
+    },
+
+    _getItemsMap: function(items, map) {
+      for (let item of items || []) {
+        map[item.id] = item;
+        if (item.children && item.children.length > 0) {
+          this._getItemsMap(item.children, map);
+        }
+      }
+
+      return map;
+    },
+
+    _getHierarchyKey: function(items) {
+      return (items || []).map(item => item.id + '[' + this._getHierarchyKey(item.children || []) + ']').join('_');
     },
 
     _isSelected: function(node, selected) {
@@ -105,3 +179,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.os-tree-select-panel .search {
+  margin-bottom: 1rem;
+}
+</style>
