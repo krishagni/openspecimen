@@ -61,7 +61,6 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTaskManager;
-import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -1432,28 +1431,12 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 	private String getRestriction(User user, Long cpId, Long groupId, boolean disableAccessChecks, String queryId) {
 		String restriction = null;
-		if (groupId != null && groupId != -1) {
-			Set<Long> cpIds = AccessCtrlMgr.getInstance().getReadAccessGroupCpIds(groupId);
-			if (CollectionUtils.isEmpty(cpIds)) {
-				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
-			}
+		if (groupId != null && groupId > 0L) {
+			restriction = cpForm + ".cpGroup.id = " + groupId;
+		}
 
-			if (cpId != null && cpId != -1) {
-				if (cpIds.contains(cpId)) {
-					cpIds = Collections.singleton(cpId);
-				} else {
-					AccessCtrlMgr.getInstance().ensureReadCpRights(cpId);
-					throw OpenSpecimenException.userError(CpGroupErrorCode.CP_NOT_IN_GRP, cpId, groupId);
-				}
-			}
-
-			restriction = cpForm + ".id in (" + Utility.join(cpIds, Objects::toString, ",") + ")";
-		} else if (cpId != null && cpId != -1) {
-			if (!user.isAdmin()) {
-				AccessCtrlMgr.getInstance().ensureReadCpRights(cpId);
-			}
-
-			restriction = cpForm + ".id = " + cpId;
+		if (cpId != null && cpId > 0L) {
+			restriction = appendRestriction(restriction, cpForm + ".id = " + cpId);
 		}
 
 		if (!user.isAdmin() && !disableAccessChecks) {
