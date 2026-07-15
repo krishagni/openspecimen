@@ -68,6 +68,47 @@
             <column>LABEL</column>
             <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$parentSpecimenId}}</recordUrl>
           </textField>
+          <textField>
+            <name>parentBarcode</name>
+            <udn>parentBarcode</udn>
+            <caption>#getMessage("specimen_parent_specimen_barcode")</caption>
+            <column>BARCODE</column>
+            <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$parentSpecimenId}}</recordUrl>
+          </textField>
+        </row>
+      </subForm>
+    </row>
+
+    <row>
+      <subForm>
+        <name>primarySpecimen</name>
+        <udn>primarySpecimen</udn>
+        <caption>#getMessage("specimen_primary_specimen")</caption>
+        <table>CATISSUE_SPECIMEN</table>
+        <foreignKey>IDENTIFIER</foreignKey>
+        <parentKey>PRIMARY_SPECIMEN_ID</parentKey>
+        <row>
+          <textField>
+            <name>primaryId</name>
+            <udn>primaryId</udn>
+            <caption>#getMessage("specimen_primary_specimen_id")</caption>
+            <column>IDENTIFIER</column>
+            <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$value}}</recordUrl>
+          </textField>
+          <textField>
+            <name>primaryLabel</name>
+            <udn>primaryLabel</udn>
+            <caption>#getMessage("specimen_primary_specimen_label")</caption>
+            <column>LABEL</column>
+            <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$primarySpecimenId}}</recordUrl>
+          </textField>
+          <textField>
+            <name>primaryBarcode</name>
+            <udn>primaryBarcode</udn>
+            <caption>#getMessage("specimen_primary_specimen_barcode")</caption>
+            <column>BARCODE</column>
+            <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$primarySpecimenId}}</recordUrl>
+          </textField>
         </row>
       </subForm>
     </row>
@@ -78,6 +119,7 @@
         <udn>barcode</udn>
         <caption>#getMessage("specimen_barcode")</caption>
         <column>BARCODE</column>
+        <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$specimenId}}</recordUrl>
       </textField>
     </row>
 

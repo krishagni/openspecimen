@@ -31,6 +31,18 @@ class Util {
     'Specimen.parentSpecimen.parentLabel': [
                            {expr: 'Specimen.parentSpecimen.parentId', caption: '$parentSpecimenId'},
                            {expr: 'CollectionProtocol.id', caption: '$cpId'}
+                         ],
+    'Specimen.parentSpecimen.parentBarcode': [
+                           {expr: 'Specimen.parentSpecimen.parentId', caption: '$parentSpecimenId'},
+                           {expr: 'CollectionProtocol.id', caption: '$cpId'}
+                         ],
+    'Specimen.primarySpecimen.primaryLabel': [
+                           {expr: 'Specimen.primarySpecimen.primaryId', caption: '$primarySpecimenId'},
+                           {expr: 'CollectionProtocol.id', caption: '$cpId'}
+                         ],
+    'Specimen.primarySpecimen.primaryBarcode': [
+                           {expr: 'Specimen.primarySpecimen.primaryId', caption: '$primarySpecimenId'},
+                           {expr: 'CollectionProtocol.id', caption: '$cpId'}
                          ]
   };
 
