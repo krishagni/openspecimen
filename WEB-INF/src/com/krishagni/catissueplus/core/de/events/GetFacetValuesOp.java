@@ -17,6 +17,11 @@ public class GetFacetValuesOp {
 
 	private boolean disableAccessChecks;
 
+	//
+	// Not for use by the query client
+	//
+	private boolean useReportingDataSource;
+
 	public String getQuerySpace() {
 		return querySpace;
 	}
@@ -71,5 +76,13 @@ public class GetFacetValuesOp {
 
 	public void setDisableAccessChecks(boolean disableAccessChecks) {
 		this.disableAccessChecks = disableAccessChecks;
+	}
+
+	public boolean isUseReportingDataSource() {
+		return useReportingDataSource;
+	}
+
+	public void setUseReportingDataSource(boolean useReportingDataSource) {
+		this.useReportingDataSource = useReportingDataSource;
 	}
 }

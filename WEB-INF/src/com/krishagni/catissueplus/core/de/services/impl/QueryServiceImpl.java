@@ -40,6 +40,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -185,6 +187,8 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 	private ScheduledTaskManager taskManager;
 
+	private DataSource reportingDataSource;
+
 	private int maxConcurrentQueries = DEF_MAX_CONCURRENT_QUERIES;
 
 	private int maxRecsInMemory = DEF_MAX_RECS_IN_MEM;
@@ -258,6 +262,10 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 	public void setTaskManager(ScheduledTaskManager taskManager) {
 		this.taskManager = taskManager;
+	}
+
+	public void setReportingDataSource(DataSource reportingDataSource) {
+		this.reportingDataSource = reportingDataSource;
 	}
 
 	@Override
@@ -602,6 +610,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			op.setWideRowMode(input.getWideRowMode());
 			op.setSavedQueryId(query.getId());
 			op.setCaseSensitive(query.isCaseSensitive());
+			op.setUseReportingDataSource(input.isUseReportingDataSource());
 			op.setAql(query.getAql() + " limit " + input.getStartAt() + ", " + input.getMaxResults());
 			return executeQuery(new RequestEvent<>(op));
 		} catch (OpenSpecimenException ose) {
@@ -1319,6 +1328,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		boolean ic = !Utility.isMySQL() && !op.isCaseSensitive();
 
 		Query query = Query.createQuery()
+			.dataSource(getReportingDataSource(op))
 			.wideRowMode(WideRowMode.valueOf(op.getWideRowMode()))
 			.ic(ic)
 			.outputIsoDateTime(op.isOutputIsoDateTime())
@@ -1354,6 +1364,14 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		query.compile(rootForm, aql, getRestriction(user, op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(), queryId));
 		op.setAql(aql);
 		return query;
+	}
+
+	private DataSource getReportingDataSource(ExecuteQueryEventOp op) {
+		return op.isUseReportingDataSource() ? reportingDataSource : null;
+	}
+
+	private DataSource getReportingDataSource(GetFacetValuesOp op) {
+		return op.isUseReportingDataSource() ? reportingDataSource : null;
 	}
 
 	private Query addAutoJoinParams(Query query) {
@@ -2026,6 +2044,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		TimeZone tz = AuthUtil.getUserTimeZone();
 		String aql = String.format(aqlFmt, aqlFmtArgs.toArray());
 		Query query = Query.createQuery()
+			.dataSource(getReportingDataSource(op))
 			.ic(!Utility.isMySQL())
 			.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 			.timeFormat(ConfigUtil.getInstance().getTimeFmt())

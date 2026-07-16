@@ -50,6 +50,11 @@ public class ExecuteQueryEventOp  {
 	//
 	private String queryUid;
 
+	//
+	// Not for use by the query client
+	//
+	private boolean useReportingDataSource;
+
 	public String getQuerySpace() {
 		return querySpace;
 	}
@@ -192,5 +197,13 @@ public class ExecuteQueryEventOp  {
 
 	public void setQueryUid(String queryUid) {
 		this.queryUid = queryUid;
+	}
+
+	public boolean isUseReportingDataSource() {
+		return useReportingDataSource;
+	}
+
+	public void setUseReportingDataSource(boolean useReportingDataSource) {
+		this.useReportingDataSource = useReportingDataSource;
 	}
 }
