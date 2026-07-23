@@ -889,6 +889,22 @@ public class Utility {
 				(input.charAt(0) == '\'' && input.charAt(input.length() - 1) == '\'');
 	}
 
+	public static <T> T toObject(InputStream in, TypeReference<T> typeRef) {
+		try {
+			return om.get().readValue(in, typeRef);
+		} catch (Exception e) {
+			throw new RuntimeException("Error parsing input stream JSON to :" + typeRef.getType().getTypeName(), e);
+		}
+	}
+
+	public static <T> T toObject(String json, TypeReference<T> typeRef) {
+		try {
+			return om.get().readValue(json, typeRef);
+		} catch (Exception e) {
+			throw new RuntimeException("Error parsing input JSON to :" + typeRef.getType().getTypeName(), e);
+		}
+	}
+
 	public static Map<String, Object> toMap(InputStream in) {
 		return toMap(in, new TypeReference<Map<String, Object>>() {});
 	}
