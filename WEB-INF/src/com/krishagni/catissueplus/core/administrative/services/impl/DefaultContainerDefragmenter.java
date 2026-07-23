@@ -335,6 +335,7 @@ public class DefaultContainerDefragmenter implements ContainerDefragmenter {
 		String nameLabel         = msg("storage_container_name");
 		String barcodeLabel      = msg("container_barcode");
 		String displayNameLabel  = msg("storage_container_display_name");
+		String siteLabel         = msg("container_site");
 
 		String currLocationLabel = msg("specimen_current_location");
 		String locationLabel     = msg("specimen_location");
@@ -350,6 +351,7 @@ public class DefaultContainerDefragmenter implements ContainerDefragmenter {
 		writer.writeNext(new String[] { "#" + nameLabel, container.getName() });
 		writer.writeNext(new String[] { "#" + barcodeLabel, container.getBarcode() });
 		writer.writeNext(new String[] { "#" + displayNameLabel, container.getDisplayName() });
+		writer.writeNext(new String[] { "#" + siteLabel, container.getSite().getName() });
 		writer.writeNext(new String[] { "#" });
 
 		writer.writeNext(new String[] {

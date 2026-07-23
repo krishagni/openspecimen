@@ -55,6 +55,7 @@ public abstract class AbstractContainerReport implements ContainerReport  {
 			writer.writeNext(new String[] { message(CONTAINER_BARCODE), container.getBarcode() });
 			writer.writeNext(new String[] { message(CONTAINER_DISPLAY_NAME), container.getDisplayName() });
 			writer.writeNext(new String[] { message(CONTAINER_HIERARCHY), container.getStringifiedAncestors() });
+			writer.writeNext(new String[] { message(CONTAINER_SITE), container.getSite().getName() });
 
 			writer.writeNext(new String[] { message(CONTAINER_RESTRICTIONS) });
 
@@ -127,6 +128,8 @@ public abstract class AbstractContainerReport implements ContainerReport  {
 	protected static final String CONTAINER_NAME           = "container_name";
 
 	protected static final String CONTAINER_BARCODE        = "container_barcode";
+
+	protected static final String CONTAINER_SITE           = "container_site";
 
 	protected static final String CONTAINER_DISPLAY_NAME   = "container_display_name";
 

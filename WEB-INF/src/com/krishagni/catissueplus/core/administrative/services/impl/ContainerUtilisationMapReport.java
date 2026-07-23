@@ -277,6 +277,7 @@ public class ContainerUtilisationMapReport extends AbstractContainerReport imple
 		writeDetail(sheet, styles, rowIdx++, message(CONTAINER_BARCODE), container.getBarcode());
 		writeDetail(sheet, styles, rowIdx++, message(CONTAINER_DISPLAY_NAME), container.getDisplayName());
 		writeDetail(sheet, styles, rowIdx++, message(CONTAINER_HIERARCHY), container.getStringifiedAncestors());
+		writeDetail(sheet, styles, rowIdx++, message(CONTAINER_SITE), container.getSite().getName());
 		writeDetail(sheet, styles, rowIdx++, message(CONTAINER_RESTRICTIONS), null);
 		writeDetail(sheet, styles, rowIdx++, message(CONTAINER_PROTOCOL), getCollectionProtocols(container));
 		writeDetail(sheet, styles, rowIdx++, message(CONTAINER_SPECIMEN_TYPES), getSpecimenTypes(container));
