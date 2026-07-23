@@ -691,8 +691,8 @@ public class Visit extends BaseExtensionEntity {
 			Specimen specimen = sr.getSpecimen();
 			specimen.setVisit(this);
 			specimen.setPrimarySpecimen(specimen);
-			specimen.updateCollectionStatus(status);
 			addSpecimen(specimen);
+			specimen.updateCollectionStatus(status);
 		}
 	}
 
