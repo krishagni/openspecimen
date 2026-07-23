@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -174,6 +175,10 @@ public class CollectionProtocolRegistration extends BaseExtensionEntity {
 
 	@Override
 	public Long getCpId() {
+		if (getCollectionProtocol() == null) {
+			throw OpenSpecimenException.userError(CpErrorCode.REQUIRED);
+		}
+
 		return getCollectionProtocol().getId();
 	}
 

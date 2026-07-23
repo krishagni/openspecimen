@@ -27,6 +27,7 @@ import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelPrePrintMode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
@@ -616,6 +617,10 @@ public class Visit extends BaseExtensionEntity {
 
 	@Override
 	public Long getCpId() {
+		if (getCollectionProtocol() == null) {
+			throw OpenSpecimenException.userError(CpErrorCode.REQUIRED);
+		}
+
 		return getCollectionProtocol().getId();
 	}
 

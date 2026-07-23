@@ -44,6 +44,7 @@ import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPos
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenReturnEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
@@ -873,6 +874,10 @@ public class Specimen extends BaseExtensionEntity {
 
 	@Override
 	public Long getCpId() {
+		if (getCollectionProtocol() == null) {
+			throw OpenSpecimenException.userError(CpErrorCode.REQUIRED);
+		}
+
 		return getCollectionProtocol().getId();
 	}
 
