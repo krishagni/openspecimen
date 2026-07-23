@@ -220,7 +220,7 @@ public class SitesController {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public SiteDetail deleteSite(
-		@PathVariable
+		@PathVariable("id")
 		Long id,
 
 		@RequestParam(value="close", required=false, defaultValue="false")
