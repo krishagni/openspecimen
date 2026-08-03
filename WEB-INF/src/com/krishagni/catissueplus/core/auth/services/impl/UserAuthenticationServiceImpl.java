@@ -340,6 +340,10 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService,
 				return ResponseEvent.userError(UserErrorCode.NOT_FOUND, domain + "/" + input.getLoginName());
 			}
 
+			if (user.isApiUser()) {
+				return ResponseEvent.userError(UserErrorCode.API_USER_IMPERSONATION_NA);
+			}
+
 			Date startTime = Calendar.getInstance().getTime();
 			Date endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
 

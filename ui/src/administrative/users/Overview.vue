@@ -49,7 +49,7 @@
 
         <os-button left-icon="user-secret"
           :label="$t('users.impersonate')" @click="impersonate"
-          v-if="ctx.user.type != 'CONTACT' && ctx.user.activityStatus == 'Active' &&
+          v-if="ctx.user.type != 'CONTACT' && ctx.user.activityStatus == 'Active' && !ctx.user.apiUser &&
             ui.currentUser.id != ctx.user.id && ui.currentUser.admin"
         />
 
