@@ -82,7 +82,7 @@ public class MessageLogServiceImpl implements MessageLogService {
 						logger.error("Error while processing message with log id = " + msgLog.getId(), e);
 						error = Utility.getErrorMessage(e);
 					} finally {
-						updateStatus(msgLog, recordIds, error);
+						updateStatus(msgLog.getId(), recordIds, error);
 					}
 				}
 			}
@@ -130,7 +130,18 @@ public class MessageLogServiceImpl implements MessageLogService {
 	}
 
 	@PlusTransactional
-	private void updateStatus(MessageLog msgLog, String recordIds, String error) {
+	private void updateStatus(Long msgLogId, String recordIds, String error) {
+		if (msgLogId == null) {
+			logger.info("No message log ID to update the status");
+			return;
+		}
+
+		MessageLog msgLog = daoFactory.getMessageLogDao().getById(msgLogId);
+		if (msgLog == null) {
+			logger.error("No message log with ID = " + msgLogId);
+			return;
+		}
+
 		if (StringUtils.isNotBlank(recordIds) && StringUtils.isBlank(error)) {
 			msgLog.setRecordId(recordIds);
 			msgLog.setStatus(MessageLog.Status.SUCCESS);
@@ -140,6 +151,5 @@ public class MessageLogServiceImpl implements MessageLogService {
 		msgLog.setError(error);
 		msgLog.incrNoOfRetries();
 		msgLog.setProcessTime(Calendar.getInstance().getTime());
-		daoFactory.getMessageLogDao().saveOrUpdate(msgLog);
 	}
 }
