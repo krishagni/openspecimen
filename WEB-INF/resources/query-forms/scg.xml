@@ -365,7 +365,7 @@
         <name>participant</name>
         <udn>participant</udn>
         <caption>#getMessage("participant")</caption>
-        <table>CPR_VIEW</table>
+        <table>OS_CPR_RECS</table>
         <foreignKey>CPR_ID</foreignKey>
         <parentKey>COLLECTION_PROTOCOL_REG_ID</parentKey>
         <pathLink>true</pathLink>
