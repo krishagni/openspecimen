@@ -91,6 +91,14 @@
 	</path>
 
 	<path>
+		<from>SpecimenCollectionGroup</from>
+		<to>Participant</to>
+		<start-field>participant</start-field>
+		<links>
+		</links>
+	</path>
+
+	<path>
 		<from>Shipment</from>
 		<to>CollectionProtocol</to>
 		<start-field>shipmentItems.specimen.scg.participant</start-field>
