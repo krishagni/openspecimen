@@ -1224,6 +1224,7 @@
         <value>com/krishagni/catissueplus/core/administrative/schema/institute.xml</value>
         <value>com/krishagni/catissueplus/core/administrative/schema/user.xml</value>
         <value>com/krishagni/catissueplus/core/administrative/schema/user-roles.xml</value>
+        <value>com/krishagni/catissueplus/core/administrative/schema/user-roles-detailed.xml</value>
         <value>com/krishagni/catissueplus/core/administrative/schema/container-type.xml</value>
         <value>com/krishagni/catissueplus/core/administrative/schema/shipment.xml</value>
         <value>com/krishagni/catissueplus/core/administrative/schema/container-shipment.xml</value>

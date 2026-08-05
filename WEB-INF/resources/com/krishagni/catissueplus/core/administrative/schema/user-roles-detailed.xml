@@ -1,0 +1,86 @@
+#macro(getMessage $code)$messageSource.getMessage($code, null, $locale)#end
+
+<object-schema>
+  <name>userRolesDetailed</name>
+  <record>
+    <name>com.krishagni.rbac.events.SubjectRoleExportDetail</name>
+
+    <field>
+      <caption>#getMessage("user_roles_identifier")</caption>
+      <attribute>subjectId</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_first_name")</caption>
+      <attribute>firstName</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_last_name")</caption>
+      <attribute>lastName</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_roles_email")</caption>
+      <attribute>emailAddress</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_institute")</caption>
+      <attribute>instituteName</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_primary_site")</caption>
+      <attribute>primarySite</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_domain_name")</caption>
+      <attribute>domainName</attribute>
+    </field>
+
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("user_api_user")</caption>
+      <attribute>apiUser</attribute>
+    </field>
+
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("user_manage_wfs")</caption>
+      <attribute>manageWfs</attribute>
+    </field>
+
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("user_manage_forms")</caption>
+      <attribute>manageForms</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_type")</caption>
+      <attribute>type</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_activity_status")</caption>
+      <attribute>activityStatus</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_roles_role_site")</caption>
+      <attribute>siteName</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_roles_role_cp_short_title")</caption>
+      <attribute>cpShortTitle</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("user_roles_role")</caption>
+      <attribute>roleName</attribute>
+    </field>
+  </record>
+</object-schema>

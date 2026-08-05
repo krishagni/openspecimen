@@ -13,6 +13,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSiteSummary;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
@@ -45,6 +46,8 @@ public interface CollectionProtocolDao extends Dao<CollectionProtocol> {
 	public Map<String, Object> getCpIds(String key, Object value);
 	
 	public Set<SiteCpPair> getSiteCps(Collection<Long> cpIds);
+
+	List<CollectionProtocolSiteSummary> getActiveSiteCps(Long instituteId, Long siteId, Long cpId, Long lastId, int maxResults);
 
 	public boolean isCpAffiliatedToUserInstitute(Long cpId, Long userId);
 

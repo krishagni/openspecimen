@@ -8,8 +8,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
+import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserEvent;
 import com.krishagni.catissueplus.core.administrative.domain.UserSavedEvent;
@@ -37,6 +40,8 @@ import com.krishagni.catissueplus.core.administrative.repository.UserListCriteri
 import com.krishagni.catissueplus.core.administrative.services.UserService;
 import com.krishagni.catissueplus.core.auth.domain.AuthErrorCode;
 import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSiteSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
@@ -70,7 +75,9 @@ import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
+import com.krishagni.rbac.domain.SubjectRole;
 import com.krishagni.rbac.events.SubjectRoleDetail;
+import com.krishagni.rbac.events.SubjectRoleExportDetail;
 import com.krishagni.rbac.events.SubjectRoleOpNotif;
 import com.krishagni.rbac.events.SubjectRolesList;
 import com.krishagni.rbac.service.RbacService;
@@ -718,8 +725,9 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		exportSvc.registerObjectsGenerator("user",      this::getUsersGenerator);
-		exportSvc.registerObjectsGenerator("userRoles", this::getUserRolesGenerator);
+		exportSvc.registerObjectsGenerator("user",              this::getUsersGenerator);
+		exportSvc.registerObjectsGenerator("userRoles",         this::getUserRolesGenerator);
+		exportSvc.registerObjectsGenerator("userRolesDetailed", this::getDetailedUserRolesGenerator);
 	}
 
 	private void validateTypes(Collection<String> types) {
@@ -1376,5 +1384,195 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		return users.stream()
 			.map(user -> SubjectRolesList.from(user.getId(), user.getEmailAddress(), user.getRoles()))
 			.collect(Collectors.toList());
+	}
+
+	private Function<ExportJob, List<?>> getDetailedUserRolesGenerator() {
+		return new Function<>() {
+			private static final int BATCH_SIZE = 100;
+
+			private final Set<String> emittedRoles = new HashSet<>();
+
+			private List<DetailedRoleContext> roleContexts = Collections.emptyList();
+
+			private DetailedRoleContext currentRole;
+
+			private Long currentUserId;
+
+			private Long lastSiteCpId;
+
+			private int roleContextIdx;
+
+			private int usersStartAt;
+
+			private boolean endOfUsers;
+
+			private boolean paramsInited;
+
+			@Override
+			public List<?> apply(ExportJob job) {
+				initParams();
+
+				List<SubjectRoleExportDetail> result = new ArrayList<>();
+				while (result.size() < BATCH_SIZE) {
+					if (currentRole == null) {
+						currentRole = nextRole(job);
+						lastSiteCpId = 0L;
+						if (currentRole == null) {
+							break;
+						}
+
+						if (!currentRole.user.getId().equals(currentUserId)) {
+							currentUserId = currentRole.user.getId();
+							emittedRoles.clear();
+						}
+
+						if (!currentRole.eligible) {
+							currentRole = null;
+							continue;
+						}
+					}
+
+					if (currentRole.cpId != null && currentRole.siteId != null) {
+						addDetailedRole(
+							result, currentRole,
+							currentRole.cpId, currentRole.cpShortTitle,
+							currentRole.siteId, currentRole.siteName
+						);
+
+						currentRole = null;
+						continue;
+					}
+
+					int pageSize = BATCH_SIZE - result.size();
+					List<CollectionProtocolSiteSummary> siteCps = daoFactory.getCollectionProtocolDao()
+						.getActiveSiteCps(
+							currentRole.siteId == null ? currentRole.user.getInstituteId() : null,
+							currentRole.siteId,
+							currentRole.cpId,
+							lastSiteCpId,
+							pageSize
+						);
+
+					for (CollectionProtocolSiteSummary siteCp : siteCps) {
+						lastSiteCpId = siteCp.getId();
+						addDetailedRole(
+							result, currentRole,
+							siteCp.getCpId(), siteCp.getCpShortTitle(),
+							siteCp.getSiteId(), siteCp.getSiteName()
+						);
+					}
+
+					if (siteCps.size() < pageSize) {
+						currentRole = null;
+					}
+				}
+
+				return result;
+			}
+
+			private DetailedRoleContext nextRole(ExportJob job) {
+				while (roleContextIdx >= roleContexts.size()) {
+					if (endOfUsers) {
+						return null;
+					}
+
+					List<Long> recordIds = job.getRecordIds();
+					boolean selectedUsers = CollectionUtils.isNotEmpty(recordIds);
+					UserListCriteria listCrit = new UserListCriteria().maxResults(BATCH_SIZE);
+					if (selectedUsers) {
+						int toIndex = Math.min(usersStartAt + BATCH_SIZE, recordIds.size());
+						listCrit.ids(recordIds.subList(usersStartAt, toIndex));
+						usersStartAt = toIndex;
+						endOfUsers = usersStartAt >= recordIds.size();
+					} else {
+						listCrit.startAt(usersStartAt);
+					}
+
+					List<User> users = daoFactory.getUserDao().getUsers(addUserListCriteria(listCrit));
+					if (!selectedUsers) {
+						usersStartAt += users.size();
+						endOfUsers = users.size() < BATCH_SIZE;
+					}
+
+					roleContexts = getDetailedRoleContexts(users);
+					roleContextIdx = 0;
+				}
+
+				return roleContexts.get(roleContextIdx++);
+			}
+
+			private void addDetailedRole(
+				List<SubjectRoleExportDetail> result,
+				DetailedRoleContext role,
+				Long cpId, String cpShortTitle,
+				Long siteId, String siteName
+			) {
+				String key = role.roleId + ":" + cpId + ":" + siteId;
+				if (emittedRoles.add(key)) {
+					result.add(SubjectRoleExportDetail.from(role.user, role.roleName, cpShortTitle, siteName));
+				}
+			}
+
+			private void initParams() {
+				if (!paramsInited) {
+					endOfUsers = !AccessCtrlMgr.getInstance().hasUserEximRights();
+					paramsInited = true;
+				}
+			}
+		};
+	}
+
+	private List<DetailedRoleContext> getDetailedRoleContexts(List<User> users) {
+		List<DetailedRoleContext> result = new ArrayList<>();
+		for (User user : users) {
+			for (SubjectRole subjectRole : user.getRoles()) {
+				result.add(DetailedRoleContext.from(user, subjectRole));
+			}
+		}
+
+		return result;
+	}
+
+	private static class DetailedRoleContext {
+		private UserSummary user;
+
+		private Long roleId;
+
+		private String roleName;
+
+		private Long cpId;
+
+		private String cpShortTitle;
+
+		private Long siteId;
+
+		private String siteName;
+
+		private boolean eligible = true;
+
+		private static DetailedRoleContext from(User user, SubjectRole subjectRole) {
+			DetailedRoleContext result = new DetailedRoleContext();
+			result.user = UserSummary.from(user);
+			result.roleId = subjectRole.getRole().getId();
+			result.roleName = subjectRole.getRole().getName();
+
+			CollectionProtocol cp = subjectRole.getCollectionProtocol();
+			if (cp != null && Status.isActiveStatus(cp.getActivityStatus())) {
+				result.cpId = cp.getId();
+				result.cpShortTitle = cp.getShortTitle();
+			} else if (cp != null) {
+				result.eligible = false;
+			}
+
+			Site site = subjectRole.getSite();
+			if (site != null && Status.isActiveStatus(site.getActivityStatus())) {
+				result.siteId = site.getId();
+				result.siteName = site.getName();
+			} else if (site != null) {
+				result.eligible = false;
+			}
+
+			return result;
+		}
 	}
 }
