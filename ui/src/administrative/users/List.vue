@@ -458,9 +458,10 @@ export default {
 
     exportOpts: function() {
       return [
-        { icon: 'user', caption: this.$t('users.list'),       onSelect: () => this.exportRecords('user') },
-        { icon: 'lock', caption: this.$t('users.user_roles'), onSelect: () => this.exportRecords('userRoles') },
-        { icon: 'copy', caption: this.$t('users.user_forms'), onSelect: () => this.exportForms() }
+        { icon: 'user', caption: this.$t('users.list'),                onSelect: () => this.exportRecords('user') },
+        { icon: 'lock', caption: this.$t('users.user_roles'),          onSelect: () => this.exportRecords('userRoles') },
+        { icon: 'lock', caption: this.$t('users.user_roles_detailed'), onSelect: () => this.exportRecords('userRolesDetailed') },
+        { icon: 'copy', caption: this.$t('users.user_forms'),          onSelect: () => this.exportForms() }
       ]
     },
 

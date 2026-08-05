@@ -16,10 +16,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSiteSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
@@ -169,6 +171,45 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 		}
 
 		return query.add(siteCond).list();
+	}
+
+	@Override
+	public List<CollectionProtocolSiteSummary> getActiveSiteCps(Long instituteId, Long siteId, Long cpId, Long lastId, int maxResults) {
+		Criteria<Object[]> query = createCriteria(CollectionProtocolSite.class, Object[].class, "cpSite")
+			.join("cpSite.collectionProtocol", "cp")
+			.join("cpSite.site", "site")
+			.select("cpSite.id", "cp.id", "cp.shortTitle", "site.id", "site.name");
+
+		query.add(query.eq("cp.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
+			.add(query.eq("site.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
+			.add(query.gt("cpSite.id", lastId != null ? lastId : 0L))
+			.addOrder(query.asc("cpSite.id"));
+
+		if (instituteId != null) {
+			query.join("site.institute", "institute")
+				.add(query.eq("institute.id", instituteId));
+		}
+
+		if (siteId != null) {
+			query.add(query.eq("site.id", siteId));
+		}
+
+		if (cpId != null) {
+			query.add(query.eq("cp.id", cpId));
+		}
+
+		List<CollectionProtocolSiteSummary> result = new ArrayList<>();
+		for (Object[] row : query.list(0, maxResults)) {
+			CollectionProtocolSiteSummary siteCp = new CollectionProtocolSiteSummary();
+			siteCp.setId((Long) row[0]);
+			siteCp.setCpId((Long) row[1]);
+			siteCp.setCpShortTitle((String) row[2]);
+			siteCp.setSiteId((Long) row[3]);
+			siteCp.setSiteName((String) row[4]);
+			result.add(siteCp);
+		}
+
+		return result;
 	}
 
 	@Override
