@@ -91,6 +91,15 @@ class Util {
     );
   }
 
+  getObjects(cache, apiFn, params) {
+    const key = this.queryString(params);
+    if (!cache[key]) {
+      cache[key] = apiFn(params);
+    }
+
+    return cache[key];
+  }
+
   queryParams(form, ls) {
     const params = {};
 

@@ -95,7 +95,7 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 	}
 
 	@Override
-	public void getProps(Map<String, Object> props) {
+	protected void getLookupProps(Map<String, Object> props) {
 		props.put("apiUrl", "rest/ng/permissible-values");
 		props.put("dataType", getDataType());
 		props.put("attribute", attribute);
@@ -109,6 +109,7 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 	public void serializeToXml(Writer writer, Properties props) {
 		XmlUtil.writeElementStart(writer, "pvField");
 		super.serializeToXml(writer, props);
+		serializeLookupProps(writer);
 		XmlUtil.writeElement(writer, "attribute", attribute);
 		XmlUtil.writeElement(writer, "leafValue", leafNode);
 		XmlUtil.writeElement(writer, "rootValue", rootNode);

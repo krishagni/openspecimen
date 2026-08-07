@@ -24,7 +24,7 @@ public class UserControl extends AbstractLookupControl {
 	}
 
 	@Override
-	public void getProps(Map<String, Object> props) {
+	protected void getLookupProps(Map<String, Object> props) {
 		props.put("apiUrl", "rest/ng/users");
 		props.put("dataType", getDataType());
 	}

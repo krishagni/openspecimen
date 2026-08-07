@@ -59,6 +59,8 @@ export default {
         return this.$filters.boolValue(this.field.value);
       } else if (this.field.type == 'textArea' || this.field.type == 'stringTextField') {
         return util.linkify(this.field.displayValue || this.field.value);
+      } else if (this.field.displayValue instanceof Array) {
+        return this.$filters.arrayJoin(this.field.displayValue);
       } else if (this.field.displayValue) {
         return this.field.displayValue;
       } else if (this.field.value instanceof Array) {

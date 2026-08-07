@@ -45,6 +45,9 @@ public class SitesController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<SiteSummary> getSites(
+			@RequestParam(value = "id", required = false)
+			List<Long> ids,
+
 			@RequestParam(value = "name", required= false)
 			List<String> names,
 			
@@ -79,6 +82,7 @@ public class SitesController {
 			boolean includeStats) {
 		
 		SiteListCriteria crit = new SiteListCriteria()
+			.ids(ids)
 			.query(names != null && names.size() == 1 ? names.get(0) : null)
 			.names(names != null && names.size() > 1 ? names : null)
 			.exactMatch(exactMatch)
@@ -86,7 +90,7 @@ public class SitesController {
 			.operation(operation)
 			.institute(institute)
 			.startAt(startAt)
-			.maxResults(maxResults)
+			.maxResults(ids != null && !ids.isEmpty() ? ids.size() : maxResults)
 			.listAll(listAll)
 			.includeTypes(includeTypes)
 			.excludeTypes(excludeTypes)

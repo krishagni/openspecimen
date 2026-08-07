@@ -219,7 +219,7 @@ class FormUtil {
 
               if (fieldSchema.defaultValue) {
                 dvRec[field.name] = fieldSchema.defaultValue;
-              } else if (fieldSchema.type == 'user') {
+              } else if (fieldSchema.type == 'user' && !fieldSchema.multiple) {
                 dvRec[field.name] = 'current_user';
               }
             }

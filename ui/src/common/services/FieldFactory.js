@@ -206,18 +206,22 @@ class FieldFactory {
     } else if (field.type == 'userField') {
       fs.type = 'user';
       fs.selectProp = 'id';
-      fs.defaultValue = 'current_user';
+      fs.multiple = field.multiple == true;
+      fs.defaultValue = fs.multiple ? null : 'current_user';
     } else if (field.type == 'pvField') {
       fs.type = 'pv';
       fs.selectProp = 'value';
       fs.attribute = field.attribute;
       fs.leafValue = field.leafValue;
+      fs.multiple = field.multiple == true;
     } else if (field.type == 'siteField') {
       fs.type = 'site';
       fs.selectProp = 'id';
+      fs.multiple = field.multiple == true;
     } else if (field.type == 'storageContainer') {
       fs.type = 'storageContainer';
       fs.selectProp = 'id';
+      fs.multiple = field.multiple == true;
     } else if (field.type == 'subForm') {
       fs.type = 'subform';
       let fields = fs.fields = [];

@@ -1,6 +1,14 @@
 <template>
   <div v-if="!preview">
-    <CommonFieldProps :field="fm" />
+    <CommonFieldProps :field="fm">
+      <div class="p-fluid p-grid">
+        <div class="p-field p-col-12">
+          <label> Allow Multiple Values </label><br />
+          <InputSwitch v-model="fm.multiple" :disabled="fm.$saved" /> <br />
+          <small v-if="fm.$saved"> This setting cannot be changed after creation. </small>
+        </div>
+      </div>
+    </CommonFieldProps>
   </div>
   <div class="p-fluid p-grid" v-else>
     <div class="p-field p-col-12">
@@ -10,6 +18,7 @@
         field="formattedName"
         :suggestions="users"
         :dropdown="true"
+        :multiple="fm.multiple"
         @complete="searchUser($event)"
         appendTo="body"
         v-tooltip.bottom="fm.toolTip"
@@ -27,6 +36,7 @@
 <script>
 import { reactive, ref } from "vue";
 import AutoComplete from "primevue/autocomplete";
+import InputSwitch from "primevue/inputswitch";
 import CommonFieldProps from "./CommonFieldProps.vue";
 
 import http from "@/common/services/HttpClient.js";
@@ -37,6 +47,7 @@ export default {
   components: {
     CommonFieldProps,
     AutoComplete,
+    InputSwitch,
   },
 
   props: {
@@ -87,4 +98,3 @@ export default {
   },
 };
 </script>
-

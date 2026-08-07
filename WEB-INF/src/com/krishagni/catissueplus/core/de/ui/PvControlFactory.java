@@ -32,8 +32,7 @@ public class PvControlFactory extends AbstractLookupControlFactory {
 
 	@Override
 	public Control parseControl(Map<String, Object> props, int row, int xPos) {
-		PvControl ctrl = new PvControl();
-		super.setControlProps(ctrl, props, row, xPos);
+		PvControl ctrl = (PvControl) super.parseControl(props, row, xPos);
 		ctrl.setAttribute((String) props.get("attribute"));
 		ctrl.setLeafNode(getBool(props, "leafValue"));
 		ctrl.setRootNode(getBool(props, "rootValue"));

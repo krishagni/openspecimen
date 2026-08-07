@@ -72,6 +72,9 @@ public class StorageContainersController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<StorageContainerSummary> getStorageContainers(
+		@RequestParam(value = "id", required = false)
+		List<Long> ids,
+
 		@RequestParam(value = "name", required = false)
 		String name,
 
@@ -136,6 +139,7 @@ public class StorageContainersController {
 		MultiValueMap<String, String> queryParams) {
 		
 		StorageContainerListCriteria crit = new StorageContainerListCriteria()
+			.ids(ids)
 			.query(name)
 			.names(names)
 			.barcodes(barcodes)
@@ -143,7 +147,7 @@ public class StorageContainersController {
 			.canHold(canHold)
 			.onlyFreeContainers(onlyFreeContainers)
 			.startAt(startAt)
-			.maxResults(maxResults)
+			.maxResults(ids != null && !ids.isEmpty() ? ids.size() : maxResults)
 			.parentContainerId(parentContainerId)
 			.includeChildren(includeChildren)
 			.topLevelContainers(topLevelContainers)

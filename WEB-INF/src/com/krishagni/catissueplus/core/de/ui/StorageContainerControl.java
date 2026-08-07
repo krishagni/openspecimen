@@ -19,7 +19,7 @@ public class StorageContainerControl extends AbstractLookupControl {
 	}
 
 	@Override
-	public void getProps(Map<String, Object> props) {
+	protected void getLookupProps(Map<String, Object> props) {
 		props.put("apiUrl", "rest/ng/storage-containers");
 		props.put("dataType", getDataType());
 	}

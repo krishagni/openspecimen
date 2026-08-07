@@ -31,6 +31,7 @@ import edu.common.dynamicextensions.domain.nui.DatePicker;
 import edu.common.dynamicextensions.domain.nui.FileUploadControl;
 import edu.common.dynamicextensions.domain.nui.Label;
 import edu.common.dynamicextensions.domain.nui.LinkControl;
+import edu.common.dynamicextensions.domain.nui.LookupControl;
 import edu.common.dynamicextensions.domain.nui.MultiSelectControl;
 import edu.common.dynamicextensions.domain.nui.PageBreak;
 import edu.common.dynamicextensions.domain.nui.SignatureControl;
@@ -165,7 +166,7 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 		Field field = getField(
 			useUdn ? ctrl.getUserDefinedName() : ctrl.getName() ,
 			ctrl.getCaption(),
-			ctrl instanceof MultiSelectControl);
+			ctrl instanceof MultiSelectControl || (ctrl instanceof LookupControl luCtrl && luCtrl.isMultiValued()));
 
 		if (ctrl.getDataType() == DataType.DATE) {
 			if (((DatePicker)ctrl).getFormat().contains("HH:mm")) {

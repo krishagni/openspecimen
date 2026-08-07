@@ -35,6 +35,10 @@ export default {
           cache = cache['site-dropdown'] = cache['site-dropdown'] || {};
 
           const selectProp = this.selectProp || (this.listSource && this.listSource.selectProp);
+          if (selectProp == 'id' && opts.id instanceof Array) {
+            return await util.getObjects(cache, params => http.get('sites', params), {id: opts.id});
+          }
+
           if (selectProp == 'id' && (opts.name || opts.name == 0)) {
             const id = parseInt(opts.name);
             if (!isNaN(id)) {
@@ -62,15 +66,10 @@ export default {
             params.listAll = true;
           }
 
-          const qs = util.queryString(params);
-          let promise = cache[qs];
-          if (!promise) {
-            promise = cache[qs] = http.get('sites', params);
-          }
-
-          return promise.then(sites => sites);
+          return await util.getObjects(cache, params => http.get('sites', params), params);
         },
         selectProp: this.selectProp || (this.listSource && this.listSource.selectProp),
+        valueProp: (this.selectProp || (this.listSource && this.listSource.selectProp)) == 'id' ? 'id' : undefined,
         displayProp: 'name',
         searchProp: 'name',
         idProp: this.listSource && this.listSource.idProp
@@ -81,6 +80,14 @@ export default {
   computed: {
     inputValue: {
       get() {
+        if (this.multiple) {
+          if (this.ddListSource.selectProp == 'id' && this.modelValue instanceof Array) {
+            return this.modelValue.map(value => value != null && !isNaN(value) ? +value : value);
+          }
+
+          return this.modelValue;
+        }
+
         if (this.ddListSource.selectProp != 'name' && this.modelValue != null && !isNaN(this.modelValue)) {
           return +this.modelValue;
         }

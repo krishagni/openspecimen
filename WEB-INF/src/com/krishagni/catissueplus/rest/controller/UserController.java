@@ -65,6 +65,9 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<UserSummary> getUsers(
+		@RequestParam(value = "id", required = false)
+		List<Long> ids,
+
 		@RequestParam(value = "start", required = false, defaultValue = "0")
 		int start,
 
@@ -127,8 +130,9 @@ public class UserController {
 		boolean includeSysUser) {
 		
 		UserListCriteria crit = new UserListCriteria()
+			.ids(ids)
 			.startAt(start)
-			.maxResults(maxResults)
+			.maxResults(ids != null && !ids.isEmpty() ? ids.size() : maxResults)
 			.query(searchString)
 			.name(name)
 			.loginName(loginName)
