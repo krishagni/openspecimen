@@ -10,6 +10,14 @@
         </div>
 
         <div class="p-field p-col-4">
+          <label> Allow Multiple Values </label>
+          <br />
+          <InputSwitch v-model="fm.multiple" :disabled="fm.$saved" />
+          <br />
+          <small v-if="fm.$saved"> This setting cannot be changed after creation. </small>
+        </div>
+
+        <div class="p-field p-col-4">
           <label> Only Leaf Values </label>
           <br />
           <InputSwitch v-model="fm.leafValue" />
@@ -32,6 +40,7 @@
         field="value"
         :suggestions="pvs"
         :dropdown="true"
+        :multiple="fm.multiple"
         @complete="searchPv($event)"
         appendTo="body"
         v-tooltip.bottom="fm.toolTip"
@@ -115,4 +124,3 @@ export default {
   },
 };
 </script>
-

@@ -23,6 +23,8 @@ public class FormFieldSummary {
 	private Map<String, Object> lookupProps;
 
 	private Boolean flatten;
+
+	private Boolean multiple;
 	
 	public String getName() {
 		return name;
@@ -83,5 +85,13 @@ public class FormFieldSummary {
 
 	public void setFlatten(boolean flatten) {
 		this.flatten = flatten;
+	}
+
+	public Boolean getMultiple() {
+		return multiple;
+	}
+
+	public void setMultiple(boolean multiple) {
+		this.multiple = multiple;
 	}
 }

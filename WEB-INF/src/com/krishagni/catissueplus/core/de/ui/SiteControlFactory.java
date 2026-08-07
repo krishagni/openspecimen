@@ -1,14 +1,9 @@
 package com.krishagni.catissueplus.core.de.ui;
 
-import java.util.Map;
-import java.util.Properties;
-
-import org.w3c.dom.Element;
-
 import edu.common.dynamicextensions.domain.nui.Control;
-import edu.common.dynamicextensions.domain.nui.factory.AbstractControlFactory;
+import edu.common.dynamicextensions.domain.nui.factory.AbstractLookupControlFactory;
 
-public class SiteControlFactory extends AbstractControlFactory {
+public class SiteControlFactory extends AbstractLookupControlFactory {
 	public static SiteControlFactory getInstance() {
 		return new SiteControlFactory();
 	}
@@ -18,17 +13,7 @@ public class SiteControlFactory extends AbstractControlFactory {
 		return "siteField";
 	}
 
-	@Override
-	public Control parseControl(Element ele, int row, int xPos, Properties props) {
-		SiteControl ctrl = new SiteControl();
-		super.setControlProps(ctrl, ele, row, xPos);
-		return ctrl;
-	}
-
-	@Override
-	public Control parseControl(Map<String, Object> props, int row, int xPos) {
-		SiteControl ctrl = new SiteControl();
-		super.setControlProps(ctrl, props, row, xPos);
-		return ctrl;
+	protected Control createControl() {
+		return new SiteControl();
 	}
 }

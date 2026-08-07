@@ -34,6 +34,10 @@ export default {
           cache = cache['user-dropdown'] = cache['user-dropdown'] || {};
 
           opts = opts || {maxResults: 100};
+          if (opts.id instanceof Array) {
+            return await util.getObjects(cache, params => http.get('users', params), {id: opts.id});
+          }
+
           if (opts.value || opts.value == 0) {
             let id = parseInt(opts.value);
             if (!isNaN(id)) {
@@ -61,15 +65,10 @@ export default {
             params.listAll = true;
           }
 
-          const qs = util.queryString(params);
-          let promise = cache[qs];
-          if (!promise) {
-            promise = cache[qs] = http.get('users', params);
-          }
-
-          return promise.then(users => users);
+          return await util.getObjects(cache, params => http.get('users', params), params);
         },
         selectProp: this.selectProp || (this.listSource && this.listSource.selectProp),
+        valueProp: (this.selectProp || (this.listSource && this.listSource.selectProp)) == 'id' ? 'id' : undefined,
         altSelectProp: 'emailAddress',
         displayProp: (user) => user.firstName + ' ' + user.lastName
       }
@@ -79,6 +78,15 @@ export default {
   computed: {
     inputValue: {
       get() {
+        if (this.multiple) {
+          const selectProp = this.selectProp || (this.listSource && this.listSource.selectProp);
+          if (selectProp == 'id' && this.modelValue instanceof Array) {
+            return this.modelValue.map(value => value != null && !isNaN(value) ? +value : value);
+          }
+
+          return this.modelValue;
+        }
+
         if (this.modelValue != null && !isNaN(this.modelValue)) {
           return +this.modelValue;
         } else if (this.modelValue == 'current_user') {

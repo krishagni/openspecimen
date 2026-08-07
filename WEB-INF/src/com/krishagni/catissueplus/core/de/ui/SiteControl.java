@@ -21,7 +21,7 @@ public class SiteControl extends AbstractLookupControl {
 	}
 
 	@Override
-	public void getProps(Map<String, Object> props) {
+	protected void getLookupProps(Map<String, Object> props) {
 		props.put("apiUrl", "rest/ng/sites");
 		props.put("dataType", getDataType());
 	}

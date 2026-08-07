@@ -1805,18 +1805,17 @@ public class FormServiceImpl implements FormService, InitializingBean {
             } else if (!(control instanceof Label || control instanceof PageBreak)) {
             	DataType dataType = getType(control);
             	field.setType(dataType.name());
-            	                
-            	if (control instanceof SelectControl) {
-            		SelectControl selectCtrl = (SelectControl)control;
+
+				if (control instanceof SelectControl selectCtrl) {
 					List<String> pvs = selectCtrl.getPvDataSource()
 						.getPermissibleValues(Calendar.getInstance().getTime(), 100)
 						.stream().map(PermissibleValue::getValue)
 						.collect(Collectors.toList());
-            		field.setPvs(pvs);
-            	} else if (control instanceof LookupControl) {
-            		LookupControl luCtrl = (LookupControl)control;
-            		field.setLookupProps(luCtrl.getPvSourceProps());
-            	}
+					field.setPvs(pvs);
+				} else if (control instanceof LookupControl luCtrl) {
+					field.setLookupProps(luCtrl.getPvSourceProps());
+					field.setMultiple(luCtrl.isMultiValued());
+				}
             	
             	fields.add(field);
             }

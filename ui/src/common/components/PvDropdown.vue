@@ -63,12 +63,7 @@ export default {
             }
           }
 
-          let key = util.queryString(queryParams);
-          if (!cache[key]) {
-            cache[key] = http.get('permissible-values/v', queryParams);
-          }
-
-          return await cache[key];
+          return await util.getObjects(cache, params => http.get('permissible-values/v', params), queryParams);
         },
         selectProp: this.selectProp || 'id',
         displayProp: (pv) => {
