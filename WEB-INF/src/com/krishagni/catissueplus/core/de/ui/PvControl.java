@@ -30,6 +30,16 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 
 	private boolean hasNumericValues;
 
+	//
+	// Form-scoped PV export/import metadata. These fields are written to the form XML during export
+	// and populated by PvControlFactory during import. The form file processor uses the caption to
+	// create a new form-scoped PV attribute and the options file to import its PVs. It then clears
+	// both fields after associating the control with the newly created attribute.
+	//
+	private String formPvCaption;
+
+	private String formPvOptionsFile;
+
 	public String getAttribute() {
 		return attribute;
 	}
@@ -68,6 +78,26 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 
 	public void setHasNumericValues(boolean hasNumericValues) {
 		this.hasNumericValues = hasNumericValues;
+	}
+
+	public String getFormPvCaption() {
+		return formPvCaption;
+	}
+
+	public void setFormPvCaption(String formPvCaption) {
+		this.formPvCaption = formPvCaption;
+	}
+
+	public String getFormPvOptionsFile() {
+		return formPvOptionsFile;
+	}
+
+	public void setFormPvOptionsFile(String formPvOptionsFile) {
+		this.formPvOptionsFile = formPvOptionsFile;
+	}
+
+	public static String getFormPvOptionsFile(String attribute) {
+		return FORM_PV_FILE_PREFIX + attribute + ".csv";
 	}
 
 	@Override
@@ -115,6 +145,7 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 		XmlUtil.writeElement(writer, "rootValue", rootNode);
 		XmlUtil.writeElement(writer, "numericValues", hasNumericValues);
 		XmlUtil.writeCDataElement(writer, "defaultValue", defaultValue);
+		serializeFormPv(writer);
 		XmlUtil.writeElementEnd(writer, "pvField");
 	}
 
@@ -162,6 +193,24 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 		);
 	}
 
+	private void serializeFormPv(Writer writer) {
+		String caption = JdbcDaoFactory.getJdbcDao().getResultSet(
+			GET_FORM_PV_CAPTION,
+			Arrays.asList(attribute),
+			(rs) -> rs.next() ? rs.getString(1) : null
+		);
+
+		if (StringUtils.isBlank(caption)) {
+			return;
+		}
+
+		String optionsFile = getFormPvOptionsFile(attribute);
+		XmlUtil.writeElementStart(writer, "formPv");
+		XmlUtil.writeCDataElement(writer, "caption", caption);
+		XmlUtil.writeElement(writer, "optionsFile", optionsFile);
+		XmlUtil.writeElementEnd(writer, "formPv");
+	}
+
 	private static final String PV_TABLE = "CATISSUE_PERMISSIBLE_VALUE";
 
 	private static final String VALUE_COLUMN = "VALUE";
@@ -170,6 +219,8 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 
 	private static final String CONCEPT_CODE = "CONCEPT_CODE";
 
+	private static final String FORM_PV_FILE_PREFIX = "form_pv_";
+
 	private static final String GET_ID_BY_VALUE =
 		"select " +
 		"  identifier " +
@@ -177,4 +228,14 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 		"  catissue_permissible_value pv " +
 		"where " +
 		"  pv.public_id = ? and (pv.value = ? or pv.concept_code = ?)";
+
+	private static final String GET_FORM_PV_CAPTION =
+		"select " +
+		"  long_name " +
+		"from " +
+		"  catissue_cde " +
+		"where " +
+		"  public_id = ? and " +
+		"  form_id is not null and " +
+		"  deleted_on is null";
 }

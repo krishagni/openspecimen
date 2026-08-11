@@ -120,4 +120,8 @@
       <column name="groupWorkflowsInherited_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Widen permissible value public ID">
+    <modifyDataType tableName="CATISSUE_PERMISSIBLE_VALUE_AUD" columnName="PUBLIC_ID" newDataType="${text.type}(128)" />
+  </changeSet>
 </databaseChangeLog>

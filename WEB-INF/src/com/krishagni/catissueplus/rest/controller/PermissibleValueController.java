@@ -7,20 +7,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.krishagni.catissueplus.core.administrative.events.ListPvAttributesCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ListPvCriteria;
+import com.krishagni.catissueplus.core.administrative.events.PermissibleValueDetails;
+import com.krishagni.catissueplus.core.administrative.events.PvAttributeDetail;
 import com.krishagni.catissueplus.core.administrative.events.PvDetail;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -28,6 +30,8 @@ import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.PermissibleValueService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/permissible-values")
@@ -38,6 +42,126 @@ public class PermissibleValueController {
 
 	@Autowired
 	private HttpServletRequest httpServletRequest;
+
+	@RequestMapping(method = RequestMethod.GET, value = "/attributes")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public List<PvAttributeDetail> getAttributes(
+		@RequestParam(value = "name", required = false)
+		String name,
+
+		@RequestParam(value = "attribute", required = false)
+		String attribute,
+
+		@RequestParam(value = "pv", required = false)
+		String pv,
+
+		@RequestParam(value = "formId", required = false)
+		Long formId,
+
+		@RequestParam(value = "formScoped", required = false)
+		Boolean formScoped,
+
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
+		int maxResults) {
+
+		ListPvAttributesCriteria criteria = new ListPvAttributesCriteria()
+			.query(name)
+			.attribute(attribute)
+			.pv(pv)
+			.formId(formId)
+			.formScoped(formScoped)
+			.startAt(startAt)
+			.maxResults(maxResults);
+		return ResponseEvent.unwrap(pvSvc.getAttributes(RequestEvent.wrap(criteria)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/attributes/count")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public Map<String, Long> getAttributesCount(
+		@RequestParam(value = "name", required = false)
+		String name,
+
+		@RequestParam(value = "attribute", required = false)
+		String attribute,
+
+		@RequestParam(value = "pv", required = false)
+		String pv,
+
+		@RequestParam(value = "formId", required = false)
+		Long formId,
+
+		@RequestParam(value = "formScoped", required = false)
+		Boolean formScoped) {
+
+		ListPvAttributesCriteria criteria = new ListPvAttributesCriteria()
+			.query(name)
+			.attribute(attribute)
+			.pv(pv)
+			.formId(formId)
+			.formScoped(formScoped);
+		Long count = ResponseEvent.unwrap(pvSvc.getAttributesCount(RequestEvent.wrap(criteria)));
+		return Collections.singletonMap("count", count);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/attributes")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public PvAttributeDetail createAttribute(@RequestBody PvAttributeDetail detail) {
+		return ResponseEvent.unwrap(pvSvc.createAttribute(RequestEvent.wrap(detail)));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/attributes/{attrId}/promote")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public PvAttributeDetail promoteAttribute(
+		@PathVariable("attrId")
+		String attrId,
+
+		@RequestBody
+		PvAttributeDetail detail) {
+
+		detail.setSourceAttribute(attrId);
+		return ResponseEvent.unwrap(pvSvc.promoteAttribute(RequestEvent.wrap(detail)));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/attributes/promote")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public List<PvAttributeDetail> promoteAttributes(@RequestBody List<PvAttributeDetail> details) {
+		return ResponseEvent.unwrap(pvSvc.promoteAttributes(RequestEvent.wrap(details)));
+	}
+
+	@RequestMapping(method = RequestMethod.POST)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public PermissibleValueDetails createPermissibleValue(@RequestBody PermissibleValueDetails detail) {
+		return ResponseEvent.unwrap(pvSvc.createPermissibleValue(RequestEvent.wrap(detail)));
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public PermissibleValueDetails updatePermissibleValue(
+		@PathVariable("id")
+		Long id,
+
+		@RequestBody PermissibleValueDetails detail) {
+
+		detail.setId(id);
+		return ResponseEvent.unwrap(pvSvc.updatePermissibleValue(RequestEvent.wrap(detail)));
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public PermissibleValueDetails deletePermissibleValue(@PathVariable("id") Long id) {
+		return ResponseEvent.unwrap(pvSvc.deletePermissibleValue(RequestEvent.wrap(id)));
+	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody

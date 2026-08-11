@@ -500,4 +500,40 @@
       <column name="GROUP_WORKFLOWS_INHERITED" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Add form ID to PV attributes">
+    <addColumn tableName="CATISSUE_CDE">
+      <column name="FORM_ID" type="${int.type}" />
+      <column name="DELETED_ON" type="timestamp" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add PV attribute form foreign key">
+    <addForeignKeyConstraint constraintName="OS_CDE_FORM_FK" baseTableName="CATISSUE_CDE" baseColumnNames="FORM_ID"
+      referencedTableName="DYEXTN_CONTAINERS" referencedColumnNames="IDENTIFIER" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add PV attribute form index">
+    <createIndex tableName="CATISSUE_CDE" indexName="OS_CDE_FORM_IDX">
+      <column name="FORM_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop PV attribute foreign key before widening public ID">
+    <dropForeignKeyConstraint baseTableName="CATISSUE_PERMISSIBLE_VALUE" constraintName="FK57DDCE1FC56C2B1" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Widen PV attribute public ID">
+    <modifyDataType tableName="CATISSUE_CDE" columnName="PUBLIC_ID" newDataType="${text.type}(128)" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Widen permissible value public ID">
+    <modifyDataType tableName="CATISSUE_PERMISSIBLE_VALUE" columnName="PUBLIC_ID" newDataType="${text.type}(128)" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Recreate widened PV attribute foreign key">
+    <addForeignKeyConstraint constraintName="FK57DDCE1FC56C2B1"
+      baseTableName="CATISSUE_PERMISSIBLE_VALUE" baseColumnNames="PUBLIC_ID"
+      referencedTableName="CATISSUE_CDE" referencedColumnNames="PUBLIC_ID" />
+  </changeSet>
 </databaseChangeLog>

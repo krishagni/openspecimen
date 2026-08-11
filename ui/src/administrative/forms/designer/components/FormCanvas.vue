@@ -70,7 +70,8 @@
 
           <component
             :is="fieldMetadata(field)"
-            v-bind="{ field: field, preview: ctx.selectedCard != field }"
+            v-bind="{ field: field, preview: ctx.selectedCard != field, main: main, subForm: subForm }"
+            @save-requested="save()"
           />
 
           <div class="buttons">

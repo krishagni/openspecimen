@@ -32,6 +32,7 @@ import com.krishagni.catissueplus.core.de.events.ListEntityFormsOp;
 import com.krishagni.catissueplus.core.de.events.ListFormFields;
 import com.krishagni.catissueplus.core.de.events.MoveFormRecordsOp;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
+import com.krishagni.catissueplus.core.de.events.UpdateFormPvAttributesOp;
 
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.PermissibleValue;
@@ -54,7 +55,9 @@ public interface FormService {
 	public ResponseEvent<Boolean> deleteForms(RequestEvent<BulkDeleteEntityOp> req);
 	
 	public ResponseEvent<List<FormFieldSummary>> getFormFields(RequestEvent<ListFormFields> req);
-	
+
+	ResponseEvent<Boolean> updatePvAttributes(RequestEvent<UpdateFormPvAttributesOp> req);
+
 	public ResponseEvent<List<FormContextDetail>> getFormContexts(RequestEvent<Long> req);
 	
 	public ResponseEvent<List<FormContextDetail>> addFormContexts(RequestEvent<List<FormContextDetail>> req);

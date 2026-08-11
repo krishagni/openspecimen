@@ -947,6 +947,13 @@
 
   <bean id="permissibleValueSvc" class="com.krishagni.catissueplus.core.common.service.impl.PermissibleValueServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="cfgSvc" ref="cfgSvc"/>
+    <property name="formSvc" ref="formSvc"/>
+  </bean>
+
+  <bean id="formScopedPvFileProcessor" class="com.krishagni.catissueplus.core.de.services.impl.FormScopedPvFileProcessor">
+    <property name="daoFactory" ref="biospecimenDaoFactory" />
+    <property name="pvSvc" ref="permissibleValueSvc" />
   </bean>
   
   <bean id="commonSvc" class="com.krishagni.catissueplus.core.common.service.impl.CommonServiceImpl">

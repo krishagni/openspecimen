@@ -59,6 +59,7 @@ import com.krishagni.catissueplus.core.de.events.MoveFormRecordsOp;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp.RemoveType;
 import com.krishagni.catissueplus.core.de.services.FormService;
+import com.krishagni.catissueplus.core.de.services.FormDefinitionFileProcessors;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.catissueplus.core.importer.services.ImportService;
 
@@ -733,6 +734,7 @@ public class FormsController {
 		try {
 			FormDefinitionExporter formExporter = new FormDefinitionExporter();
 			formExporter.export(form, tmpDir);
+			FormDefinitionFileProcessors.getInstance().exportForm(form, tmpDir);
 
 			String fileName = form.getName() + ".zip";
 			zipFileName = zipFiles(tmpDir);
