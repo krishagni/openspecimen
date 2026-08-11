@@ -3,13 +3,17 @@ package com.krishagni.catissueplus.core.administrative.repository.impl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
+import com.krishagni.catissueplus.core.administrative.domain.PvAttribute;
+import com.krishagni.catissueplus.core.administrative.events.ListPvAttributesCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ListPvCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.PermissibleValueDao;
 import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
@@ -20,6 +24,83 @@ import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> implements PermissibleValueDao {
+	@Override
+	public PvAttribute getAttribute(String name) {
+		Criteria<PvAttribute> query = createCriteria(PvAttribute.class, "attr");
+		return query.add(query.eq("attr.publicId", name)).uniqueResult();
+	}
+
+	@Override
+	public List<PvAttribute> getAttributes(ListPvAttributesCriteria criteria) {
+		Criteria<PvAttribute> query = getAttributesQuery(criteria);
+		return query.addOrder(query.asc("attr.longName")).list(criteria.startAt(), criteria.maxResults());
+	}
+
+	@Override
+	public Long getAttributesCount(ListPvAttributesCriteria criteria) {
+		return getAttributesQuery(criteria).getCount("attr.publicId");
+	}
+
+	@Override
+	public List<PvAttribute> getFormAttributes(Long formId) {
+		Criteria<PvAttribute> query = createCriteria(PvAttribute.class, "attr");
+		return query.add(query.eq("attr.formId", formId))
+			.add(query.isNull("attr.deletedOn"))
+			.addOrder(query.asc("attr.publicId"))
+			.list();
+	}
+
+	@Override
+	public void saveAttribute(PvAttribute attribute) {
+		getCurrentSession().persist(attribute);
+	}
+
+	@Override
+	public PvAttribute promoteAttribute(String oldName, String newName, String caption) {
+		getCurrentSession().flush();
+		int inserted = createNativeQuery(INSERT_PROMOTED_ATTRIBUTE_SQL)
+			.setParameter("newName", newName)
+			.setParameter("caption", caption)
+			.setParameter("oldName", oldName)
+			.executeUpdate();
+		if (inserted != 1) {
+			throw new IllegalStateException("Unable to promote PV attribute: " + oldName);
+		}
+
+		createNativeQuery(UPDATE_PROMOTED_ATTRIBUTE_PVS_SQL)
+			.setParameter("newName", newName)
+			.setParameter("oldName", oldName)
+			.executeUpdate();
+
+		createNativeQuery(DELETE_FORM_ATTRIBUTE_SQL)
+			.setParameter("oldName", oldName)
+			.executeUpdate();
+
+		getCurrentSession().clear();
+		return getAttribute(newName);
+	}
+
+	@Override
+	public void deleteFormAttributes(Long formId) {
+		createNativeQuery(CLOSE_FORM_ATTRIBUTE_PVS_SQL)
+			.setParameter("formId", formId)
+			.executeUpdate();
+
+		createNativeQuery(DELETE_FORM_ATTRIBUTES_SQL)
+			.setParameter("formId", formId)
+			.executeUpdate();
+	}
+
+	@Override
+	public List<PermissibleValue> getPvs(String attribute, Long lastId, int maxResults) {
+		Criteria<PermissibleValue> query = createCriteria(PermissibleValue.class, "pv");
+		query.add(query.eq("pv.attribute", attribute));
+		if (lastId != null) {
+			query.add(query.gt("pv.id", lastId));
+		}
+
+		return query.addOrder(query.asc("pv.id")).list(0, maxResults);
+	}
 
 	@Override
 	public Class<PermissibleValue> getType() {
@@ -39,6 +120,25 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	@Override
 	public Long getPvsCount(ListPvCriteria crit) {
 		return getPvQuery(crit).getCount("pv.id");
+	}
+
+	@Override
+	public Map<String, Long> getPvCounts(Collection<String> attributes) {
+		Map<String, Long> result = new LinkedHashMap<>();
+		if (CollectionUtils.isEmpty(attributes)) {
+			return result;
+		}
+
+		List<Object> rows = createNativeQuery(GET_PV_COUNTS_SQL)
+			.setParameterList("attributes", attributes)
+			.list();
+
+		for (Object rowObj : rows) {
+			Object[] row = (Object[]) rowObj;
+			result.put(((String) row[0]).toLowerCase(Locale.ROOT), ((Number) row[1]).longValue());
+		}
+
+		return result;
 	}
 
 	@Override
@@ -200,6 +300,40 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 		return count.intValue() == values.size();
 	}
 	
+	private Criteria<PvAttribute> getAttributesQuery(ListPvAttributesCriteria criteria) {
+		Criteria<PvAttribute> query = createCriteria(PvAttribute.class, "attr");
+		query.add(query.isNull("attr.deletedOn"));
+
+		if (Boolean.TRUE.equals(criteria.formScoped())) {
+			query.add(query.isNotNull("attr.formId"));
+		} else if (criteria.formId() != null) {
+			query.add(
+				query.or(
+					query.isNull("attr.formId"),
+					query.eq("attr.formId", criteria.formId())
+				)
+			);
+		} else {
+			query.add(query.isNull("attr.formId"));
+		}
+
+		if (StringUtils.isNotBlank(criteria.query())) {
+			query.add(isMySQL() ? query.like("attr.longName", criteria.query()) : query.ilike("attr.longName", criteria.query()));
+		}
+
+		if (StringUtils.isNotBlank(criteria.attribute())) {
+			query.add(isMySQL() ? query.like("attr.publicId", criteria.attribute()) : query.ilike("attr.publicId", criteria.attribute()));
+		}
+
+		if (StringUtils.isNotBlank(criteria.pv())) {
+			SubQuery<String> sq = query.createSubQuery(PermissibleValue.class, String.class, "pv");
+			sq.add(sq.eq("pv.value", criteria.pv())).select("pv.attribute");
+			query.add(query.in("attr.publicId", sq));
+		}
+
+		return query;
+	}
+
 	private Criteria<PermissibleValue> getPvQuery(ListPvCriteria crit) {
 		Criteria<PermissibleValue> query = createCriteria(PermissibleValue.class, "pv");
 		if (crit.values() != null) {
@@ -279,4 +413,56 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	private static final String GET_SPECIMEN_TYPES = FQN + ".getSpecimenTypes";
 
 	private static final String GET_SPECIMEN_CLASS = FQN + ".getSpecimenClass";
+
+	private static final String INSERT_PROMOTED_ATTRIBUTE_SQL =
+		"insert into catissue_cde " +
+		"  (public_id, long_name, definition, version, last_updated, form_id, deleted_on) " +
+		"select " +
+		"  :newName, :caption, :caption, version, last_updated, null, null " +
+		"from " +
+		"  catissue_cde " +
+		"where " +
+		"  public_id = :oldName";
+
+	private static final String UPDATE_PROMOTED_ATTRIBUTE_PVS_SQL =
+		"update catissue_permissible_value set public_id = :newName where public_id = :oldName";
+
+	private static final String DELETE_FORM_ATTRIBUTE_SQL =
+		"delete from catissue_cde where public_id = :oldName";
+
+	private static final String CLOSE_FORM_ATTRIBUTE_PVS_SQL =
+		"update " +
+		"  catissue_permissible_value " +
+		"set " +
+		"  activity_status = 'Closed' " +
+		"where " +
+		"  public_id in (" +
+		"    select " +
+		"      public_id " +
+		"    from " +
+		"      catissue_cde " +
+		"    where " +
+		"      form_id = :formId and " +
+		"      deleted_on is null" +
+		"  )";
+
+	private static final String DELETE_FORM_ATTRIBUTES_SQL =
+		"update " +
+		"  catissue_cde " +
+		"set " +
+		"  deleted_on = current_timestamp " +
+		"where " +
+		"  form_id = :formId and " +
+		"  deleted_on is null";
+
+	private static final String GET_PV_COUNTS_SQL =
+		"select " +
+		"  public_id, count(*) " +
+		"from " +
+		"  catissue_permissible_value " +
+		"where " +
+		"  activity_status = 'Active' and " +
+		"  public_id in (:attributes) " +
+		"group by " +
+		"  public_id";
 }

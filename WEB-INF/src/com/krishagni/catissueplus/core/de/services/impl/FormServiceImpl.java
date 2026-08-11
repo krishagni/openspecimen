@@ -95,10 +95,13 @@ import com.krishagni.catissueplus.core.de.events.ListFormFields;
 import com.krishagni.catissueplus.core.de.events.MoveFormRecordsOp;
 import com.krishagni.catissueplus.core.de.events.ObjectCpDetail;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
+import com.krishagni.catissueplus.core.de.events.UpdateFormPvAttributesOp;
 import com.krishagni.catissueplus.core.de.repository.FormDao;
 import com.krishagni.catissueplus.core.de.services.FormAccessChecker;
 import com.krishagni.catissueplus.core.de.services.FormContextProcessor;
 import com.krishagni.catissueplus.core.de.services.FormService;
+import com.krishagni.catissueplus.core.de.services.FormDefinitionFileProcessors;
+import com.krishagni.catissueplus.core.de.ui.PvControl;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHolder;
@@ -310,6 +313,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 			Container parsedForm = new ContainerParser(formXmlPath, pvsDirPath).parse();
 			Long formId = saveForm(parsedForm, true);
+			parsedForm.setId(formId);
+
+			FormDefinitionFileProcessors.getInstance().importForm(parsedForm, inputDir.getAbsolutePath());
+			formId = saveForm(parsedForm, false);
 
 			FormSummary result = new FormSummary();
 			result.setFormId(formId);
@@ -325,6 +332,42 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			}
 
 			return ResponseEvent.serverError(fe);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Boolean> updatePvAttributes(RequestEvent<UpdateFormPvAttributesOp> req) {
+		try {
+			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+
+			UpdateFormPvAttributesOp input = req.getPayload();
+			Map<String, String> renamedAttrs = input.getAttributes();
+			if (renamedAttrs == null || renamedAttrs.isEmpty()) {
+				return ResponseEvent.response(false);
+			}
+
+			Container form = getContainer(input.getFormId(), null);
+			boolean changed = false;
+			for (Control control : form.getAllControls()) {
+				if (control instanceof PvControl pvControl) {
+					String targetAttribute = renamedAttrs.get(pvControl.getAttribute());
+					if (StringUtils.isNotBlank(targetAttribute)) {
+						pvControl.setAttribute(targetAttribute);
+						changed = true;
+					}
+				}
+			}
+
+			if (changed) {
+				saveForm(form, false);
+			}
+
+			return ResponseEvent.response(changed);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
@@ -1322,6 +1365,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 		if (form != null) {
 			form.getAssociations().forEach(this::ensureUpdateAllowed);
+		}
+
+		if (!importedForm) {
+			FormDefinitionFileProcessors.getInstance().validateForm(input);
 		}
 
 		try {

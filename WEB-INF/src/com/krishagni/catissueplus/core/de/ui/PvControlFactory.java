@@ -27,6 +27,13 @@ public class PvControlFactory extends AbstractLookupControlFactory {
 		ctrl.setRootNode(ParserUtil.getBooleanValue(ele, "rootValue"));
 		ctrl.setHasNumericValues(ParserUtil.getBooleanValue(ele, "numericValues"));
 		ctrl.setDefaultValue(ParserUtil.getTextValue(ele, "defaultValue"));
+
+		Element formPv = (Element) ele.getElementsByTagName("formPv").item(0);
+		if (formPv != null) {
+			ctrl.setFormPvCaption(ParserUtil.getTextValue(formPv, "caption"));
+			ctrl.setFormPvOptionsFile(ParserUtil.getTextValue(formPv, "optionsFile"));
+		}
+
 		return ctrl;
 	}
 

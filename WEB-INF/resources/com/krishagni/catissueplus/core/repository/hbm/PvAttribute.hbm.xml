@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="com.krishagni.catissueplus.core.administrative.domain.PvAttribute" table="CATISSUE_CDE"
+         entity-name="com.krishagni.catissueplus.core.administrative.domain.PvAttribute">
+    <id name="publicId" column="PUBLIC_ID" />
+
+    <property name="longName" column="LONG_NAME" />
+
+    <property name="definition" column="DEFINITION" />
+
+    <property name="version" column="VERSION" />
+
+    <property name="lastUpdated" column="LAST_UPDATED" />
+
+    <property name="formId" column="FORM_ID" />
+
+    <property name="deletedOn" column="DELETED_ON" />
+  </class>
+</hibernate-mapping>

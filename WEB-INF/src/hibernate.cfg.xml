@@ -44,6 +44,7 @@
 		<mapping resource="com/krishagni/catissueplus/core/repository/hbm/StorageContainerPosition.hbm.xml" />
 		<mapping resource="com/krishagni/catissueplus/core/repository/hbm/DistributionProtocol.hbm.xml" />
 		<mapping resource="com/krishagni/catissueplus/core/repository/hbm/PermissibleValue.hbm.xml"/>
+		<mapping resource="com/krishagni/catissueplus/core/repository/hbm/PvAttribute.hbm.xml"/>
 		<mapping resource="com/krishagni/catissueplus/core/repository/hbm/ConsentTier.hbm.xml"/>
 		<mapping resource="com/krishagni/catissueplus/core/repository/hbm/CollectionProtocolEvent.hbm.xml"/>
 		<mapping resource="com/krishagni/catissueplus/core/repository/hbm/SpecimenRequirement.hbm.xml"/>
