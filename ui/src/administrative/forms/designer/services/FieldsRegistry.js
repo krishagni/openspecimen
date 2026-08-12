@@ -49,10 +49,12 @@ const fields = [
     {
         type: "combobox",
         label: "Dropdown",
+        addable: false,
     },
     {
         type: "multiSelectListbox",
         label: "Multiselect Dropdown",
+        addable: false,
     },
     {
         type: "datePicker",
@@ -77,7 +79,7 @@ const fields = [
     },
     {
         type: "pvField",
-        label: "Permissible Value",
+        label: "Dropdown",
         validate: function (field) {
             if (!field.attribute) {
                 return { status: false, error: 'PV attribute is required' };
