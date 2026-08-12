@@ -271,6 +271,10 @@ export default {
       let result = [];
       let types = fieldsRegistry.getTypes();
       for (let type in types) {
+        if (types[type].addable == false) {
+          continue;
+        }
+
         if (props.subForm && types[type].allowedInSubForm == false) {
           continue;
         }
