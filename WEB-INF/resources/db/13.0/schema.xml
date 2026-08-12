@@ -527,8 +527,16 @@
     <modifyDataType tableName="CATISSUE_CDE" columnName="PUBLIC_ID" newDataType="${text.type}(128)" />
   </changeSet>
 
+  <changeSet author="vpawar" id="Drop the function based index on column public ID before widening its width" dbms="oracle">
+    <dropIndex tableName="CATISSUE_PERMISSIBLE_VALUE" indexName="OS_PERMISSIBLE_VALUE_UQ" />
+  </changeSet>
+
   <changeSet author="vpawar" id="Widen permissible value public ID">
     <modifyDataType tableName="CATISSUE_PERMISSIBLE_VALUE" columnName="PUBLIC_ID" newDataType="${text.type}(128)" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Recreate the function based index on column public ID after widening its width" dbms="oracle">
+    <sql>create unique index OS_PERMISSIBLE_VALUE_UQ on CATISSUE_PERMISSIBLE_VALUE(PUBLIC_ID, LOWER(VALUE));</sql>
   </changeSet>
 
   <changeSet author="vpawar" id="Recreate widened PV attribute foreign key">
