@@ -34,9 +34,9 @@
           </span>
         </span>
 
-        <div class="help">
+        <span class="help">
           <slot :name="field.name"></slot>
-        </div>
+        </span>
       </span>
     </li>
   </ul>
@@ -394,6 +394,10 @@ export default {
 .os-sf-table img {
   height: 75px;
   width: 150px;
+}
+
+.os-key-value-pairs .value .help {
+  margin-left: 1rem;
 }
 
 .os-textarea {
