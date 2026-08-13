@@ -83,6 +83,7 @@ import PluginViews from './PluginViews.vue';
 import Popover from './Popover.vue';
 import ProgressBar from './ProgressBar.vue';
 import PvDropdown from './PvDropdown.vue';
+import PvOptions from './PvOptions.vue';
 import QueryListView from './QueryListView.vue';
 import RadioButton from './RadioButton.vue';
 import RetrieveSpecimens from './RetrieveSpecimens.vue';
@@ -211,6 +212,7 @@ export default {
     app.component('os-popover',          Popover);
     app.component('os-progress-bar',     ProgressBar);
     app.component('os-pv-dropdown',      PvDropdown);
+    app.component('os-pv-options',       PvOptions);
     app.component('os-radio-button',     RadioButton);
     app.component('os-retrieve-specimens', RetrieveSpecimens);
     app.component('os-query-list-view',  QueryListView);

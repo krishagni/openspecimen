@@ -28,6 +28,8 @@ class FieldFactory {
     signature: 'os-signature-pad',
     user: 'os-user-dropdown',
     pv: 'os-pv-dropdown',
+    pvCheckbox: 'os-pv-options',
+    pvRadioButton: 'os-pv-options',
     site: 'os-site-dropdown',
     span: 'os-span',
     'specimen-measure': 'os-specimen-measure',
@@ -214,6 +216,17 @@ class FieldFactory {
       fs.attribute = field.attribute;
       fs.leafValue = field.leafValue;
       fs.multiple = field.multiple == true;
+    } else if (field.type == 'pvCheckbox' || field.type == 'pvRadioButton') {
+      fs.type = field.type;
+      fs.attribute = field.attribute;
+      fs.leafValue = field.leafValue;
+      fs.rootValue = field.rootValue;
+      fs.multiple = field.type == 'pvCheckbox';
+      fs.optionsPerRow = field.optionsPerRow || 1;
+      fs.defaultValue = field.defaultValue;
+      if (fs.multiple) {
+        fs.defaultValue = fs.defaultValue ? [fs.defaultValue] : [];
+      }
     } else if (field.type == 'siteField') {
       fs.type = 'site';
       fs.selectProp = 'id';

@@ -548,6 +548,7 @@ class Util {
 
       case 'multiselect':
       case 'pv':
+      case 'pvCheckbox':
       case 'checkbox':
         if (inputValue instanceof Array) {
           if (inputValue.length > 0 && inputValue[0] && typeof inputValue[0] == 'object') {

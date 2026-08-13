@@ -33,27 +33,29 @@ const fields = [
         label: "Number Field",
     },
     {
-        type: "radiobutton",
+        type: "pvRadioButton",
         label: "Radio Button",
-        allowedInSubForm: false
+        allowedInSubForm: false,
+        validate: validatePvField
     },
     {
-        type: "checkbox",
+        type: "pvCheckbox",
         label: "Checkbox",
-        allowedInSubForm: false
+        allowedInSubForm: false,
+        validate: validatePvField
     },
     {
         type: "booleanCheckbox",
         label: "Yes/No Checkbox",
     },
     {
-        type: "combobox",
+        type: "pvField",
         label: "Dropdown",
-        addable: false,
+        validate: validatePvField
     },
     {
         type: "multiSelectListbox",
-        label: "Multiselect Dropdown",
+        label: "Multiselect Dropdown (Deprecated)",
         addable: false,
     },
     {
@@ -78,15 +80,21 @@ const fields = [
         label: "User",
     },
     {
-        type: "pvField",
-        label: "Dropdown",
-        validate: function (field) {
-            if (!field.attribute) {
-                return { status: false, error: 'PV attribute is required' };
-            }
-
-            return { status: true };
-        }
+        type: "radiobutton",
+        label: "Radio Button (Deprecated)",
+        addable: false,
+        allowedInSubForm: false
+    },
+    {
+        type: "checkbox",
+        label: "Checkbox (Deprecated)",
+        addable: false,
+        allowedInSubForm: false
+    },
+    {
+        type: "combobox",
+        label: "Dropdown (Deprecated)",
+        addable: false,
     },
     {
         type: "siteField",
@@ -102,6 +110,14 @@ const fields = [
         allowedInSubForm: false
     },
 ];
+
+function validatePvField(field) {
+    if (!field.attribute) {
+        return { status: false, error: 'PV attribute is required' };
+    }
+
+    return { status: true };
+}
 
 const fr = new FieldsRegistry();
 fields.forEach(field => fr.registerType(field));

@@ -101,7 +101,7 @@ import com.krishagni.catissueplus.core.de.services.FormAccessChecker;
 import com.krishagni.catissueplus.core.de.services.FormContextProcessor;
 import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.catissueplus.core.de.services.FormDefinitionFileProcessors;
-import com.krishagni.catissueplus.core.de.ui.PvControl;
+import com.krishagni.catissueplus.core.de.ui.AbstractPvControl;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHolder;
@@ -352,7 +352,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			Container form = getContainer(input.getFormId(), null);
 			boolean changed = false;
 			for (Control control : form.getAllControls()) {
-				if (control instanceof PvControl pvControl) {
+				if (control instanceof AbstractPvControl pvControl) {
 					String targetAttribute = renamedAttrs.get(pvControl.getAttribute());
 					if (StringUtils.isNotBlank(targetAttribute)) {
 						pvControl.setAttribute(targetAttribute);

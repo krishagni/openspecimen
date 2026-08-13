@@ -31,7 +31,7 @@ import com.krishagni.catissueplus.core.common.util.DbUtil;
 import com.krishagni.catissueplus.core.common.util.SessionUtil;
 import com.krishagni.catissueplus.core.de.services.FormDefinitionFileProcessor;
 import com.krishagni.catissueplus.core.de.services.FormDefinitionFileProcessors;
-import com.krishagni.catissueplus.core.de.ui.PvControl;
+import com.krishagni.catissueplus.core.de.ui.AbstractPvControl;
 
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.Control;
@@ -91,24 +91,24 @@ public class FormScopedPvFileProcessor implements FormDefinitionFileProcessor, F
 			return false;
 		}
 
-		Map<String, List<PvControl>> controlsByAttribute = new LinkedHashMap<>();
+		Map<String, List<AbstractPvControl>> controlsByAttribute = new LinkedHashMap<>();
 		for (Control control : form.getAllControls()) {
-			if (control instanceof PvControl pvCtrl) {
+			if (control instanceof AbstractPvControl pvCtrl) {
 				if (StringUtils.isNotBlank(pvCtrl.getFormPvOptionsFile())) {
-					List<PvControl> pvCtrls = controlsByAttribute.computeIfAbsent(pvCtrl.getAttribute(), key -> new ArrayList<>());
+					List<AbstractPvControl> pvCtrls = controlsByAttribute.computeIfAbsent(pvCtrl.getAttribute(), key -> new ArrayList<>());
 					pvCtrls.add(pvCtrl);
 				}
 			}
 		}
 
 		boolean changed = false;
-		for (Map.Entry<String, List<PvControl>> entry : controlsByAttribute.entrySet()) {
-			PvControl sourceControl = entry.getValue().get(0);
+		for (Map.Entry<String, List<AbstractPvControl>> entry : controlsByAttribute.entrySet()) {
+			AbstractPvControl sourceControl = entry.getValue().get(0);
 
 			String targetAttribute = getOrCreateAttribute(form, sourceControl);
 			File csvFile = new File(pvsDir, sourceControl.getFormPvOptionsFile());
 			importPvs(targetAttribute, csvFile);
-			for (PvControl control : entry.getValue()) {
+			for (AbstractPvControl control : entry.getValue()) {
 				control.setAttribute(targetAttribute);
 				control.setFormPvCaption(null);
 				control.setFormPvOptionsFile(null);
@@ -124,7 +124,7 @@ public class FormScopedPvFileProcessor implements FormDefinitionFileProcessor, F
 	public void validateForm(Container form) {
 		PermissibleValueDao pvDao = daoFactory.getPermissibleValueDao();
 		for (Control control : form.getAllControls()) {
-			if (!(control instanceof PvControl)) {
+			if (!(control instanceof AbstractPvControl)) {
 				continue;
 			}
 
@@ -133,7 +133,7 @@ public class FormScopedPvFileProcessor implements FormDefinitionFileProcessor, F
 			// cannot be referenced by another form. This guards form XML and API-based updates that
 			// bypass the Form Designer's filtered attribute list.
 			//
-			PvAttribute attribute = pvDao.getAttribute(((PvControl) control).getAttribute());
+			PvAttribute attribute = pvDao.getAttribute(((AbstractPvControl) control).getAttribute());
 			if (attribute != null && attribute.isFormScoped() && !Objects.equals(form.getId(), attribute.getFormId())) {
 				throw OpenSpecimenException.userError(
 					PvErrorCode.FORM_ATTR_FORM_MISMATCH,
@@ -217,7 +217,7 @@ public class FormScopedPvFileProcessor implements FormDefinitionFileProcessor, F
 		}
 	}
 
-	private String getOrCreateAttribute(Container form, PvControl sourceControl) {
+	private String getOrCreateAttribute(Container form, AbstractPvControl sourceControl) {
 		PvAttribute sourceAttribute = daoFactory.getPermissibleValueDao().getAttribute(sourceControl.getAttribute());
 		if (sourceAttribute != null) {
 			if (!sourceAttribute.isFormScoped() || sourceAttribute.getFormId().equals(form.getId())) {
@@ -258,6 +258,6 @@ public class FormScopedPvFileProcessor implements FormDefinitionFileProcessor, F
 	}
 
 	private String getOptionsFile(String attribute) {
-		return PvControl.getFormPvOptionsFile(attribute);
+		return AbstractPvControl.getFormPvOptionsFile(attribute);
 	}
 }

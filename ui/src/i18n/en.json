@@ -1343,6 +1343,7 @@
     "not_applicable": "Not Applicable",
     "notify_users": "Notification Recipients",
     "preview": "Preview",
+    "pv_options_limit": "This field has more than 25 options. Change the field type to a dropdown.",
     "search_records": "Filter by form...",
     "select_form_xml": "Select the form XML to upload...",
     "send_notif_to_users": "Send notifications to users on adding/editing form records",
