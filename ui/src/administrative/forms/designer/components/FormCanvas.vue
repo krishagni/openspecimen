@@ -582,8 +582,13 @@ export default {
     let changeFieldType = function (field, type) {
       let oldType = field.type;
       let oldDefValue = field.defaultValue;
+      let oldMultiple = field.multiple;
 
       field.type = type.name
+      if (Object.prototype.hasOwnProperty.call(type, 'multiple')) {
+        field.multiple = type.multiple;
+      }
+
       if (field.type == 'stringTextField') {
         field.defaultValue = field.defaultValue && field.defaultValue.value;
       }
@@ -596,6 +601,7 @@ export default {
           } else {
             field.type = oldType;
             field.defaultValue = oldDefValue;
+            field.multiple = oldMultiple;
           }
         }
       );

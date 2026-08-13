@@ -1,15 +1,8 @@
 package com.krishagni.catissueplus.core.de.ui;
 
-import java.util.Map;
-import java.util.Properties;
-
-import org.w3c.dom.Element;
-
 import edu.common.dynamicextensions.domain.nui.Control;
-import edu.common.dynamicextensions.domain.nui.factory.AbstractLookupControlFactory;
-import edu.common.dynamicextensions.nutility.ParserUtil;
 
-public class PvControlFactory extends AbstractLookupControlFactory {
+public class PvControlFactory extends AbstractPvControlFactory {
 	public static PvControlFactory getInstance() {
 		return new PvControlFactory();
 	}
@@ -17,35 +10,6 @@ public class PvControlFactory extends AbstractLookupControlFactory {
 	@Override
 	public String getType() {
 		return "pvField";
-	}
-
-	@Override
-	public Control parseControl(Element ele, int row, int xPos, Properties props) {
-		PvControl ctrl = (PvControl) super.parseControl(ele, row, xPos, props);
-		ctrl.setAttribute(ParserUtil.getTextValue(ele, "attribute"));
-		ctrl.setLeafNode(ParserUtil.getBooleanValue(ele, "leafValue"));
-		ctrl.setRootNode(ParserUtil.getBooleanValue(ele, "rootValue"));
-		ctrl.setHasNumericValues(ParserUtil.getBooleanValue(ele, "numericValues"));
-		ctrl.setDefaultValue(ParserUtil.getTextValue(ele, "defaultValue"));
-
-		Element formPv = (Element) ele.getElementsByTagName("formPv").item(0);
-		if (formPv != null) {
-			ctrl.setFormPvCaption(ParserUtil.getTextValue(formPv, "caption"));
-			ctrl.setFormPvOptionsFile(ParserUtil.getTextValue(formPv, "optionsFile"));
-		}
-
-		return ctrl;
-	}
-
-	@Override
-	public Control parseControl(Map<String, Object> props, int row, int xPos) {
-		PvControl ctrl = (PvControl) super.parseControl(props, row, xPos);
-		ctrl.setAttribute((String) props.get("attribute"));
-		ctrl.setLeafNode(getBool(props, "leafValue"));
-		ctrl.setRootNode(getBool(props, "rootValue"));
-		ctrl.setHasNumericValues(getBool(props, "numericValues"));
-		ctrl.setDefaultValue((String) props.get("defaultValue"));
-		return ctrl;
 	}
 
 	@Override

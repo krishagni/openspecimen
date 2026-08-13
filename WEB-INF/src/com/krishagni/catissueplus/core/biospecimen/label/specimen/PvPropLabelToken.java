@@ -10,7 +10,7 @@ import com.krishagni.catissueplus.core.common.domain.AbstractLabelTmplToken;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
-import com.krishagni.catissueplus.core.de.ui.PvControl;
+import com.krishagni.catissueplus.core.de.ui.AbstractPvControl;
 
 //
 // %PV_PROP(field_name, prop_name, [custom_field])%
@@ -52,7 +52,7 @@ public class PvPropLabelToken extends AbstractLabelTmplToken {
 			DeObject extn = (DeObject)objectWrapper.getPropertyValue("extension");
 			if (extn != null && extn.getAttrs() != null) {
 				for (DeObject.Attr attr : extn.getAttrs()) {
-					if (attr.getUdn().equals(fieldName) && attr.getCtrlValue().getControl() instanceof PvControl pvCtrl) {
+					if (attr.getUdn().equals(fieldName) && attr.getCtrlValue().getControl() instanceof AbstractPvControl pvCtrl) {
 						if (attr.getValue() != null) {
 							String valueStr = attr.getValue().toString();
 							if (StringUtils.isNumeric(valueStr)) {

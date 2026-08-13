@@ -1,10 +1,10 @@
 package com.krishagni.catissueplus.core.de.ui;
 
-public class PvControl extends AbstractPvControl {
+public class RadioButtonPvControl extends AbstractPvOptionsControl {
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public String getCtrlType() {
-		return "pvField";
+		return "pvRadioButton";
 	}
 }

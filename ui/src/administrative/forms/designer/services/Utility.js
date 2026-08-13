@@ -67,6 +67,14 @@ class Utility {
           return [
             { name: 'checkbox', caption: 'Checkbox' }
           ]
+        } else if (field.type == 'pvRadioButton') {
+          return [
+            { name: 'pvField', caption: 'Dropdown', multiple: false }
+          ]
+        } else if (field.type == 'pvCheckbox') {
+          return [
+            { name: 'pvField', caption: 'Dropdown', multiple: true }
+          ]
         }
 
         return [];

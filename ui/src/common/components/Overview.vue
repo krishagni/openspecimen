@@ -326,7 +326,8 @@ export default {
               }
             }
           }
-        } else if (field.type == 'multiselect' || (field.type == 'pv' && field.multiple == true)) {
+        } else if (field.type == 'multiselect' || field.type == 'pvCheckbox' ||
+          (field.type == 'pv' && field.multiple == true)) {
           const ls = field.listSource || {};
           if (value instanceof Array) {
             if (value.length == 0) {

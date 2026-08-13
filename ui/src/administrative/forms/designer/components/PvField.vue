@@ -3,7 +3,7 @@
     <CommonFieldProps :field="fm">
       <div class="p-fluid p-grid">
         <div class="p-field p-col-12">
-          <label> Dropdown </label>
+          <label> Options </label>
           <div class="dropdown-selector">
             <Dropdown v-model="fm.attribute"
               :options="pvAttrsList" option-label="name" option-value="attribute"
@@ -16,7 +16,7 @@
           </div>
         </div>
 
-        <div class="p-field p-col-4">
+        <div class="p-field p-col-4" v-if="displayType == 'dropdown'">
           <label> Allow Multiple Values </label>
           <br />
           <InputSwitch v-model="fm.multiple" :disabled="fm.$saved" />
@@ -34,6 +34,11 @@
           <label> Numeric Values </label>
           <br />
           <InputSwitch v-model="fm.numericValues" />
+        </div>
+
+        <div class="p-field p-col-4" v-if="displayType != 'dropdown'">
+          <label> Options Per Row </label>
+          <InputNumber v-model="fm.optionsPerRow" :min="1" />
         </div>
       </div>
     </CommonFieldProps>
@@ -86,7 +91,7 @@
   <div class="p-fluid p-grid" v-else>
     <div class="p-field p-col-12">
       <label v-if="!noLabel"> {{ fm.caption }} </label>
-      <AutoComplete
+      <AutoComplete v-if="displayType == 'dropdown'"
         v-model="fm.$unused"
         field="value"
         :suggestions="pvs"
@@ -102,24 +107,40 @@
           </span>
         </template>
       </AutoComplete>
+      <div v-else v-tooltip.bottom="fm.toolTip">
+        <div class="pv-options-row" v-for="(row, idx) in optionRows" :key="idx">
+          <div class="pv-option" :style="{width: optionWidth + '%'}" v-for="(option, jdx) in row" :key="jdx">
+            <Checkbox v-if="displayType == 'checkbox'" :name="fm.udn" :value="option.value" v-model="fm.$unused" />
+            <RadioButton v-else :name="fm.udn" :value="option.value" v-model="fm.$unused" />
+            <label>{{ option.value }}</label>
+          </div>
+        </div>
+        <os-message type="warn" v-if="hasMorePvs">
+          <span v-t="'forms.pv_options_limit'"></span>
+        </os-message>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { reactive, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import AutoComplete from "primevue/autocomplete";
+import Checkbox from "primevue/checkbox";
 import Dropdown from "primevue/dropdown";
+import InputNumber from "primevue/inputnumber";
 import InputSwitch from "primevue/inputswitch";
 import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import Paginator from "primevue/paginator";
+import RadioButton from "primevue/radiobutton";
 import { useToast } from "primevue/usetoast";
 import CommonFieldProps from "./CommonFieldProps.vue";
 
 import http from "@/common/services/HttpClient.js";
+import utility from "../services/Utility.js";
 
 export default {
   name: "PvField",
@@ -127,13 +148,16 @@ export default {
   components: {
     CommonFieldProps,
     AutoComplete,
+    Checkbox,
     Dropdown,
+    InputNumber,
     InputSwitch,
     InputText,
     Textarea,
     Button,
     Dialog,
     Paginator,
+    RadioButton,
   },
 
   props: {
@@ -142,6 +166,10 @@ export default {
     noLabel: Boolean,
     main: Object,
     subForm: Object,
+    displayType: {
+      type: String,
+      default: 'dropdown'
+    }
   },
 
   emits: ['save-requested'],
@@ -149,10 +177,26 @@ export default {
   setup(props) {
     const toast = useToast();
     let fm = reactive(props.field);
-    fm["$unused"] = fm.defaultValue;
+    if (props.displayType == 'checkbox') {
+      fm.multiple = true;
+      fm["$unused"] = fm.defaultValue ? [fm.defaultValue] : [];
+    } else {
+      if (props.displayType == 'radio') {
+        fm.multiple = false;
+      }
+      fm["$unused"] = fm.defaultValue;
+    }
 
-    let pvs = ref([]);
-    let cachedPvs = {};
+    if (props.displayType != 'dropdown' && !fm.optionsPerRow) {
+      fm.optionsPerRow = 1;
+    }
+
+    let pvs         = ref([]);
+    let hasMorePvs  = ref(false);
+    let cachedPvs   = {};
+    let optionRows  = computed(() => utility.getOptionRows(pvs.value, fm.optionsPerRow));
+    let optionWidth = computed(() => utility.getOptionWidth(fm.optionsPerRow));
+
     let searchPv = (event) => {
       let searchTerm = event.query.trim();
 
@@ -179,6 +223,33 @@ export default {
 
     let pvAttrsList = ref([]);
     let selectedAttribute = ref(null);
+
+    //
+    // Loads up to 26 active options when the field is initialised, its attribute changes, or its
+    // managed options change. The first 25 are previewed; the extra result determines whether to
+    // warn the designer that the PV list is unsuitable for checkbox or radio-button rendering.
+    //
+    let _loadPreviewPvs = async () => {
+      if (props.displayType == 'dropdown') {
+        return;
+      }
+
+      if (!fm.attribute) {
+        pvs.value = [];
+        hasMorePvs.value = false;
+        return;
+      }
+
+      let result = await http.get('permissible-values/v', {
+        attribute: fm.attribute,
+        includeOnlyLeafValue: fm.leafValue,
+        maxResults: 26
+      });
+      hasMorePvs.value = result.length > 25;
+      pvs.value = result.slice(0, 25);
+    };
+
+    watch(() => fm.leafValue, _loadPreviewPvs);
 
     //
     // Merges server results while retaining the currently selected attribute for display.
@@ -235,10 +306,12 @@ export default {
     //
     let selectAttribute = (event) => {
       selectedAttribute.value = pvAttrsList.value.find(attr => attr.attribute == event.value) || null;
+      _loadPreviewPvs();
     };
 
     _loadAttributes();
     _loadSelectedAttribute();
+    _loadPreviewPvs();
 
     let dropdownDialog = reactive({visible: false, caption: '', options: '', saving: false});
     let manageDialog = reactive({
@@ -292,6 +365,7 @@ export default {
         fm.attribute = attr.attribute;
         selectedAttribute.value = attr;
         _mergeAttributes([[attr]]);
+        await _loadPreviewPvs();
         dropdownDialog.visible = false;
       } finally {
         dropdownDialog.saving = false;
@@ -309,12 +383,21 @@ export default {
         startAt: manageDialog.first,
         maxResults: manageDialog.rows
       };
-      let [pvs, count] = await Promise.all([
+      let [managedPvs, count] = await Promise.all([
         http.get('permissible-values', params),
         http.get('permissible-values/count', params)
       ]);
-      manageDialog.pvs = pvs;
+      manageDialog.pvs = managedPvs;
       manageDialog.totalRecords = count.count;
+    };
+
+    //
+    // Refreshes the management dialog and its independently filtered checkbox/radio preview after
+    // an option is added, updated, or deleted.
+    //
+    let _refreshManagedOptions = async () => {
+      await _loadManagedOptions();
+      await _loadPreviewPvs();
     };
 
     //
@@ -359,7 +442,7 @@ export default {
       }
 
       manageDialog.newOptions = '';
-      await _loadManagedOptions();
+      await _refreshManagedOptions();
     };
 
     //
@@ -367,7 +450,7 @@ export default {
     //
     let updateOption = async (pv) => {
       await http.put('permissible-values/' + pv.id, pv);
-      await _loadManagedOptions();
+      await _refreshManagedOptions();
     };
 
     //
@@ -375,13 +458,16 @@ export default {
     //
     let deleteOption = async (pv) => {
       await http.delete('permissible-values/' + pv.id);
-      await _loadManagedOptions();
+      await _refreshManagedOptions();
     };
 
     return {
       fm,
       pvs,
       searchPv,
+      optionRows,
+      optionWidth,
+      hasMorePvs,
       pvAttrsList,
       selectedAttribute,
       searchAttributes,
@@ -417,6 +503,18 @@ export default {
 .dropdown-selector .p-button {
   flex: none;
   width: 2.5rem;
+}
+
+.pv-options-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.pv-option {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .option-editor .p-inputtext {

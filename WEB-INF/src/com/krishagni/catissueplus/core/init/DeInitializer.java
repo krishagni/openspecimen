@@ -14,7 +14,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.ui.CheckboxPvControlFactory;
 import com.krishagni.catissueplus.core.de.ui.PvControlFactory;
+import com.krishagni.catissueplus.core.de.ui.RadioButtonPvControlFactory;
 import com.krishagni.catissueplus.core.de.ui.SiteControlFactory;
 import com.krishagni.catissueplus.core.de.ui.StorageContainerControlFactory;
 import com.krishagni.catissueplus.core.de.ui.UserControlFactory;
@@ -85,6 +87,8 @@ public class DeInitializer implements InitializingBean {
 		ControlManager.getInstance().registerFactory(StorageContainerControlFactory.getInstance());
 		ControlManager.getInstance().registerFactory(SiteControlFactory.getInstance());
 		ControlManager.getInstance().registerFactory(PvControlFactory.getInstance());
+		ControlManager.getInstance().registerFactory(CheckboxPvControlFactory.getInstance());
+		ControlManager.getInstance().registerFactory(RadioButtonPvControlFactory.getInstance());
 
 		InputStream in = null;
 		try {

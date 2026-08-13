@@ -80,13 +80,19 @@ const fields = [
     {
         type: "pvField",
         label: "Dropdown",
-        validate: function (field) {
-            if (!field.attribute) {
-                return { status: false, error: 'PV attribute is required' };
-            }
-
-            return { status: true };
-        }
+        validate: validatePvField
+    },
+    {
+        type: "pvRadioButton",
+        label: "PV Radio Button",
+        allowedInSubForm: false,
+        validate: validatePvField
+    },
+    {
+        type: "pvCheckbox",
+        label: "PV Checkbox",
+        allowedInSubForm: false,
+        validate: validatePvField
     },
     {
         type: "siteField",
@@ -102,6 +108,14 @@ const fields = [
         allowedInSubForm: false
     },
 ];
+
+function validatePvField(field) {
+    if (!field.attribute) {
+        return { status: false, error: 'PV attribute is required' };
+    }
+
+    return { status: true };
+}
 
 const fr = new FieldsRegistry();
 fields.forEach(field => fr.registerType(field));
