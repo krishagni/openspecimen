@@ -51,7 +51,7 @@ class Utility {
     getInterchangeableTypes(field) {
         if (field.type == 'radiobutton') {
           return [
-            // { name: 'combobox', caption: 'Dropdown' },
+            { name: 'combobox', caption: 'Dropdown' },
             { name: 'stringTextField', caption: 'Text Field' }
           ]
         } else if (field.type == 'combobox') {
@@ -59,21 +59,21 @@ class Utility {
             { name: 'radiobutton', caption: 'Radio Button' },
             { name: 'stringTextField', caption: 'Text Field' }
           ]
-        // } else if (field.type == 'checkbox') {
-        //   return [
-        //     { name: 'multiSelectListbox', caption: 'Multiselect Dropdown' }
-        //   ]
+        } else if (field.type == 'checkbox') {
+          return [
+            { name: 'multiSelectListbox', caption: 'Multiselect Dropdown' }
+          ]
         } else if (field.type == 'multiSelectListbox') {
           return [
             { name: 'checkbox', caption: 'Checkbox' }
           ]
         } else if (field.type == 'pvRadioButton') {
           return [
-            { name: 'pvField', caption: 'Dropdown', multiple: false }
+            { name: 'pvField', caption: 'Permissible Value', multiple: false }
           ]
         } else if (field.type == 'pvCheckbox') {
           return [
-            { name: 'pvField', caption: 'Dropdown', multiple: true }
+            { name: 'pvField', caption: 'Permissible Value', multiple: true }
           ]
         }
 
