@@ -33,30 +33,26 @@ const fields = [
         label: "Number Field",
     },
     {
-        type: "pvRadioButton",
+        type: "radiobutton",
         label: "Radio Button",
-        allowedInSubForm: false,
-        validate: validatePvField
+        allowedInSubForm: false
     },
     {
-        type: "pvCheckbox",
+        type: "checkbox",
         label: "Checkbox",
-        allowedInSubForm: false,
-        validate: validatePvField
+        allowedInSubForm: false
     },
     {
         type: "booleanCheckbox",
         label: "Yes/No Checkbox",
     },
     {
-        type: "pvField",
+        type: "combobox",
         label: "Dropdown",
-        validate: validatePvField
     },
     {
         type: "multiSelectListbox",
-        label: "Multiselect Dropdown (Deprecated)",
-        addable: false,
+        label: "Multiselect Dropdown",
     },
     {
         type: "datePicker",
@@ -80,21 +76,23 @@ const fields = [
         label: "User",
     },
     {
-        type: "radiobutton",
-        label: "Radio Button (Deprecated)",
-        addable: false,
-        allowedInSubForm: false
+        type: "pvField",
+        label: "Permissible Value",
+        validate: validatePvField
     },
     {
-        type: "checkbox",
-        label: "Checkbox (Deprecated)",
+        type: "pvRadioButton",
+        label: "PV Radio Button",
         addable: false,
-        allowedInSubForm: false
+        allowedInSubForm: false,
+        validate: validatePvField
     },
     {
-        type: "combobox",
-        label: "Dropdown (Deprecated)",
+        type: "pvCheckbox",
+        label: "PV Checkbox",
         addable: false,
+        allowedInSubForm: false,
+        validate: validatePvField
     },
     {
         type: "siteField",
