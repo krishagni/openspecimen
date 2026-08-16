@@ -22,9 +22,11 @@ public interface PermissibleValueDao extends Dao<PermissibleValue>{
 
 	void saveAttribute(PvAttribute attribute);
 
+	void deleteAttribute(String name);
+
 	PvAttribute promoteAttribute(String oldName, String newName, String caption);
 
-	void deleteFormAttributes(Long formId);
+	void archiveFormAttributes(Long formId);
 
 	List<PermissibleValue> getPvs(String attribute, Long lastId, int maxResults);
 

@@ -28,10 +28,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.krishagni.catissueplus.core.administrative.domain.FormDataDeleteEvent;
 import com.krishagni.catissueplus.core.administrative.domain.FormDataSavedEvent;
+import com.krishagni.catissueplus.core.administrative.domain.PvAttribute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
+import com.krishagni.catissueplus.core.administrative.domain.factory.PvErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserGroupErrorCode;
+import com.krishagni.catissueplus.core.administrative.events.PermissibleValueDetails;
+import com.krishagni.catissueplus.core.administrative.events.PvAttributeDetail;
 import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
@@ -63,9 +67,11 @@ import com.krishagni.catissueplus.core.common.events.Operation;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.service.PermissibleValueService;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.DbUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
@@ -74,6 +80,7 @@ import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.Form;
 import com.krishagni.catissueplus.core.de.domain.FormErrorCode;
 import com.krishagni.catissueplus.core.de.events.AddRecordEntryOp;
+import com.krishagni.catissueplus.core.de.events.ConvertToPvFieldOp;
 import com.krishagni.catissueplus.core.de.events.EntityFormRecords;
 import com.krishagni.catissueplus.core.de.events.FileDetail;
 import com.krishagni.catissueplus.core.de.events.FormContextDetail;
@@ -99,8 +106,8 @@ import com.krishagni.catissueplus.core.de.events.UpdateFormPvAttributesOp;
 import com.krishagni.catissueplus.core.de.repository.FormDao;
 import com.krishagni.catissueplus.core.de.services.FormAccessChecker;
 import com.krishagni.catissueplus.core.de.services.FormContextProcessor;
-import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.catissueplus.core.de.services.FormDefinitionFileProcessors;
+import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.catissueplus.core.de.ui.AbstractPvControl;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
@@ -108,15 +115,20 @@ import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHol
 import com.krishagni.catissueplus.core.importer.services.impl.ImporterContextHolder;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
+import edu.common.dynamicextensions.domain.nui.ComboBox;
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.Control;
 import edu.common.dynamicextensions.domain.nui.DataType;
 import edu.common.dynamicextensions.domain.nui.FileUploadControl;
 import edu.common.dynamicextensions.domain.nui.Label;
 import edu.common.dynamicextensions.domain.nui.LookupControl;
+import edu.common.dynamicextensions.domain.nui.MultiSelectCheckBox;
+import edu.common.dynamicextensions.domain.nui.MultiSelectControl;
+import edu.common.dynamicextensions.domain.nui.MultiSelectListBox;
 import edu.common.dynamicextensions.domain.nui.PageBreak;
 import edu.common.dynamicextensions.domain.nui.PermissibleValue;
 import edu.common.dynamicextensions.domain.nui.PvDataSource;
+import edu.common.dynamicextensions.domain.nui.RadioButton;
 import edu.common.dynamicextensions.domain.nui.SelectControl;
 import edu.common.dynamicextensions.domain.nui.SubFormControl;
 import edu.common.dynamicextensions.domain.nui.UserContext;
@@ -126,6 +138,9 @@ import edu.common.dynamicextensions.napi.FormData;
 import edu.common.dynamicextensions.napi.FormDataManager;
 import edu.common.dynamicextensions.napi.FormEventsNotifier;
 import edu.common.dynamicextensions.napi.FormException;
+import edu.common.dynamicextensions.ndao.DbSettingsFactory;
+import edu.common.dynamicextensions.ndao.JdbcDao;
+import edu.common.dynamicextensions.ndao.JdbcDaoFactory;
 import edu.common.dynamicextensions.nutility.ContainerParser;
 import edu.common.dynamicextensions.nutility.ContainerPropsParser;
 import edu.common.dynamicextensions.nutility.DeConfiguration;
@@ -185,6 +200,8 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
 
 	private ExportService exportSvc;
+
+	private PermissibleValueService pvSvc;
 	
 	private Map<String, List<FormContextProcessor>> ctxtProcs = new HashMap<>();
 
@@ -206,6 +223,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 	public void setExportSvc(ExportService exportSvc) {
 		this.exportSvc = exportSvc;
+	}
+
+	public void setPvSvc(PermissibleValueService pvSvc) {
+		this.pvSvc = pvSvc;
 	}
 
 	public void setCtxtProcs(Map<String, List<FormContextProcessor>> ctxtProcs) {
@@ -392,6 +413,71 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			return ResponseEvent.serverError(fe);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Map<String, Object>> convertToPvField(RequestEvent<ConvertToPvFieldOp> req) {
+		AccessCtrlMgr.getInstance().ensureFormUpdateRights();
+
+		PvConversion conversion = null;
+		String createdAttribute = null;
+		try {
+			ConvertToPvFieldOp input = req.getPayload();
+			if (input.getFormId() == null) {
+				return ResponseEvent.userError(FormErrorCode.ID_REQ);
+			} else if (StringUtils.isBlank(input.getName())) {
+				return ResponseEvent.userError(FormErrorCode.FIELD_FQN_REQ);
+			}
+
+			Container form = Container.getContainer(input.getFormId());
+			if (form == null) {
+				return ResponseEvent.userError(FormErrorCode.NOT_FOUND, input.getFormId(), 1);
+			}
+
+			Control field = form.getControl(input.getName(), "\\.");
+			if (!isLegacyPvConvertibleField(field)) {
+				return ResponseEvent.userError(FormErrorCode.INV_PV_CONVERSION, input.getName());
+			}
+
+			Map<String, Object> formProps = getFormProps(form);
+			formProps.put("id", form.getId());
+
+			Map<String, Object> fieldProps = findField(formProps, input.getName().split("\\."));
+			if (fieldProps == null) {
+				return ResponseEvent.userError(FormErrorCode.INV_PV_CONVERSION, input.getName());
+			}
+
+			String attribute = getPvAttribute(input, (SelectControl) field);
+			createdAttribute = input.isUseFormOptions() ? attribute : null;
+
+			conversion = new PvConversion(field, attribute);
+			conversion.updateSchema();
+
+			boolean multiple = field instanceof MultiSelectControl;
+			fieldProps.put("type", "pvField");
+			fieldProps.put("attribute", attribute);
+			fieldProps.put("multiple", multiple);
+			fieldProps.put("defaultValue", getPvDefaultValue(attribute, fieldProps.get("defaultValue")));
+			fieldProps.remove("pvs");
+			fieldProps.remove("optionsPerRow");
+
+			Container.enableSelectToLookupConversion();
+			try {
+				saveForm(new ContainerPropsParser(formProps).parse(), false);
+			} finally {
+				Container.disableSelectToLookupConversion();
+			}
+
+			Control convertedField = Container.getContainer(input.getFormId()).getControl(input.getName(), "\\.");
+			return ResponseEvent.response(convertedField.getProps());
+		} catch (OpenSpecimenException ose) {
+			ResponseEvent<Map<String, Object>> restoreError = restorePvConversion(conversion, createdAttribute);
+			return restoreError != null ? restoreError : ResponseEvent.error(ose);
+		} catch (Exception e) {
+			ResponseEvent<Map<String, Object>> restoreError = restorePvConversion(conversion, createdAttribute);
+			return restoreError != null ? restoreError : ResponseEvent.serverError(e);
 		}
 	}
 
@@ -1380,6 +1466,223 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			}
 
 			throw e;
+		}
+	}
+
+	private Map<String, Object> getFormProps(Container form) {
+		return Utility.jsonToMap(Utility.mapToJson(form.getProps()));
+	}
+
+	private String getPvAttribute(ConvertToPvFieldOp input, SelectControl field) {
+		if (input.isUseFormOptions()) {
+			if (StringUtils.isBlank(input.getNewAttributeCaption())) {
+				throw OpenSpecimenException.userError(PvErrorCode.ATTR_CAPTION_REQUIRED);
+			}
+
+			List<PermissibleValueDetails> pvs = field.getPvs()
+				.stream()
+				.map(
+					pv -> {
+						PermissibleValueDetails detail = new PermissibleValueDetails();
+						detail.setValue(pv.getValue());
+						return detail;
+					}
+				)
+				.toList();
+
+			PvAttributeDetail attr = new PvAttributeDetail();
+			attr.setFormId(input.getFormId());
+			attr.setName(input.getNewAttributeCaption());
+			attr.setPvs(pvs);
+			return ResponseEvent.unwrap(pvSvc.createAttribute(RequestEvent.wrap(attr))).getAttribute();
+		}
+
+		if (StringUtils.isBlank(input.getAttribute())) {
+			throw OpenSpecimenException.userError(PvErrorCode.ATTR_NAME_REQUIRED);
+		}
+
+		PvAttribute attr = daoFactory.getPermissibleValueDao().getAttribute(input.getAttribute());
+		if (attr == null) {
+			throw OpenSpecimenException.userError(PvErrorCode.ATTR_NOT_FOUND, input.getAttribute());
+		} else if (attr.isFormScoped() && !Objects.equals(attr.getFormId(), input.getFormId())) {
+			throw OpenSpecimenException.userError(PvErrorCode.FORM_ATTR_FORM_MISMATCH, attr.getPublicId(), attr.getFormId(), input.getFormId());
+		}
+
+		return attr.getPublicId();
+	}
+
+	private String getPvDefaultValue(String attribute, Object defaultValue) {
+		if (defaultValue instanceof Map<?, ?> valueMap) {
+			defaultValue = valueMap.get("value");
+		}
+
+		if (defaultValue == null) {
+			return null;
+		}
+
+		com.krishagni.catissueplus.core.administrative.domain.PermissibleValue defaultPv =
+			daoFactory.getPermissibleValueDao().getByValue(attribute, defaultValue.toString());
+		if (defaultPv == null || "Disabled".equals(defaultPv.getActivityStatus())) {
+			return null;
+		}
+
+		return defaultPv.getValue();
+	}
+
+	private boolean isLegacyPvConvertibleField(Control field) {
+		return field instanceof ComboBox || field instanceof RadioButton ||
+			field instanceof MultiSelectListBox || field instanceof MultiSelectCheckBox;
+	}
+
+	private ResponseEvent<Map<String, Object>> restorePvConversion(final PvConversion conversion, final String createdAttribute) {
+		Exception schemaRestoreError = null;
+		if (conversion != null) {
+			try {
+				DbUtil.newTxn(
+					() -> {
+						conversion.dropNewColumn();
+						return null;
+					}
+				);
+			} catch (Exception e) {
+				logger.error("Error dropping new column after PV field conversion", e);
+				schemaRestoreError = e;
+			}
+
+			try {
+				DbUtil.newTxn(
+					() -> {
+						conversion.restoreOldColumn();
+						return null;
+					}
+				);
+			} catch (Exception e) {
+				logger.error("Error restoring old column after PV field conversion", e);
+				if (schemaRestoreError == null) {
+					schemaRestoreError = e;
+				}
+			}
+		}
+
+		Exception attributeDeleteError = null;
+		try {
+			DbUtil.newTxn(
+				() -> {
+					deleteCreatedPvAttribute(createdAttribute);
+					return null;
+				}
+			);
+		} catch (Exception e) {
+			logger.error("Error deleting PV attribute after PV field conversion", e);
+			attributeDeleteError = e;
+		}
+
+		if (schemaRestoreError != null) {
+			return ResponseEvent.userError(FormErrorCode.PV_CONV_SCHEMA_RESET_FAILED, schemaRestoreError.getMessage());
+		} else if (attributeDeleteError != null) {
+			return ResponseEvent.userError(FormErrorCode.PV_CONV_ROLLBACK_FAILED, createdAttribute, attributeDeleteError.getMessage());
+		}
+
+		return null;
+	}
+
+	private void deleteCreatedPvAttribute(String attributeName) {
+		if (StringUtils.isBlank(attributeName)) {
+			return;
+		}
+
+		PvAttribute attribute = daoFactory.getPermissibleValueDao().getAttribute(attributeName);
+		if (attribute == null || !attribute.isFormScoped()) {
+			return;
+		}
+
+		daoFactory.getPermissibleValueDao().deleteAttribute(attributeName);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> findField(Map<String, Object> props, String[] parts) {
+		List<List<Map<String, Object>>> rows = (List<List<Map<String, Object>>>) props.get("rows");
+		if (rows == null) {
+			rows = Collections.emptyList();
+		}
+
+		for (int i = 0; i < parts.length - 1; ++i) {
+			Map<String, Object> sfProps = findField(rows, parts[i]);
+			if (sfProps == null) {
+				return null;
+			}
+
+			rows = (List<List<Map<String, Object>>>) sfProps.get("rows");
+		}
+
+		return findField(rows, parts[parts.length - 1]);
+	}
+
+	private Map<String, Object> findField(List<List<Map<String, Object>>> rows, String field) {
+		for (List<Map<String, Object>> row : rows) {
+			for (Map<String, Object> fieldProps : row) {
+				if (StringUtils.equals(field, (String) fieldProps.get("name"))) {
+					return fieldProps;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private class PvConversion {
+		private final String table;
+
+		private final String column;
+
+		private final String oldColumn;
+
+		private final String attribute;
+
+		private boolean renamed;
+
+		private boolean added;
+
+		private PvConversion(Control field, String attribute) {
+			this.table     = field instanceof MultiSelectControl multiSelect
+				? multiSelect.getTableName()
+				: field.getContainer().getDbTableName();
+
+			this.column    = field.getDbColumnName();
+			this.oldColumn = this.column + "_old";
+			this.attribute = attribute;
+
+			if (DbUtil.doesColumnExist(table, oldColumn)) {
+				throw OpenSpecimenException.userError(FormErrorCode.PV_CONV_BKP_COL_EXISTS, field.getName(), oldColumn);
+			}
+		}
+
+		private void updateSchema() {
+			JdbcDao jdbcDao = JdbcDaoFactory.getJdbcDao();
+
+			jdbcDao.executeDDL(String.format(RENAME_COLUMN_DDL, table, column, oldColumn));
+			renamed = true;
+
+			jdbcDao.executeDDL(String.format(ADD_COLUMN_DDL, table, column, DbSettingsFactory.getDbSettings().getIntegerColType()));
+			added = true;
+
+			String dmlTmpl   = DbSettingsFactory.isOracle() ? SET_PV_IDS_SQL_ORA : SET_PV_IDS_SQL_MYSQL;
+			String updateDml = String.format(dmlTmpl, table, oldColumn, column);
+			jdbcDao.executeUpdate(updateDml, Collections.singletonList(attribute));
+		}
+
+		private void dropNewColumn() {
+			JdbcDao jdbcDao = JdbcDaoFactory.getJdbcDao();
+			if (added && DbUtil.doesColumnExist(table, column)) {
+				jdbcDao.executeDDL(String.format(DROP_COLUMN_DDL, table, column));
+			}
+		}
+
+		private void restoreOldColumn() {
+			JdbcDao jdbcDao = JdbcDaoFactory.getJdbcDao();
+			if (renamed && DbUtil.doesColumnExist(table, oldColumn) && !DbUtil.doesColumnExist(table, column)) {
+				jdbcDao.executeDDL(String.format(RENAME_COLUMN_DDL, table, oldColumn, column));
+			}
 		}
 	}
 
@@ -2504,4 +2807,35 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	private static final String FORM_SAVE_NOTIF_TMPL = "form_data_save_notif";
 
 	private static final String FORM_DELETE_NOTIF_TMPL = "form_data_delete_notif";
+
+	private static final String RENAME_COLUMN_DDL = "alter table %s rename column %s to %s";
+
+	private static final String ADD_COLUMN_DDL = "alter table %s add %s %s";
+
+	private static final String DROP_COLUMN_DDL = "alter table %s drop column %s";
+
+	private static final String SET_PV_IDS_SQL_ORA =
+		"merge into " +
+		"  %s d " +
+		"using (" +
+		"  select " +
+		"    identifier, value " +
+		"  from " +
+		"    catissue_permissible_value " +
+		"  where " +
+		"    public_id = ? and " +
+		"    activity_status in ('Active', 'Closed')" +
+		") p on (d.%s = p.value) " +
+		"when matched then " +
+		"  update set d.%s = p.identifier";
+
+	private static final String SET_PV_IDS_SQL_MYSQL =
+		"update " +
+		"  %s d " +
+		"  left join catissue_permissible_value p " +
+		"    on p.public_id = ? and " +
+		"       p.activity_status in ('Active', 'Closed') and " +
+		"       p.value = d.%s " +
+		"set " +
+		"  d.%s = p.identifier";
 }

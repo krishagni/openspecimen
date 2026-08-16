@@ -141,8 +141,12 @@
       :subForm="ctx.selectedCard"
       @return-to-main="onReturnToMainForm"
       @save="onSubFormSave"
+      @form-updated="onFormUpdated"
     />
   </div>
+
+  <ConvertToPvFieldDialog :visible="pvConversion.visible" :field="pvConversion.field" :form="main"
+    :saving="ctx.saving" @cancel="cancelPvConversion" @convert="convertToPvField" />
 </template>
 
 <script>
@@ -160,8 +164,10 @@ import { useConfirm } from "primevue/useconfirm";
 import { VueDraggableNext } from "vue-draggable-next";
 
 import ChangeFieldTypeMenu from "./ChangeFieldTypeMenu.vue"
+import ConvertToPvFieldDialog from "./ConvertToPvFieldDialog.vue"
 import fieldsRegistry from "../services/FieldsRegistry.js";
 import utility from "../services/Utility.js";
+import http from "@/common/services/HttpClient.js";
 
 export default {
   name: "FormCanvas",
@@ -180,6 +186,7 @@ export default {
     Menu,
     Breadcrumb,
     ChangeFieldTypeMenu,
+    ConvertToPvFieldDialog,
     draggable: VueDraggableNext,
   },
 
@@ -575,11 +582,53 @@ export default {
         return;
       }
 
-      setTimeout(() => titleRef.value.$el.focus(), 100);
+      setTimeout(() => titleRef.value?.$el?.focus(), 100);
     });
 
 
+    let pvConversion = reactive({visible: false, field: {}});
+
     let changeFieldType = function (field, type) {
+      if (type.pvConversion) {
+        pvConversion.field = field;
+        pvConversion.visible = true;
+        return;
+      }
+
+      _changeFieldType(field, type);
+    }
+
+    let convertToPvField = async function (selection) {
+      let field = pvConversion.field;
+      let fieldName = props.subForm ? props.subForm.name + '.' + field.name : field.name;
+      let input = {
+        name: fieldName,
+        attribute: selection.attribute,
+        newAttributeCaption: selection.newAttributeCaption,
+        useFormOptions: selection.useFormOptions
+      };
+
+      ctx.saving = true;
+      try {
+        let result = await http.put('forms/' + props.main.id + '/convert-to-pv', input);
+        Object.assign(field, result);
+        field.$saved = true;
+        pvConversion.visible = false;
+        ctx.selectedCard = field;
+        setTimeout(() => ctx.selectedCard = null, 100);
+        emit('form-updated', {form: props.main});
+      } catch {
+        return;
+      } finally {
+        ctx.saving = false;
+      }
+    };
+
+    let cancelPvConversion = function () {
+      pvConversion.visible = false;
+    };
+
+    let _changeFieldType = function (field, type) {
       let oldType = field.type;
       let oldDefValue = field.defaultValue;
       let oldMultiple = field.multiple;
@@ -607,6 +656,10 @@ export default {
       );
     }
 
+    let onFormUpdated = function (data) {
+      emit('form-updated', data);
+    };
+
     return {
       form,
       fields,
@@ -622,9 +675,13 @@ export default {
       cancel,
       fieldMetadata,
       hierarchy,
+      pvConversion,
+      convertToPvField,
+      cancelPvConversion,
       goBackToMainForm,
       onReturnToMainForm,
       onSubFormSave,
+      onFormUpdated,
       onMoveField,
       titleRef,
       changeFieldType

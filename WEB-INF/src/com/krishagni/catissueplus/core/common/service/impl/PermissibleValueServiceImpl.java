@@ -34,6 +34,7 @@ import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.service.PermissibleValueService;
 import com.krishagni.catissueplus.core.common.util.SessionUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.domain.FormErrorCode;
 import com.krishagni.catissueplus.core.de.events.UpdateFormPvAttributesOp;
 import com.krishagni.catissueplus.core.de.services.FormService;
 
@@ -118,7 +119,7 @@ public class PermissibleValueServiceImpl implements PermissibleValueService {
 			if (input.getFormId() != null) {
 				Container form = Container.getContainer(input.getFormId());
 				if (form == null) {
-					throw OpenSpecimenException.userError(PvErrorCode.NOT_FOUND, input.getFormId());
+					throw OpenSpecimenException.userError(FormErrorCode.NOT_FOUND, input.getFormId(), 1);
 				}
 
 				if (StringUtils.isBlank(attributeName)) {

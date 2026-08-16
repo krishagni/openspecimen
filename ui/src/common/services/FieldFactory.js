@@ -216,6 +216,10 @@ class FieldFactory {
       fs.attribute = field.attribute;
       fs.leafValue = field.leafValue;
       fs.multiple = field.multiple == true;
+      fs.defaultValue = field.defaultValue;
+      if (fs.multiple) {
+        fs.defaultValue = fs.defaultValue ? [fs.defaultValue] : [];
+      }
     } else if (field.type == 'pvCheckbox' || field.type == 'pvRadioButton') {
       fs.type = field.type;
       fs.attribute = field.attribute;

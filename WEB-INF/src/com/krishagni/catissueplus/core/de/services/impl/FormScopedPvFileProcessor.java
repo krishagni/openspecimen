@@ -160,7 +160,7 @@ public class FormScopedPvFileProcessor implements FormDefinitionFileProcessor, F
 	@Override
 	@PlusTransactional
 	public void onDelete(Container form) {
-		daoFactory.getPermissibleValueDao().deleteFormAttributes(form.getId());
+		daoFactory.getPermissibleValueDao().archiveFormAttributes(form.getId());
 	}
 
 	private void exportAttribute(File pvsDir, PvAttribute attribute) {

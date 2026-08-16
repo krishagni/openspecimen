@@ -13,6 +13,7 @@ import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.de.events.AddRecordEntryOp;
+import com.krishagni.catissueplus.core.de.events.ConvertToPvFieldOp;
 import com.krishagni.catissueplus.core.de.events.EntityFormRecords;
 import com.krishagni.catissueplus.core.de.events.FileDetail;
 import com.krishagni.catissueplus.core.de.events.FormContextDetail;
@@ -51,6 +52,8 @@ public interface FormService {
 	ResponseEvent<FormSummary> importForm(RequestEvent<String> req);
 
 	public ResponseEvent<Long> saveForm(RequestEvent<Map<String, Object>> req);
+
+	ResponseEvent<Map<String, Object>> convertToPvField(RequestEvent<ConvertToPvFieldOp> req);
 
 	public ResponseEvent<Boolean> deleteForms(RequestEvent<BulkDeleteEntityOp> req);
 	

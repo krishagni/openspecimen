@@ -56,6 +56,17 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	}
 
 	@Override
+	public void deleteAttribute(String name) {
+		createNamedQuery(DELETE_PVS_BY_ATTRIBUTE)
+			.setParameter("attribute", name)
+			.executeUpdate();
+
+		createNamedQuery(DELETE_ATTRIBUTE_BY_NAME)
+			.setParameter("attribute", name)
+			.executeUpdate();
+	}
+
+	@Override
 	public PvAttribute promoteAttribute(String oldName, String newName, String caption) {
 		getCurrentSession().flush();
 		int inserted = createNativeQuery(INSERT_PROMOTED_ATTRIBUTE_SQL)
@@ -81,7 +92,7 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	}
 
 	@Override
-	public void deleteFormAttributes(Long formId) {
+	public void archiveFormAttributes(Long formId) {
 		createNativeQuery(CLOSE_FORM_ATTRIBUTE_PVS_SQL)
 			.setParameter("formId", formId)
 			.executeUpdate();
@@ -413,6 +424,10 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	private static final String GET_SPECIMEN_TYPES = FQN + ".getSpecimenTypes";
 
 	private static final String GET_SPECIMEN_CLASS = FQN + ".getSpecimenClass";
+
+	private static final String DELETE_PVS_BY_ATTRIBUTE = FQN + ".deleteByAttribute";
+
+	private static final String DELETE_ATTRIBUTE_BY_NAME = PvAttribute.class.getName() + ".deleteByName";
 
 	private static final String INSERT_PROMOTED_ATTRIBUTE_SQL =
 		"insert into catissue_cde " +

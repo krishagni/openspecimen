@@ -67,5 +67,12 @@
         pv.attribute = 'specimen_type' and
         cpv.value = :type
     </query>
+
+    <query name="deleteByAttribute">
+      delete from
+        com.krishagni.catissueplus.core.administrative.domain.PermissibleValue pv
+      where
+        pv.attribute = :attribute
+    </query>
   </class>
 </hibernate-mapping>

@@ -48,24 +48,36 @@ class Utility {
             .toLowerCase();
     }
 
+    toPvAttributeName(formName, caption) {
+        return (formName + '_' + caption).normalize('NFD')
+            .replaceAll(/\p{M}/gu, '')
+            .replaceAll(/[^A-Za-z0-9]+/g, '_')
+            .replaceAll(/^_+|_+$/g, '')
+            .toLowerCase() || 'form_dropdown';
+    }
+
     getInterchangeableTypes(field) {
         if (field.type == 'radiobutton') {
           return [
             { name: 'combobox', caption: 'Dropdown' },
-            { name: 'stringTextField', caption: 'Text Field' }
+            { name: 'stringTextField', caption: 'Text Field' },
+            { name: 'pvField', caption: 'Permissible Value', pvConversion: true }
           ]
         } else if (field.type == 'combobox') {
           return [
             { name: 'radiobutton', caption: 'Radio Button' },
-            { name: 'stringTextField', caption: 'Text Field' }
+            { name: 'stringTextField', caption: 'Text Field' },
+            { name: 'pvField', caption: 'Permissible Value', pvConversion: true }
           ]
         } else if (field.type == 'checkbox') {
           return [
-            { name: 'multiSelectListbox', caption: 'Multiselect Dropdown' }
+            { name: 'multiSelectListbox', caption: 'Multiselect Dropdown' },
+            { name: 'pvField', caption: 'Permissible Value', pvConversion: true }
           ]
         } else if (field.type == 'multiSelectListbox') {
           return [
-            { name: 'checkbox', caption: 'Checkbox' }
+            { name: 'checkbox', caption: 'Checkbox' },
+            { name: 'pvField', caption: 'Permissible Value', pvConversion: true }
           ]
         } else if (field.type == 'pvRadioButton') {
           return [

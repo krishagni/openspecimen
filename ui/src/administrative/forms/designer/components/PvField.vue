@@ -5,9 +5,7 @@
         <div class="p-field p-col-12">
           <label> Options </label>
           <div class="dropdown-selector">
-            <Dropdown v-model="fm.attribute"
-              :options="pvAttrsList" option-label="name" option-value="attribute"
-              :filter="true" @filter="searchAttributes" @change="selectAttribute" />
+            <PvAttributeDropdown v-model="fm.attribute" :form-id="main.id" @select="selectAttribute" />
             <Button icon="pi pi-plus" aria-label="Add Dropdown" class="p-button-text"
               v-tooltip.bottom="'Add Dropdown'" @click="showAddDropdown" />
             <Button v-if="selectedAttribute && selectedAttribute.formId"
@@ -39,6 +37,12 @@
         <div class="p-field p-col-4" v-if="displayType != 'dropdown'">
           <label> Options Per Row </label>
           <InputNumber v-model="fm.optionsPerRow" :min="1" />
+        </div>
+
+        <div class="p-field p-col-12">
+          <label> Default Value </label>
+          <AutoComplete v-model="defaultPv" field="value" :suggestions="pvs"
+            :dropdown="true" @complete="searchPv($event)" />
         </div>
       </div>
     </CommonFieldProps>
@@ -127,7 +131,6 @@
 import { computed, reactive, ref, watch } from "vue";
 import AutoComplete from "primevue/autocomplete";
 import Checkbox from "primevue/checkbox";
-import Dropdown from "primevue/dropdown";
 import InputNumber from "primevue/inputnumber";
 import InputSwitch from "primevue/inputswitch";
 import InputText from "primevue/inputtext";
@@ -138,6 +141,7 @@ import Paginator from "primevue/paginator";
 import RadioButton from "primevue/radiobutton";
 import { useToast } from "primevue/usetoast";
 import CommonFieldProps from "./CommonFieldProps.vue";
+import PvAttributeDropdown from "./PvAttributeDropdown.vue";
 
 import http from "@/common/services/HttpClient.js";
 import utility from "../services/Utility.js";
@@ -149,7 +153,6 @@ export default {
     CommonFieldProps,
     AutoComplete,
     Checkbox,
-    Dropdown,
     InputNumber,
     InputSwitch,
     InputText,
@@ -158,6 +161,7 @@ export default {
     Dialog,
     Paginator,
     RadioButton,
+    PvAttributeDropdown,
   },
 
   props: {
@@ -184,7 +188,13 @@ export default {
       if (props.displayType == 'radio') {
         fm.multiple = false;
       }
-      fm["$unused"] = fm.defaultValue;
+
+      if (props.displayType == 'dropdown') {
+        let defaultPv = fm.defaultValue ? {value: fm.defaultValue} : null;
+        fm["$unused"] = fm.multiple ? (defaultPv ? [defaultPv] : []) : defaultPv;
+      } else {
+        fm["$unused"] = fm.defaultValue;
+      }
     }
 
     if (props.displayType != 'dropdown' && !fm.optionsPerRow) {
@@ -194,6 +204,10 @@ export default {
     let pvs         = ref([]);
     let hasMorePvs  = ref(false);
     let cachedPvs   = {};
+    let defaultPv   = computed({
+      get: () => fm.defaultValue ? {value: fm.defaultValue} : null,
+      set: (pv) => fm.defaultValue = pv?.value || null
+    });
     let optionRows  = computed(() => utility.getOptionRows(pvs.value, fm.optionsPerRow));
     let optionWidth = computed(() => utility.getOptionWidth(fm.optionsPerRow));
 
@@ -221,7 +235,6 @@ export default {
       });
     };
 
-    let pvAttrsList = ref([]);
     let selectedAttribute = ref(null);
 
     //
@@ -251,66 +264,29 @@ export default {
 
     watch(() => fm.leafValue, _loadPreviewPvs);
 
-    //
-    // Merges server results while retaining the currently selected attribute for display.
-    //
-    let _mergeAttributes = (lists) => {
-      let attributes = new Map();
-      if (selectedAttribute.value) {
-        attributes.set(selectedAttribute.value.attribute, selectedAttribute.value);
-      }
-
-      lists.flat().forEach(attr => attributes.set(attr.attribute, attr));
-      pvAttrsList.value = Array.from(attributes.values());
-    };
+    let currentAttribute = fm.attribute;
 
     //
-    // Loads the first attribute page or searches attributes by both caption and internal name.
+    // Clears an invalid default when the attribute changes and retains the selected attribute
+    // detail used to identify form-scoped attributes.
     //
-    let _loadAttributes = async (query) => {
-      let params = {formId: props.main.id, maxResults: 100};
-      if (!query) {
-        _mergeAttributes([await http.get("permissible-values/attributes", params)]);
+    let selectAttribute = (attribute) => {
+      let newAttribute = attribute?.attribute;
+
+      // Ignore a stale selection emitted by an earlier asynchronous attribute load.
+      if (newAttribute != fm.attribute) {
         return;
       }
 
-      let [byCaption, byAttribute] = await Promise.all([
-        http.get("permissible-values/attributes", {...params, name: query}),
-        http.get("permissible-values/attributes", {...params, attribute: query})
-      ]);
-      _mergeAttributes([byCaption, byAttribute]);
-    };
-
-    //
-    // Loads the selected attribute explicitly because it might not be present in the first page.
-    //
-    let _loadSelectedAttribute = async () => {
-      if (!fm.attribute) {
-        return;
+      if (currentAttribute != newAttribute) {
+        fm.defaultValue = null;
+        currentAttribute = newAttribute;
       }
 
-      let list = await http.get("permissible-values/attributes", {
-        formId: props.main.id, attribute: fm.attribute, maxResults: 100
-      });
-      selectedAttribute.value = list.find(attr => attr.attribute == fm.attribute) || null;
-      _mergeAttributes([list]);
-    };
-
-    //
-    // Handles server-side filtering of the potentially large attribute list.
-    //
-    let searchAttributes = (event) => _loadAttributes(event.value.trim());
-
-    //
-    // Retains the complete selected attribute detail used to identify form-scoped attributes.
-    //
-    let selectAttribute = (event) => {
-      selectedAttribute.value = pvAttrsList.value.find(attr => attr.attribute == event.value) || null;
+      selectedAttribute.value = attribute;
       _loadPreviewPvs();
     };
 
-    _loadAttributes();
-    _loadSelectedAttribute();
     _loadPreviewPvs();
 
     let dropdownDialog = reactive({visible: false, caption: '', options: '', saving: false});
@@ -363,9 +339,7 @@ export default {
         }
 
         fm.attribute = attr.attribute;
-        selectedAttribute.value = attr;
-        _mergeAttributes([[attr]]);
-        await _loadPreviewPvs();
+        selectAttribute(attr);
         dropdownDialog.visible = false;
       } finally {
         dropdownDialog.saving = false;
@@ -463,14 +437,13 @@ export default {
 
     return {
       fm,
+      defaultPv,
       pvs,
       searchPv,
       optionRows,
       optionWidth,
       hasMorePvs,
-      pvAttrsList,
       selectedAttribute,
-      searchAttributes,
       selectAttribute,
       dropdownDialog,
       manageDialog,
@@ -495,7 +468,7 @@ export default {
   gap: 0.25rem;
 }
 
-.dropdown-selector .p-dropdown {
+.dropdown-selector .p-autocomplete {
   flex: 1;
   min-width: 0;
 }

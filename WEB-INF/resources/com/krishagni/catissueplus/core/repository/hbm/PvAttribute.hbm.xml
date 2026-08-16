@@ -19,5 +19,12 @@
     <property name="formId" column="FORM_ID" />
 
     <property name="deletedOn" column="DELETED_ON" />
+
+    <query name="deleteByName">
+      delete from
+        com.krishagni.catissueplus.core.administrative.domain.PvAttribute attr
+      where
+        attr.publicId = :attribute
+    </query>
   </class>
 </hibernate-mapping>

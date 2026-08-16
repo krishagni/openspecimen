@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import InputText from "primevue/inputtext";
 import InputSwitch from "primevue/inputswitch";
 import Checkbox from "primevue/checkbox";
@@ -101,9 +101,9 @@ export default {
     }
 
     let labelRef = ref(null);
-    onMounted(() => {
-      setTimeout(() => labelRef.value.$el.focus(), 100);
-    });
+    let focusTimeout;
+    onMounted(() => focusTimeout = setTimeout(() => labelRef.value?.$el?.focus(), 100));
+    onBeforeUnmount(() => clearTimeout(focusTimeout));
 
     return {
       fm,

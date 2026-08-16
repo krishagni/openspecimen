@@ -6,7 +6,7 @@
       <div class="hint">Loading...</div>
     </div>
     <div class="designer" v-else>
-      <form-canvas :main="form" @save="onSave" @done="onDone"/>
+      <form-canvas :main="form" @save="onSave" @done="onDone" @form-updated="onFormUpdated"/>
     </div>
   </BlockUI>
 </template>
@@ -85,11 +85,16 @@ export default {
       }
     }
 
+    let onFormUpdated = function (data) {
+      emit('form-saved', data);
+    };
+
     return {
       loading,
       form,
       onSave,
       onDone,
+      onFormUpdated,
       saving,
     };
   },

@@ -25,7 +25,9 @@ public enum PvErrorCode implements ErrorCode {
 	
 	NOT_FOUND,
 
-	IN_USE;
+	IN_USE,
+
+	ATTR_NOT_FOUND;
 
 	@Override
 	public String code() {		

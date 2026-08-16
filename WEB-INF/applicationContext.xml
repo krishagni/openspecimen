@@ -600,6 +600,7 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="deDaoFactory" ref="deDaoFactory"/>
     <property name="exportSvc" ref="exportSvc"/>
+    <property name="pvSvc" ref="permissibleValueSvc"/>
     <property name="ctxtProcs">
       <map>
         <entry key="ParticipantExtension">
