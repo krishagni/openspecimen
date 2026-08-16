@@ -6,6 +6,8 @@ public enum FormErrorCode implements ErrorCode {
 	NOT_FOUND,
 	
 	INVALID_REQ,
+
+	ID_REQ,
 	
 	NAME_REQUIRED,
 
@@ -55,7 +57,17 @@ public enum FormErrorCode implements ErrorCode {
 
 	INV_DATA_STATUS,
 
-	TOO_MANY_FIELDS;
+	TOO_MANY_FIELDS,
+
+	INV_PV_CONVERSION,
+
+	PV_CONV_BKP_COL_EXISTS,
+
+	PV_CONV_SCHEMA_RESET_FAILED,
+
+	PV_CONV_ROLLBACK_FAILED,
+
+	FIELD_FQN_REQ;
 
 	@Override
 	public String code() {

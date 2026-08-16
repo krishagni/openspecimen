@@ -44,6 +44,7 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.FormErrorCode;
+import com.krishagni.catissueplus.core.de.events.ConvertToPvFieldOp;
 import com.krishagni.catissueplus.core.de.events.FormContextDetail;
 import com.krishagni.catissueplus.core.de.events.FormContextRevisionDetail;
 import com.krishagni.catissueplus.core.de.events.FormDataDetail;
@@ -244,6 +245,20 @@ public class FormsController {
 
 		formId = ResponseEvent.unwrap(formSvc.saveForm(RequestEvent.wrap(props)));
 		return Collections.singletonMap("id", formId);
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value="{id}/convert-to-pv")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Object> convertToPvField(
+		@PathVariable("id")
+		Long formId,
+
+		@RequestBody
+		ConvertToPvFieldOp input) {
+
+		input.setFormId(formId);
+		return ResponseEvent.unwrap(formSvc.convertToPvField(RequestEvent.wrap(input)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value="{id}/fields")
