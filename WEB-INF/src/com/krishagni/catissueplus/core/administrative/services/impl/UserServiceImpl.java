@@ -807,6 +807,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		}
 
 		resetAttrs(existingUser, user);
+		user.setId(existingUser.getId());
 
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		ensureUniqueEmail(existingUser, user, ose);
