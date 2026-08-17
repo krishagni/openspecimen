@@ -875,7 +875,7 @@ public class Specimen extends BaseExtensionEntity {
 	@Override
 	public Long getCpId() {
 		if (getCollectionProtocol() == null) {
-			throw OpenSpecimenException.userError(CpErrorCode.REQUIRED);
+			throw OpenSpecimenException.userError(CpErrorCode.REQ_OR_INV);
 		}
 
 		return getCollectionProtocol().getId();

@@ -100,6 +100,8 @@ public enum CpErrorCode implements ErrorCode {
 
 	REQUIRED,
 
+	REQ_OR_INV,
+
 	RPT_DISABLED,
 
 	RPT_FILE_NOT_FOUND,
