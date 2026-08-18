@@ -1785,8 +1785,12 @@ public class StorageContainer extends BaseExtensionEntity {
 	private void updateContainerLocation(
 		Site otherSite, StorageContainer otherParentContainer, StorageContainerPosition otherPos,
 		User transferredBy, Date transferDate, String transferReasons, boolean checkOut) {
-		Site existing = site;
 
+		if (checkOut && (getStatus() == Status.CHECKED_OUT || getBlockedPosition() != null)) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.CHECKED_OUT_ALREADY, getName());
+		}
+
+		Site existing = site;
 		if (Objects.equals(site, otherSite) &&
 			Objects.equals(parentContainer, otherParentContainer) &&
 			StorageContainerPosition.areSame(position, otherPos)) {
