@@ -270,24 +270,24 @@ public class MigrateFormFiles implements InitializingBean {
 
 	private static final String MYSQL_ASSOCIATE_FILES_SQL =
 		"update " +
-		"  dyextn_form_files file " +
+		"  dyextn_form_files dfile " +
 		"  inner join (" + FILE_RECORDS_SQL + ") rec " +
-		"    on rec.form_id = file.form_id and rec.record_id = file.record_id " +
+		"    on rec.form_id = dfile.form_id and rec.record_id = dfile.record_id " +
 		"set " +
-		"  file.object_type = rec.object_type, " +
-		"  file.object_id = rec.object_id " +
+		"  dfile.object_type = rec.object_type, " +
+		"  dfile.object_id = rec.object_id " +
 		"where " +
-		"  file.object_id is null";
+		"  dfile.object_id is null";
 
 	private static final String ORACLE_ASSOCIATE_FILES_SQL =
 		"merge into " +
-		"  dyextn_form_files file " +
+		"  dyextn_form_files dfile " +
 		"using (" + FILE_RECORDS_SQL + ") rec " +
-		"  on (rec.form_id = file.form_id and rec.record_id = file.record_id) " +
+		"  on (rec.form_id = dfile.form_id and rec.record_id = dfile.record_id) " +
 		"when matched then " +
 		"  update set " +
-		"    file.object_type = rec.object_type, " +
-		"    file.object_id = rec.object_id " +
+		"    dfile.object_type = rec.object_type, " +
+		"    dfile.object_id = rec.object_id " +
 		"where " +
-		"  file.object_id is null";
+		"  dfile.object_id is null";
 }
