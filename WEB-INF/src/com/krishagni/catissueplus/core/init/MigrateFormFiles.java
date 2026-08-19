@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.init;
 
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,9 @@ public class MigrateFormFiles implements InitializingBean {
 
 		logger.info("Migrating form files...");
 		migrateFormFiles();
+
+		logger.info("Associating form files with their objects...");
+		associateFormFilesWithObjects();
 	}
 
 	private void migrateFormFiles() {
@@ -71,8 +75,23 @@ public class MigrateFormFiles implements InitializingBean {
 	}
 
 	@PlusTransactional
+	private void associateFormFilesWithObjects() {
+		sessionFactory.getCurrentSession().doWork(
+			connection -> {
+				String dbProductName = connection.getMetaData().getDatabaseProductName();
+				boolean isOracle = dbProductName.toLowerCase().contains("oracle");
+				try (Statement stmt = connection.createStatement()) {
+					stmt.executeUpdate(isOracle ? ORACLE_ASSOCIATE_FILES_SQL : MYSQL_ASSOCIATE_FILES_SQL);
+				}
+			}
+		);
+	}
+
+	@PlusTransactional
 	private boolean areFormFilesMigrated() {
-		Number count = sessionFactory.getCurrentSession().createNativeQuery(GET_MIGRATED_FILES_COUNT, Long.class).uniqueResult();
+		Number count = sessionFactory.getCurrentSession()
+			.createNativeQuery(GET_MIGRATED_FILES_COUNT, Long.class)
+			.uniqueResult();
 		return count != null && count.longValue() > 0L;
 	}
 
@@ -206,4 +225,69 @@ public class MigrateFormFiles implements InitializingBean {
 		"  dyextn_form_files (form_id, record_id, file_id, file_type, filename) " +
 		"values " +
 		"  (?, ?, ?, ?, ?)";
+
+	private static final String FILE_RECORDS_SQL =
+		"select " +
+		"  fc.container_id as form_id, re.record_id, fc.entity_type as object_type, re.object_id " +
+		"from " +
+		"  catissue_form_record_entry re " +
+		"  inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id " +
+
+		"union all " +
+
+		"select " +
+		"  form_id, record_id, 'CollectionProtocolExtension', cp_id " +
+		"from " +
+		"  os_cp_cust_fields " +
+
+		"union all " +
+
+		"select " +
+		"  form_id, record_id, 'ParticipantExtension', cpr_id " +
+		"from " +
+		"  os_cpr_cust_fields " +
+
+		"union all " +
+
+		"select " +
+		"  form_id, record_id, 'VisitExtension', visit_id " +
+		"from " +
+		"  os_visit_cust_fields " +
+
+		"union all " +
+
+		"select " +
+		"  form_id, record_id, 'SpecimenExtension', specimen_id " +
+		"from " +
+		"  os_spmn_cust_fields " +
+
+		"union all " +
+
+		"select " +
+		"  form_id, record_id, 'OrderExtension', order_id " +
+		"from " +
+		"  os_order_cust_fields";
+
+	private static final String MYSQL_ASSOCIATE_FILES_SQL =
+		"update " +
+		"  dyextn_form_files file " +
+		"  inner join (" + FILE_RECORDS_SQL + ") rec " +
+		"    on rec.form_id = file.form_id and rec.record_id = file.record_id " +
+		"set " +
+		"  file.object_type = rec.object_type, " +
+		"  file.object_id = rec.object_id " +
+		"where " +
+		"  file.object_id is null";
+
+	private static final String ORACLE_ASSOCIATE_FILES_SQL =
+		"merge into " +
+		"  dyextn_form_files file " +
+		"using (" + FILE_RECORDS_SQL + ") rec " +
+		"  on (rec.form_id = file.form_id and rec.record_id = file.record_id) " +
+		"when matched then " +
+		"  update set " +
+		"    file.object_type = rec.object_type, " +
+		"    file.object_id = rec.object_id " +
+		"where " +
+		"  file.object_id is null";
 }

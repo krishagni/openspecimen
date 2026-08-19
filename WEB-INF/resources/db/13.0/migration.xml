@@ -580,4 +580,83 @@
   <changeSet author="vpawar" id="Report disposed specimens without disposal events">
     <customChange class="com.krishagni.catissueplus.core.upgrade.ReportDisposedSpecimensWithoutDisposalEvent" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Associate uploaded custom form files missed during 12.2 upgrade" dbms="mysql">
+    <sql>
+      update
+        dyextn_form_files file
+        inner join (
+          select
+            fc.container_id as form_id, re.record_id, fc.entity_type as object_type, re.object_id
+          from
+            catissue_form_record_entry re
+            inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+
+          union all
+
+          select form_id, record_id, 'CollectionProtocolExtension', cp_id from os_cp_cust_fields
+
+          union all
+
+          select form_id, record_id, 'ParticipantExtension', cpr_id from os_cpr_cust_fields
+
+          union all
+
+          select form_id, record_id, 'VisitExtension', visit_id from os_visit_cust_fields
+
+          union all
+
+          select form_id, record_id, 'SpecimenExtension', specimen_id from os_spmn_cust_fields
+
+          union all
+
+          select form_id, record_id, 'OrderExtension', order_id from os_order_cust_fields
+        ) rec on rec.form_id = file.form_id and rec.record_id = file.record_id
+      set
+        file.object_type = rec.object_type,
+        file.object_id = rec.object_id
+      where
+        file.object_id is null
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Associate uploaded custom form files missed during 12.2 upgrade" dbms="oracle">
+    <sql>
+      merge into
+        dyextn_form_files file
+      using (
+        select
+          fc.container_id as form_id, re.record_id, fc.entity_type as object_type, re.object_id
+        from
+          catissue_form_record_entry re
+          inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+
+        union all
+
+        select form_id, record_id, 'CollectionProtocolExtension', cp_id from os_cp_cust_fields
+
+        union all
+
+        select form_id, record_id, 'ParticipantExtension', cpr_id from os_cpr_cust_fields
+
+        union all
+
+        select form_id, record_id, 'VisitExtension', visit_id from os_visit_cust_fields
+
+        union all
+
+        select form_id, record_id, 'SpecimenExtension', specimen_id from os_spmn_cust_fields
+
+        union all
+
+        select form_id, record_id, 'OrderExtension', order_id from os_order_cust_fields
+      ) rec on (rec.form_id = file.form_id and rec.record_id = file.record_id)
+      when matched then
+        update set
+          file.object_type = rec.object_type,
+          file.object_id = rec.object_id
+        where
+          file.object_id is null
+    </sql>
+  </changeSet>
 </databaseChangeLog>
