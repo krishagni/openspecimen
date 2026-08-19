@@ -584,7 +584,7 @@
   <changeSet author="vpawar" id="Associate uploaded custom form files missed during 12.2 upgrade" dbms="mysql">
     <sql>
       update
-        dyextn_form_files file
+        dyextn_form_files dfile
         inner join (
           select
             fc.container_id as form_id, re.record_id, fc.entity_type as object_type, re.object_id
@@ -611,19 +611,19 @@
           union all
 
           select form_id, record_id, 'OrderExtension', order_id from os_order_cust_fields
-        ) rec on rec.form_id = file.form_id and rec.record_id = file.record_id
+        ) rec on rec.form_id = dfile.form_id and rec.record_id = dfile.record_id
       set
-        file.object_type = rec.object_type,
-        file.object_id = rec.object_id
+        dfile.object_type = rec.object_type,
+        dfile.object_id = rec.object_id
       where
-        file.object_id is null
+        dfile.object_id is null
     </sql>
   </changeSet>
 
   <changeSet author="vpawar" id="Associate uploaded custom form files missed during 12.2 upgrade" dbms="oracle">
     <sql>
       merge into
-        dyextn_form_files file
+        dyextn_form_files dfile
       using (
         select
           fc.container_id as form_id, re.record_id, fc.entity_type as object_type, re.object_id
@@ -650,13 +650,13 @@
         union all
 
         select form_id, record_id, 'OrderExtension', order_id from os_order_cust_fields
-      ) rec on (rec.form_id = file.form_id and rec.record_id = file.record_id)
+      ) rec on (rec.form_id = dfile.form_id and rec.record_id = dfile.record_id)
       when matched then
         update set
-          file.object_type = rec.object_type,
-          file.object_id = rec.object_id
+          dfile.object_type = rec.object_type,
+          dfile.object_id = rec.object_id
         where
-          file.object_id is null
+          dfile.object_id is null
     </sql>
   </changeSet>
 </databaseChangeLog>
