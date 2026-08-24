@@ -57,11 +57,11 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 
 	@Override
 	public void deleteAttribute(String name) {
-		createNamedQuery(DELETE_PVS_BY_ATTRIBUTE)
+		getCurrentSession().createNamedMutationQuery(DELETE_PVS_BY_ATTRIBUTE)
 			.setParameter("attribute", name)
 			.executeUpdate();
 
-		createNamedQuery(DELETE_ATTRIBUTE_BY_NAME)
+		getCurrentSession().createNamedMutationQuery(DELETE_ATTRIBUTE_BY_NAME)
 			.setParameter("attribute", name)
 			.executeUpdate();
 	}
