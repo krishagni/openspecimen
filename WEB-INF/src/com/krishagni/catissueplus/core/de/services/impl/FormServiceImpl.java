@@ -417,68 +417,69 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	}
 
 	@Override
-	@PlusTransactional
 	public ResponseEvent<Map<String, Object>> convertToPvField(RequestEvent<ConvertToPvFieldOp> req) {
 		AccessCtrlMgr.getInstance().ensureFormUpdateRights();
 
-		PvConversion conversion = null;
-		String createdAttribute = null;
+		PvConversionContext context = new PvConversionContext();
 		try {
-			ConvertToPvFieldOp input = req.getPayload();
-			if (input.getFormId() == null) {
-				return ResponseEvent.userError(FormErrorCode.ID_REQ);
-			} else if (StringUtils.isBlank(input.getName())) {
-				return ResponseEvent.userError(FormErrorCode.FIELD_FQN_REQ);
-			}
-
-			Container form = Container.getContainer(input.getFormId());
-			if (form == null) {
-				return ResponseEvent.userError(FormErrorCode.NOT_FOUND, input.getFormId(), 1);
-			}
-
-			Control field = form.getControl(input.getName(), "\\.");
-			if (!isLegacyPvConvertibleField(field)) {
-				return ResponseEvent.userError(FormErrorCode.INV_PV_CONVERSION, input.getName());
-			}
-
-			Map<String, Object> formProps = getFormProps(form);
-			formProps.put("id", form.getId());
-
-			Map<String, Object> fieldProps = findField(formProps, input.getName().split("\\."));
-			if (fieldProps == null) {
-				return ResponseEvent.userError(FormErrorCode.INV_PV_CONVERSION, input.getName());
-			}
-
-			String attribute = getPvAttribute(input, (SelectControl) field);
-			createdAttribute = input.isUseFormOptions() ? attribute : null;
-
-			conversion = new PvConversion(field, attribute);
-			conversion.updateSchema();
-
-			boolean multiple = field instanceof MultiSelectControl;
-			fieldProps.put("type", "pvField");
-			fieldProps.put("attribute", attribute);
-			fieldProps.put("multiple", multiple);
-			fieldProps.put("defaultValue", getPvDefaultValue(attribute, fieldProps.get("defaultValue")));
-			fieldProps.remove("pvs");
-			fieldProps.remove("optionsPerRow");
-
-			Container.enableSelectToLookupConversion();
-			try {
-				saveForm(new ContainerPropsParser(formProps).parse(), false);
-			} finally {
-				Container.disableSelectToLookupConversion();
-			}
-
-			Control convertedField = Container.getContainer(input.getFormId()).getControl(input.getName(), "\\.");
-			return ResponseEvent.response(convertedField.getProps());
+			return DbUtil.newTxn(() -> convertToPvField(req.getPayload(), context));
 		} catch (OpenSpecimenException ose) {
-			ResponseEvent<Map<String, Object>> restoreError = restorePvConversion(conversion, createdAttribute);
+			ResponseEvent<Map<String, Object>> restoreError = restorePvConversion(context.conversion, context.createdAttribute);
 			return restoreError != null ? restoreError : ResponseEvent.error(ose);
 		} catch (Exception e) {
-			ResponseEvent<Map<String, Object>> restoreError = restorePvConversion(conversion, createdAttribute);
+			ResponseEvent<Map<String, Object>> restoreError = restorePvConversion(context.conversion, context.createdAttribute);
 			return restoreError != null ? restoreError : ResponseEvent.serverError(e);
 		}
+	}
+
+	private ResponseEvent<Map<String, Object>> convertToPvField(ConvertToPvFieldOp input, PvConversionContext context) {
+		if (input.getFormId() == null) {
+			return ResponseEvent.userError(FormErrorCode.ID_REQ);
+		} else if (StringUtils.isBlank(input.getName())) {
+			return ResponseEvent.userError(FormErrorCode.FIELD_FQN_REQ);
+		}
+
+		Container form = Container.getContainer(input.getFormId());
+		if (form == null) {
+			return ResponseEvent.userError(FormErrorCode.NOT_FOUND, input.getFormId(), 1);
+		}
+
+		Control field = form.getControl(input.getName(), "\\.");
+		if (!isLegacyPvConvertibleField(field)) {
+			return ResponseEvent.userError(FormErrorCode.INV_PV_CONVERSION, input.getName());
+		}
+
+		Map<String, Object> formProps = getFormProps(form);
+		formProps.put("id", form.getId());
+
+		Map<String, Object> fieldProps = findField(formProps, input.getName().split("\\."));
+		if (fieldProps == null) {
+			return ResponseEvent.userError(FormErrorCode.INV_PV_CONVERSION, input.getName());
+		}
+
+		String attribute = getPvAttribute(input, (SelectControl) field);
+		context.createdAttribute = input.isUseFormOptions() ? attribute : null;
+
+		context.conversion = new PvConversion(field, attribute);
+		context.conversion.updateSchema();
+
+		boolean multiple = field instanceof MultiSelectControl;
+		fieldProps.put("type", "pvField");
+		fieldProps.put("attribute", attribute);
+		fieldProps.put("multiple", multiple);
+		fieldProps.put("defaultValue", getPvDefaultValue(attribute, fieldProps.get("defaultValue")));
+		fieldProps.remove("pvs");
+		fieldProps.remove("optionsPerRow");
+
+		Container.enableSelectToLookupConversion();
+		try {
+			saveForm(new ContainerPropsParser(formProps).parse(), false);
+		} finally {
+			Container.disableSelectToLookupConversion();
+		}
+
+		Control convertedField = Container.getContainer(input.getFormId()).getControl(input.getName(), "\\.");
+		return ResponseEvent.response(convertedField.getProps());
 	}
 
 	@Override
@@ -1630,6 +1631,12 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		return null;
 	}
 
+	private class PvConversionContext {
+		private PvConversion conversion;
+
+		private String createdAttribute;
+	}
+
 	private class PvConversion {
 		private final String table;
 
@@ -1639,9 +1646,27 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 		private final String attribute;
 
+		private final String oldColumnType;
+
+		private final boolean multiValued;
+
+		private final String foreignKey;
+
+		private final String uniqueIndex;
+
+		private final String recordIndex;
+
 		private boolean renamed;
 
+		private boolean madeOldColumnNullable;
+
+		private boolean droppedOldUniqueIndex;
+
 		private boolean added;
+
+		private boolean addedNewUniqueIndex;
+
+		private boolean addedRecordIndex;
 
 		private PvConversion(Control field, String attribute) {
 			this.table     = field instanceof MultiSelectControl multiSelect
@@ -1651,6 +1676,20 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			this.column    = field.getDbColumnName();
 			this.oldColumn = this.column + "_old";
 			this.attribute = attribute;
+			this.multiValued = field instanceof MultiSelectControl;
+			this.foreignKey = multiValued ? ((MultiSelectControl) field).getForeignKey() : null;
+			this.uniqueIndex = multiValued ? table + "_UQ" : null;
+			this.recordIndex = multiValued ? table + "_RECORD_IDX" : null;
+			this.oldColumnType = field.getColumnDefs()
+				.stream()
+				.filter(columnDef -> StringUtils.equalsIgnoreCase(columnDef.getColumnName(), column))
+				.map(columnDef -> columnDef.getDbType().replaceFirst("(?i)\\s+not\\s+null\\s*$", ""))
+				.findFirst()
+				.orElse(null);
+
+			if (multiValued && oldColumnType == null) {
+				throw new IllegalStateException("Unable to determine the database type of " + table + "." + column);
+			}
 
 			if (DbUtil.doesColumnExist(table, oldColumn)) {
 				throw OpenSpecimenException.userError(FormErrorCode.PV_CONV_BKP_COL_EXISTS, field.getName(), oldColumn);
@@ -1663,16 +1702,42 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			jdbcDao.executeDDL(String.format(RENAME_COLUMN_DDL, table, column, oldColumn));
 			renamed = true;
 
+			if (multiValued) {
+				jdbcDao.executeDDL(getModifyColumnConstraintDdl(table, oldColumn, oldColumnType, "null"));
+				madeOldColumnNullable = true;
+
+				jdbcDao.executeDDL(getDropIndexDdl(table, uniqueIndex));
+				droppedOldUniqueIndex = true;
+			}
+
 			jdbcDao.executeDDL(String.format(ADD_COLUMN_DDL, table, column, DbSettingsFactory.getDbSettings().getIntegerColType()));
 			added = true;
 
 			String dmlTmpl   = DbSettingsFactory.isOracle() ? SET_PV_IDS_SQL_ORA : SET_PV_IDS_SQL_MYSQL;
 			String updateDml = String.format(dmlTmpl, table, oldColumn, column);
 			jdbcDao.executeUpdate(updateDml, Collections.singletonList(attribute));
+
+			if (multiValued) {
+				jdbcDao.executeDDL(getUniqueIndexDdl(table, uniqueIndex, foreignKey, column));
+				addedNewUniqueIndex = true;
+
+				jdbcDao.executeDDL(String.format(CREATE_INDEX_DDL, recordIndex, table, foreignKey));
+				addedRecordIndex = true;
+			}
 		}
 
 		private void dropNewColumn() {
 			JdbcDao jdbcDao = JdbcDaoFactory.getJdbcDao();
+			if (addedRecordIndex) {
+				jdbcDao.executeDDL(getDropIndexDdl(table, recordIndex));
+				addedRecordIndex = false;
+			}
+
+			if (addedNewUniqueIndex) {
+				jdbcDao.executeDDL(getDropIndexDdl(table, uniqueIndex));
+				addedNewUniqueIndex = false;
+			}
+
 			if (added && DbUtil.doesColumnExist(table, column)) {
 				jdbcDao.executeDDL(String.format(DROP_COLUMN_DDL, table, column));
 			}
@@ -1682,7 +1747,31 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			JdbcDao jdbcDao = JdbcDaoFactory.getJdbcDao();
 			if (renamed && DbUtil.doesColumnExist(table, oldColumn) && !DbUtil.doesColumnExist(table, column)) {
 				jdbcDao.executeDDL(String.format(RENAME_COLUMN_DDL, table, oldColumn, column));
+				if (madeOldColumnNullable) {
+					jdbcDao.executeDDL(getModifyColumnConstraintDdl(table, column, oldColumnType, "not null"));
+				}
+
+				if (droppedOldUniqueIndex) {
+					jdbcDao.executeDDL(getUniqueIndexDdl(table, uniqueIndex, foreignKey, column));
+					droppedOldUniqueIndex = false;
+				}
 			}
+		}
+
+		private String getModifyColumnConstraintDdl(String table, String column, String type, String constraint) {
+			return DbSettingsFactory.isOracle()
+				? String.format(MODIFY_COLUMN_CONSTRAINT_DDL_ORA, table, column, constraint)
+				: String.format(MODIFY_COLUMN_CONSTRAINT_DDL_MYSQL, table, column, type, constraint);
+		}
+
+		private String getUniqueIndexDdl(String table, String indexName, String foreignKey, String valueColumn) {
+			return String.format(CREATE_UNIQUE_INDEX_DDL, indexName, table, valueColumn, foreignKey);
+		}
+
+		private String getDropIndexDdl(String table, String indexName) {
+			return DbSettingsFactory.isOracle()
+				? String.format(DROP_INDEX_DDL_ORA, indexName)
+				: String.format(DROP_INDEX_DDL_MYSQL, indexName, table);
 		}
 	}
 
@@ -2813,6 +2902,18 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	private static final String ADD_COLUMN_DDL = "alter table %s add %s %s";
 
 	private static final String DROP_COLUMN_DDL = "alter table %s drop column %s";
+
+	private static final String MODIFY_COLUMN_CONSTRAINT_DDL_ORA = "alter table %s modify %s %s";
+
+	private static final String MODIFY_COLUMN_CONSTRAINT_DDL_MYSQL = "alter table %s modify %s %s %s";
+
+	private static final String DROP_INDEX_DDL_ORA = "drop index %s";
+
+	private static final String DROP_INDEX_DDL_MYSQL = "drop index %s on %s";
+
+	private static final String CREATE_UNIQUE_INDEX_DDL = "create unique index %s on %s(%s, %s)";
+
+	private static final String CREATE_INDEX_DDL = "create index %s on %s(%s)";
 
 	private static final String SET_PV_IDS_SQL_ORA =
 		"merge into " +
