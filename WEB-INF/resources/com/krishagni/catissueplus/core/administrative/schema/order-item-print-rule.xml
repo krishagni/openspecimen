@@ -21,6 +21,11 @@
     </field>
 
     <field>
+      <caption>#getMessage("print_rule_sort_order")</caption>
+      <attribute>sortOrder</attribute>
+    </field>
+
+    <field>
       <caption>#getMessage("print_rule_activity_status")</caption>
       <attribute>activityStatus</attribute>
     </field>
