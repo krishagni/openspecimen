@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Populate specimen stats using collection receive details" runOnChange="true" dbms="mysql">
+    <sql>
+      drop procedure if exists populate_specimen_stats;
+    </sql>
+
+    <sql endDelimiter="//">
+      create procedure populate_specimen_stats()
+      begin
+        insert into tmp_specimen_stats (
+          specimen_id,
+          collection_time, collection_procedure_id,
+          collection_container_id, collector_id,
+          received_time,
+          received_quality_id, receiver_id,
+          frozen_time, processing_time, ischemia_time,
+          specimen_seq
+        )
+        select
+          c.identifier as specimen_id,
+          crd.collection_time, crd.collection_procedure_id,
+          crd.collection_container_id, crd.collection_user_id,
+          crd.received_time,
+          crd.received_quality_id, crd.received_user_id,
+          fe.event_timestamp as frozen_time,
+          timestampdiff(MINUTE, crd.received_time, fe.event_timestamp) as processing_time,
+          timestampdiff(MINUTE, crd.collection_time, fe.event_timestamp) as ischemia_time,
+          0
+        from
+          catissue_specimen c
+          inner join os_spmn_coll_recv_details crd on crd.primary_specimen_id = c.primary_specimen_id
+          left join (
+            select
+              fre.object_id as specimen_id, max(fep.event_timestamp) as event_timestamp
+            from
+              catissue_frozen_event_param fep
+              inner join catissue_form_record_entry fre on fre.record_id = fep.identifier
+              inner join catissue_form_context ffc on ffc.identifier = fre.form_ctxt_id
+              inner join dyextn_containers ff on ff.identifier = ffc.container_id and ff.name = 'SpecimenFrozenEvent'
+            group by
+              fre.object_id
+          ) fe on fe.specimen_id = c.primary_specimen_id
+        where
+          c.activity_status != 'Disabled' and
+          c.collection_status = 'Collected';
+
+        update
+          tmp_specimen_stats stats
+          inner join (
+            select
+              identifier,
+              dense_rank() over (partition by specimen_collection_group_id, parent_specimen_id, specimen_type_id order by identifier) as specimen_seq
+            from
+              catissue_specimen
+            where
+              activity_status = 'Active' and
+              availability_status = 'Available'
+          ) t on t.identifier = stats.specimen_id
+        set
+          stats.specimen_seq = t.specimen_seq;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Populate specimen stats using collection receive details" runOnChange="true" dbms="oracle">
+    <sql endDelimiter="//">
+      create or replace procedure populate_specimen_stats is
+      begin
+        execute immediate 'insert into tmp_specimen_stats (
+          specimen_id,
+          collection_time, collection_procedure_id,
+          collection_container_id, collector_id,
+          received_time,
+          received_quality_id, receiver_id,
+          frozen_time, processing_time, ischemia_time,
+          specimen_seq
+        )
+        select
+          c.identifier as specimen_id,
+          crd.collection_time, crd.collection_procedure_id,
+          crd.collection_container_id, crd.collection_user_id,
+          crd.received_time,
+          crd.received_quality_id, crd.received_user_id,
+          fe.event_timestamp as frozen_time,
+          round((cast(fe.event_timestamp as date) - cast(crd.received_time as date))*24*60) as processing_time,
+          round((cast(fe.event_timestamp as date) - cast(crd.collection_time as date))*24*60) as ischemia_time,
+          0
+        from
+          catissue_specimen c
+          inner join os_spmn_coll_recv_details crd on crd.primary_specimen_id = c.primary_specimen_id
+          left join (
+            select
+              fre.object_id as specimen_id, max(fep.event_timestamp) as event_timestamp
+            from
+              catissue_frozen_event_param fep
+              inner join catissue_form_record_entry fre on fre.record_id = fep.identifier
+              inner join catissue_form_context ffc on ffc.identifier = fre.form_ctxt_id
+              inner join dyextn_containers ff on ff.identifier = ffc.container_id and ff.name = ''SpecimenFrozenEvent''
+            group by
+              fre.object_id
+          ) fe on fe.specimen_id = c.primary_specimen_id
+        where
+          c.activity_status != ''Disabled'' and
+          c.collection_status = ''Collected''';
+
+        execute immediate 'merge into tmp_specimen_stats stats using (
+          select
+            identifier,
+            dense_rank() over (partition by specimen_collection_group_id, parent_specimen_id, specimen_type_id order by identifier) as specimen_seq
+          from
+            catissue_specimen
+          where
+            activity_status = ''Active'' and
+            availability_status = ''Available''
+        ) t on (t.identifier = stats.specimen_id)
+        when matched then
+          update set stats.specimen_seq = t.specimen_seq';
+      end;
+      //
+    </sql>
+  </changeSet>
+</databaseChangeLog>
+
