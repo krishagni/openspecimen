@@ -1941,6 +1941,7 @@
     "field_labels": "Field Labels",
     "fns": {
       "current_date": "Current Date",
+      "current_timestamp": "Current Date and Time",
       "months_between": "Months Between",
       "years_between": "Years Between",
       "minutes_between": "Minutes Between",

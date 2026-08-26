@@ -75,12 +75,13 @@ export default {
     dateFns: function() {
       const t = (fn) => this.$t('queries.fns.' + fn);
       return [
-        {caption: t('current_date'),    onSelect: () => this.insertExpr('current_date()')},
-        {caption: t('months_between'),  onSelect: () => this.insertExpr('months_between(<minuend>, <subtrahend>)')},
-        {caption: t('years_between'),   onSelect: () => this.insertExpr('years_between(<minuend>, <subtrahend>)')},
-        {caption: t('minutes_between'), onSelect: () => this.insertExpr('minutes_between(<minuend>, <subtrahend>)')},
-        {caption: t('round'),           onSelect: () => this.insertExpr('round(<number>, <digits_after_decimal>)')},
-        {caption: t('date_range'),      onSelect: () => this.insertExpr('date_range(<date>, <range_type>, [range=1])')}
+        {caption: t('current_date'),      onSelect: () => this.insertExpr('current_date()')},
+        {caption: t('current_timestamp'), onSelect: () => this.insertExpr('current_timestamp()')},
+        {caption: t('months_between'),    onSelect: () => this.insertExpr('months_between(<minuend>, <subtrahend>)')},
+        {caption: t('years_between'),     onSelect: () => this.insertExpr('years_between(<minuend>, <subtrahend>)')},
+        {caption: t('minutes_between'),   onSelect: () => this.insertExpr('minutes_between(<minuend>, <subtrahend>)')},
+        {caption: t('round'),             onSelect: () => this.insertExpr('round(<number>, <digits_after_decimal>)')},
+        {caption: t('date_range'),        onSelect: () => this.insertExpr('date_range(<date>, <range_type>, [range=1])')}
       ];
     },
 
