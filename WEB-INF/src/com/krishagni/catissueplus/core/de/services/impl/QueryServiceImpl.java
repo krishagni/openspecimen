@@ -495,6 +495,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	public ResponseEvent<QueryExecResult> executeQuery(RequestEvent<ExecuteQueryEventOp> req) {
 		String queryId = UUID.randomUUID().toString();
 		ExecuteQueryEventOp opDetail = req.getPayload();
+		DataSource queryDataSource = getReportingDataSource(opDetail);
 
 		Query query = null;
 		QueryResultData queryResult = null;
@@ -565,7 +566,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			}
 
 			try {
-				cleanupSiteCpsInAclTable(queryId, opDetail.isDisableAccessChecks());
+				cleanupSiteCpsInAclTable(queryDataSource, queryId, opDetail.isDisableAccessChecks());
 			} catch (Exception e) {
 				logger.error("Error cleaning the query ACL table", e);
 			}
@@ -1175,15 +1176,19 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	public ResponseEvent<List<FacetDetail>> getFacetValues(RequestEvent<GetFacetValuesOp> req) {
 		String queryId = UUID.randomUUID().toString();
 		GetFacetValuesOp op = req.getPayload();
+		DataSource queryDataSource = getReportingDataSource(op);
 		try {
 			if (!op.isDisableAccessChecks()) {
 				ensureReadRights();
 			}
 
 			QuerySpace qs = getQuerySpace(op.getQuerySpace());
-			String restriction = qs == null ?
-				getRestriction(AuthUtil.getCurrentUser(), op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(), queryId) :
-				StringUtils.EMPTY;
+			String restriction = qs == null
+				? getRestriction(
+					AuthUtil.getCurrentUser(),
+					op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(),
+					queryId, queryDataSource)
+				: StringUtils.EMPTY;
 
 			List<FacetDetail> result = op.getFacets().stream()
 				.map(facet -> getFacetDetail(op, facet, restriction))
@@ -1194,7 +1199,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		} finally {
-			cleanupSiteCpsInAclTable(queryId, op != null && op.isDisableAccessChecks());
+			cleanupSiteCpsInAclTable(queryDataSource, queryId, op != null && op.isDisableAccessChecks());
 		}
 	}
 
@@ -1264,19 +1269,29 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 					}
 				}
 
-				@PlusTransactional
 				private void run0() {
 					Calendar cal = Calendar.getInstance();
 					cal.add(Calendar.MINUTE, -60); // any entry older than 60 minutes is considered older
+					Timestamp cutoffTime = new Timestamp(cal.getTimeInMillis());
 
-					sessionFactory.getCurrentSession().doWork(
-						(conn) -> {
-							try (PreparedStatement pstmt = conn.prepareStatement(DELETE_ACL_CP_SITE_TS_SQL)) {
-								pstmt.setTimestamp(1, new Timestamp(cal.getTimeInMillis()));
-								pstmt.executeUpdate();
+					try {
+						DbUtil.newTxn(
+							() -> {
+								cleanupStaleSiteCpsInAclTable(null, cutoffTime);
+								return null;
 							}
+						);
+					} catch (Exception e) {
+						logger.error("Error deleting stale query ACL tab entries from the operational database", e);
+					}
+
+					if (reportingDataSource != null) {
+						try {
+							cleanupStaleSiteCpsInAclTable(reportingDataSource, cutoffTime);
+						} catch (Exception e) {
+							logger.error("Error deleting stale query ACL tab entries from the reporting database", e);
 						}
-					);
+					}
 				}
 			},
 			30
@@ -1326,9 +1341,10 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		User user = AuthUtil.getCurrentUser();
 		TimeZone tz = AuthUtil.getUserTimeZone();
 		boolean ic = !Utility.isMySQL() && !op.isCaseSensitive();
+		DataSource queryDataSource = getReportingDataSource(op);
 
 		Query query = Query.createQuery()
-			.dataSource(getReportingDataSource(op))
+			.dataSource(queryDataSource)
 			.wideRowMode(WideRowMode.valueOf(op.getWideRowMode()))
 			.ic(ic)
 			.outputIsoDateTime(op.isOutputIsoDateTime())
@@ -1361,7 +1377,13 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			aql = getAqlWithCpIdInSelect(user, countQuery, aql);
 		}
 
-		query.compile(rootForm, aql, getRestriction(user, op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(), queryId));
+		query.compile(
+			rootForm, aql,
+			getRestriction(
+				user, op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(),
+				queryId, queryDataSource
+			)
+		);
 		op.setAql(aql);
 		return query;
 	}
@@ -1410,7 +1432,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		return formattedResult;
 	}
 
-	private String getRestriction(User user, Long cpId, Long groupId, boolean disableAccessChecks, String queryId) {
+	private String getRestriction(User user, Long cpId, Long groupId, boolean disableAccessChecks, String queryId, DataSource queryDataSource) {
 		String restriction = null;
 		if (groupId != null && groupId != -1) {
 			Set<Long> cpIds = AccessCtrlMgr.getInstance().getReadAccessGroupCpIds(groupId);
@@ -1442,14 +1464,15 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 			}
 
-			restriction = appendRestriction(restriction, getSiteCpRestriction(queryId, siteCps));
+			restriction = appendRestriction(restriction, getSiteCpRestriction(queryDataSource, queryId, siteCps));
 		}
 
 		return restriction;
 	}
 
-	private void insertSiteCpsInAclTable(String queryId, Set<SiteCpPair> siteCps) {
-		sessionFactory.getCurrentSession().doWork(
+	private void insertSiteCpsInAclTable(DataSource queryDataSource, String queryId, Set<SiteCpPair> siteCps) {
+		executeAclTableWork(
+			queryDataSource,
 			connection -> {
 				Set<Pair<Long, Long>> siteCpIds = getSiteCpIdPairs(connection, siteCps);
 				insertSiteCpIds(connection, queryId, siteCpIds);
@@ -1516,10 +1539,10 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		return "Participant.id in " + sql(restrictionSql);
 	}
 
-	private String getSiteCpRestriction(String queryId, Set<SiteCpPair> siteCps) {
+	private String getSiteCpRestriction(DataSource queryDataSource, String queryId, Set<SiteCpPair> siteCps) {
 		boolean useSqForSiteCpsFiltering = useSqForSiteCpsFiltering();
 		if (useSqForSiteCpsFiltering && useAclTableRestrictions(siteCps)) {
-			insertSiteCpsInAclTable(queryId, siteCps);
+			insertSiteCpsInAclTable(queryDataSource, queryId, siteCps);
 			return getRestrictionSql(queryId);
 		}
 
@@ -1553,12 +1576,13 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		return "(" + base + " and " + toAppend + ")";
 	}
 
-	private void cleanupSiteCpsInAclTable(String queryId, boolean disableAccessChecks) {
+	private void cleanupSiteCpsInAclTable(DataSource queryDataSource, String queryId, boolean disableAccessChecks) {
 		if (AuthUtil.isAdmin() || disableAccessChecks) {
 			return;
 		}
 
-		sessionFactory.getCurrentSession().doWork(
+		executeAclTableWork(
+			queryDataSource,
 			connection -> {
 				try (PreparedStatement pstmt = connection.prepareStatement(DELETE_ACL_CP_SITE_SQL)) {
 					pstmt.setString(1, queryId);
@@ -1566,6 +1590,43 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				}
 			}
 		);
+	}
+
+	private void cleanupStaleSiteCpsInAclTable(DataSource queryDataSource, Timestamp cutoffTime) {
+		executeAclTableWork(
+			queryDataSource,
+			connection -> {
+				try (PreparedStatement pstmt = connection.prepareStatement(DELETE_ACL_CP_SITE_TS_SQL)) {
+					pstmt.setTimestamp(1, cutoffTime);
+					pstmt.executeUpdate();
+				}
+			}
+		);
+	}
+
+	private void executeAclTableWork(DataSource queryDataSource, AclTableWork work) {
+		if (queryDataSource == null) {
+			sessionFactory.getCurrentSession().doWork(work::execute);
+			return;
+		}
+
+		try (Connection connection = queryDataSource.getConnection()) {
+			boolean autoCommit = connection.getAutoCommit();
+			try {
+				work.execute(connection);
+				if (!autoCommit) {
+					connection.commit();
+				}
+			} catch (Exception e) {
+				if (!autoCommit) {
+					connection.rollback();
+				}
+
+				throw e;
+			}
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		}
 	}
 
 	private String getAqlWithCpIdInSelect(User user, boolean isCount, String aql) {
@@ -2288,7 +2349,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				FileUtils.deleteQuietly(progressFile);
 				DbUtil.newTxn(
 					() -> {
-						cleanupSiteCpsInAclTable(queryId, op != null && op.isDisableAccessChecks());
+						cleanupSiteCpsInAclTable(getReportingDataSource(op), queryId, op != null && op.isDisableAccessChecks());
 						return null;
 					}
 				);
@@ -2367,6 +2428,11 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		}
 
 		return null;
+	}
+
+	@FunctionalInterface
+	private interface AclTableWork {
+		void execute(Connection connection) throws SQLException;
 	}
 
 	private static final String GET_INSTITUTE_SITE_IDS_SQL =
