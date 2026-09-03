@@ -24,17 +24,18 @@
         )
         select
           c.identifier as specimen_id,
-          crd.collection_time, crd.collection_procedure_id,
-          crd.collection_container_id, crd.collection_user_id,
-          crd.received_time,
-          crd.received_quality_id, crd.received_user_id,
+          s.collection_time, s.collection_procedure_id,
+          s.collection_container_id, s.collection_user_id,
+          s.received_time,
+          s.received_quality_id, s.received_user_id,
           fe.event_timestamp as frozen_time,
-          timestampdiff(MINUTE, crd.received_time, fe.event_timestamp) as processing_time,
-          timestampdiff(MINUTE, crd.collection_time, fe.event_timestamp) as ischemia_time,
+          timestampdiff(MINUTE, s.received_time, fe.event_timestamp) as processing_time,
+          timestampdiff(MINUTE, s.collection_time, fe.event_timestamp) as ischemia_time,
           0
         from
-          catissue_specimen c
-          inner join os_spmn_coll_recv_details crd on crd.primary_specimen_id = c.primary_specimen_id
+          catissue_specimen s
+          inner join catissue_specimen_hierarchy h on h.ancestor_id = s.identifier
+          inner join catissue_specimen c on c.identifier = h.descendent_id
           left join (
             select
               fre.object_id as specimen_id, max(fep.event_timestamp) as event_timestamp
@@ -45,9 +46,11 @@
               inner join dyextn_containers ff on ff.identifier = ffc.container_id and ff.name = 'SpecimenFrozenEvent'
             group by
               fre.object_id
-          ) fe on fe.specimen_id = c.primary_specimen_id
+          ) fe on fe.specimen_id = s.identifier
         where
-          c.activity_status != 'Disabled' and
+          s.parent_specimen_id is null and
+          s.collection_status = 'Collected' and
+          s.activity_status != 'Disabled' and c.activity_status != 'Disabled' and
           c.collection_status = 'Collected';
 
         update
@@ -84,17 +87,18 @@
         )
         select
           c.identifier as specimen_id,
-          crd.collection_time, crd.collection_procedure_id,
-          crd.collection_container_id, crd.collection_user_id,
-          crd.received_time,
-          crd.received_quality_id, crd.received_user_id,
+          s.collection_time, s.collection_procedure_id,
+          s.collection_container_id, s.collection_user_id,
+          s.received_time,
+          s.received_quality_id, s.received_user_id,
           fe.event_timestamp as frozen_time,
-          round((cast(fe.event_timestamp as date) - cast(crd.received_time as date))*24*60) as processing_time,
-          round((cast(fe.event_timestamp as date) - cast(crd.collection_time as date))*24*60) as ischemia_time,
+          round((cast(fe.event_timestamp as date) - cast(s.received_time as date))*24*60) as processing_time,
+          round((cast(fe.event_timestamp as date) - cast(s.collection_time as date))*24*60) as ischemia_time,
           0
         from
-          catissue_specimen c
-          inner join os_spmn_coll_recv_details crd on crd.primary_specimen_id = c.primary_specimen_id
+          catissue_specimen s
+          inner join catissue_specimen_hierarchy h on h.ancestor_id = s.identifier
+          inner join catissue_specimen c on c.identifier = h.descendent_id
           left join (
             select
               fre.object_id as specimen_id, max(fep.event_timestamp) as event_timestamp
@@ -105,9 +109,10 @@
               inner join dyextn_containers ff on ff.identifier = ffc.container_id and ff.name = ''SpecimenFrozenEvent''
             group by
               fre.object_id
-          ) fe on fe.specimen_id = c.primary_specimen_id
+          ) fe on fe.specimen_id = s.identifier
         where
-          c.activity_status != ''Disabled'' and
+          s.parent_specimen_id is null and s.collection_status = ''Collected'' and
+          s.activity_status != ''Disabled'' and c.activity_status != ''Disabled'' and
           c.collection_status = ''Collected''';
 
         execute immediate 'merge into tmp_specimen_stats stats using (
