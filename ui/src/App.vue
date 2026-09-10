@@ -4,7 +4,11 @@
   </div>
 
   <div class="os-root" v-else>
-    <os-navbar :hide-buttons="navCtrls.hideButtons" @single-logout="logout" />
+    <os-navbar :hide-buttons="navCtrls.hideButtons" @single-logout="logout">
+      <template #default="{minimalLogin}">
+        <os-plugin-views page="app" view="navbar" v-if="!minimalLogin" />
+      </template>
+    </os-navbar>
 
     <div class="os-user-impersonate-warn" v-if="(ui.currentUser && (ui.currentUser.impersonated || (ui.currentUser.daysBeforePasswordExpiry >= 0 && ui.currentUser.daysBeforePasswordExpiry <= 5))) || ui.global.appProps.auditEnabled == 'false' || ui.global.appProps.auditEnabled == false">
       <div class="text" v-if="ui.currentUser && ui.currentUser.impersonated">
