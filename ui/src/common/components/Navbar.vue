@@ -30,6 +30,8 @@
 
         <os-ask-os v-if="showAskOs" />
 
+        <slot :authenticated="authenticated" :minimal-login="minimalLogin" />
+
         <div class="user-profile" v-os-tooltip.bottom="$t('common.user_profile')" v-if="authenticated">
           <button @click="toggleProfileMenu">
             <os-username-avatar :name="username" />
@@ -53,8 +55,6 @@
             </ul>
           </os-overlay>
         </div>
-
-        <slot :authenticated="authenticated" :minimal-login="minimalLogin" />
       </div>
     </div>
 

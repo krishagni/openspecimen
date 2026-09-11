@@ -255,11 +255,7 @@ export default {
     },
 
     editQuery: function() {
-      if (this.query.id > 0) {
-        routerSvc.goto('QueryDetail.AddEdit', {queryId: this.query.id});
-      } else {
-        routerSvc.back();
-      }
+      routerSvc.goto('QueryDetail.AddEdit', {queryId: this.query.id > 0 ? this.query.id : -1});
     },
 
     showSaveQueryDialog: function() {

@@ -28,12 +28,14 @@ export default {
     }
   },
 
-  created() {
+  async created() {
     const {osQuery} = window;
     const {query} = osQuery || {};
     if (query) {
-      this.query = JSON.parse(query);
+      const parsedQuery = JSON.parse(query);
       delete window.osQuery;
+      await this._hydrateFilters(parsedQuery);
+      this.query = parsedQuery;
     } else {
       this._loadQuery();
     }
