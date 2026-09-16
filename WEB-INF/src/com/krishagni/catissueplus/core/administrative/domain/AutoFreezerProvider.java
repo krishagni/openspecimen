@@ -63,7 +63,7 @@ public class AutoFreezerProvider extends BaseEntity {
 			return klass.getConstructor().newInstance();
 		} catch (Exception e) {
 			logger.error("Error obtaining an instance of automated freezer", e);
-			throw OpenSpecimenException.userError(AutoFreezerProviderErrorCode.INVALID_CLASS, name, e.getMessage());
+			throw OpenSpecimenException.userErrorWithCause(AutoFreezerProviderErrorCode.INVALID_CLASS, e, name, "The provider could not be initialized. Check its configuration or contact support");
 		}
 	}
 }

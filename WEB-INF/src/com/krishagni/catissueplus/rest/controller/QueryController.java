@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.JsonErrorUtil;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
@@ -82,7 +83,7 @@ public class QueryController {
 			try {
 				return new ObjectMapper().readValue(fieldsJson, new TypeReference<List<String>>(){});
 			} catch (IOException e) {
-				throw OpenSpecimenException.userError(SavedQueryErrorCode.INV_RV_CFG, e.getMessage());
+				throw OpenSpecimenException.userErrorWithCause(SavedQueryErrorCode.INV_RV_CFG, e, JsonErrorUtil.getMessage(e));
 			}
 		}
 	}

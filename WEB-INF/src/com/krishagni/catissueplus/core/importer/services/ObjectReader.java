@@ -413,7 +413,7 @@ public class ObjectReader implements Closeable {
 			try {
 				return parseDate(value, dateFmt);
 			} catch (ParseException | DateTimeParseException e1) {
-				throw OpenSpecimenException.userError(CommonErrorCode.DATE_PARSE_ERROR, value, format, e.getMessage());
+				throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.DATE_PARSE_ERROR, e1, value, format, e1.getMessage());
 			}
 		}
 	}
@@ -422,7 +422,7 @@ public class ObjectReader implements Closeable {
 		try {
 			return parseDate(value, dateFmt, dateOnly);
 		} catch (ParseException | DateTimeParseException e) {
-			throw OpenSpecimenException.userError(CommonErrorCode.DATE_PARSE_ERROR, value, dateFmt, e.getMessage());
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.DATE_PARSE_ERROR, e, value, dateFmt, e.getMessage());
 		}
 	}
 

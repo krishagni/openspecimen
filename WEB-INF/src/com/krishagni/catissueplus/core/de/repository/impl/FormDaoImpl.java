@@ -1007,7 +1007,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 
 			return Container.fromXml(new String(xmlBlob.getBytes(1, Long.valueOf(xmlBlob.length()).intValue())));
 		} catch (Exception e) {
-			throw OpenSpecimenException.serverError(CommonErrorCode.SQL_EXCEPTION, e.getMessage());
+			throw OpenSpecimenException.serverErrorWithCause(CommonErrorCode.SQL_EXCEPTION, e, e.getMessage());
 		}
 	}
 

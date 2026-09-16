@@ -240,10 +240,11 @@ public class CollectionProtocolGroupsController {
 		ResponseEvent<CpGroupWorkflowCfgDetail> resp = groupSvc.getWorkflows(RequestEvent.wrap(crit));
 		resp.throwErrorIfUnsuccessful();
 
+		String filename = "workflow configuration";
 		InputStream in = null;
 		try {
 			CpGroupWorkflowCfgDetail workflowDetail = resp.getPayload();
-			String filename = (workflowDetail.getGroupName() +  "_workflows.json")
+			filename = (workflowDetail.getGroupName() +  "_workflows.json")
 				.replaceAll("\\\\", "_")  // replace backslash with _
 				.replaceAll("/", "_")     // replace forward slash with _
 				.replaceAll("\\s+", "_"); // replace whitespace with _
@@ -253,7 +254,7 @@ public class CollectionProtocolGroupsController {
 			in = new ByteArrayInputStream(workflowsJson.getBytes());
 			Utility.sendToClient(httpResp, filename, "application/json", in);
 		} catch (Exception e) {
-			throw OpenSpecimenException.userError(CommonErrorCode.FILE_SEND_ERROR, e.getMessage());
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.FILE_SEND_ERROR, e, e.getMessage(), filename);
 		} finally {
 			IOUtils.closeQuietly(in);
 		}
@@ -276,7 +277,7 @@ public class CollectionProtocolGroupsController {
 			ObjectMapper mapper = new ObjectMapper();
 			workflows = mapper.readValue(file.getInputStream(), new TypeReference<List<WorkflowDetail>>() {});
 		} catch (Exception e) {
-			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_REQUEST, e.getMessage());
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.INVALID_REQUEST, e);
 		}
 
 		return saveWorkflows(groupId, workflows, true);

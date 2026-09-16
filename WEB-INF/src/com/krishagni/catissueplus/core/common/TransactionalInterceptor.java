@@ -87,7 +87,7 @@ public class TransactionalInterceptor {
 			throw OpenSpecimenException.serverError(dae.getCause() != null ? dae.getCause() : dae);
 		} catch (CannotCreateTransactionException te) {
 			String rootCause = NestedExceptionUtils.getMostSpecificCause(te).getMessage();
-			throw OpenSpecimenException.serverError(CommonErrorCode.DB_CONN_ERROR, rootCause);
+			throw OpenSpecimenException.serverErrorWithCause(CommonErrorCode.DB_CONN_ERROR, te, rootCause);
 		} catch (Throwable t) {
 			OpenSpecimenException ose = t instanceof OpenSpecimenException ? (OpenSpecimenException) t : null;
 			if (ose != null) {

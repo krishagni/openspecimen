@@ -311,7 +311,7 @@ public class PermissibleValueServiceImpl implements PermissibleValueService {
 				}
 
 				if (cause != null) {
-					throw OpenSpecimenException.userError(PvErrorCode.IN_USE, existing.getValue(), cause.getMessage());
+					throw OpenSpecimenException.userErrorWithCause(PvErrorCode.IN_USE, t, existing.getValue(), cause.getMessage());
 				}
 
 				throw t;

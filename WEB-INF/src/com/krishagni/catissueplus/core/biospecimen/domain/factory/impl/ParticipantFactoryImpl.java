@@ -214,7 +214,7 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 				}
 			} catch (Exception e) {
 				logger.error("Error copying the field: " + field + ". Error: " + e.getMessage(), e);
-				throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Invalid locked field name: " + field + ". Error: " + e.getMessage());
+				throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.INVALID_INPUT, e, "Invalid locked field name: " + field);
 			}
 		}
 

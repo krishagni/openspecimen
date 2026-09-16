@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.rest.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -320,17 +321,30 @@ public class SpecimensController {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.ID_REQUIRED);
 		}
 
-		SpecimenQueryCriteria crit = null;
-		try {
-			Number id = (Number) payload.get("id");
-			Boolean includeChildren = (Boolean) payload.get("includeChildren");
-			String reason = (String) payload.get("reason");
-			crit = new SpecimenQueryCriteria(id.longValue());
-			crit.setIncludeChildren(includeChildren != null && includeChildren);
-			crit.setParams(Collections.singletonMap("comments", reason));
-		} catch (Exception e) {
-			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, e.getMessage());
+		Object id = payload.get("id");
+		if (!(id instanceof Number)) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "The parameter \"id\" must be an integer.");
 		}
+
+		long specimenId;
+		try {
+			specimenId = new BigDecimal(id.toString()).longValueExact();
+		} catch (ArithmeticException | NumberFormatException e) {
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.INVALID_INPUT, e,
+				"The parameter \"id\" must be an integer within the supported range.");
+		}
+
+		if (payload.get("includeChildren") != null && !(payload.get("includeChildren") instanceof Boolean)) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "The parameter \"includeChildren\" must be a boolean (true or false).");
+		}
+
+		if (payload.get("reason") != null && !(payload.get("reason") instanceof String)) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "The parameter \"reason\" must be text.");
+		}
+
+		SpecimenQueryCriteria crit = new SpecimenQueryCriteria(specimenId);
+		crit.setIncludeChildren(Boolean.TRUE.equals(payload.get("includeChildren")));
+		crit.setParams(Collections.singletonMap("comments", (String) payload.get("reason")));
 
 		return ResponseEvent.unwrap(specimenSvc.undeleteSpecimen(RequestEvent.wrap(crit)));
 	}
