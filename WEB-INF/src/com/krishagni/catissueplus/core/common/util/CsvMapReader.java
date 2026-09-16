@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.common.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -33,12 +34,13 @@ public class CsvMapReader {
 			}
 
 			if (in == null) {
-				throw OpenSpecimenException.userError(CommonErrorCode.FILE_NOT_FOUND, resourcePath);
+				throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.FILE_NOT_FOUND,
+					new FileNotFoundException(resourcePath), new File(resourcePath).getName());
 			}
 
 			return getMap(in);
 		} catch (FileNotFoundException fe) {
-			throw OpenSpecimenException.userError(CommonErrorCode.FILE_NOT_FOUND, resourcePath);
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.FILE_NOT_FOUND, fe, new File(resourcePath).getName());
 		} catch (Exception e) {
 			logger.error("Error reading values from csv file: " + resourcePath, e);
 			throw OpenSpecimenException.serverError(e);

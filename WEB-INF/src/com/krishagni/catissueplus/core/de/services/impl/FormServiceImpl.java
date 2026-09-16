@@ -746,7 +746,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		} catch(IllegalArgumentException ex) {
 			return ResponseEvent.userError(FormErrorCode.INVALID_DATA, ex.getMessage());
 		} catch (DataAccessException dae) {
-			return ResponseEvent.userError(CommonErrorCode.SQL_EXCEPTION, dae.getMessage());
+			return ResponseEvent.error(OpenSpecimenException.userErrorWithCause(CommonErrorCode.SQL_EXCEPTION, dae, dae.getMessage()));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -772,7 +772,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		} catch(IllegalArgumentException ex) {
 			return ResponseEvent.userError(FormErrorCode.INVALID_DATA, ex.getMessage());
 		} catch (DataAccessException dae) {
-			return ResponseEvent.userError(CommonErrorCode.SQL_EXCEPTION, dae.getMessage());
+			return ResponseEvent.error(OpenSpecimenException.userErrorWithCause(CommonErrorCode.SQL_EXCEPTION, dae, dae.getMessage()));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -1579,9 +1579,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		}
 
 		if (schemaRestoreError != null) {
-			return ResponseEvent.userError(FormErrorCode.PV_CONV_SCHEMA_RESET_FAILED, schemaRestoreError.getMessage());
+			return ResponseEvent.error(OpenSpecimenException.userErrorWithCause(FormErrorCode.PV_CONV_SCHEMA_RESET_FAILED, schemaRestoreError, schemaRestoreError.getMessage()));
 		} else if (attributeDeleteError != null) {
-			return ResponseEvent.userError(FormErrorCode.PV_CONV_ROLLBACK_FAILED, createdAttribute, attributeDeleteError.getMessage());
+			return ResponseEvent.error(OpenSpecimenException.userErrorWithCause(FormErrorCode.PV_CONV_ROLLBACK_FAILED, attributeDeleteError, createdAttribute, attributeDeleteError.getMessage()));
 		}
 
 		return null;

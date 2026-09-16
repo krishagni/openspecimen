@@ -139,10 +139,22 @@ public class OpenSpecimenException extends RuntimeException {
 		return new OpenSpecimenException(ErrorType.USER_ERROR, error, params);
 	}
 	
+	public static OpenSpecimenException userErrorWithCause(ErrorCode error, Throwable cause, Object ... params) {
+		OpenSpecimenException result = userError(error, params);
+		result.initCause(cause);
+		return result;
+	}
+
 	public static OpenSpecimenException serverError(ErrorCode error, Object ... params) {
 		return new OpenSpecimenException(ErrorType.SYSTEM_ERROR, error, params);
 	}
 	
+	public static OpenSpecimenException serverErrorWithCause(ErrorCode error, Throwable cause, Object ... params) {
+		OpenSpecimenException result = serverError(error, params);
+		result.initCause(cause);
+		return result;
+	}
+
 	public static OpenSpecimenException serverError(Throwable e) {
 		return new OpenSpecimenException(e);
 	}

@@ -278,7 +278,7 @@ public class StorageContainerListCriteria extends AbstractListCriteria<StorageCo
 
 			return self();
 		} catch (Exception e) {
-			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, e.getMessage());
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.INVALID_INPUT, e, "Invalid usageMode. Allowed values: " + Arrays.toString(StorageContainer.UsageMode.values()));
 		}
 	}
 
@@ -295,7 +295,7 @@ public class StorageContainerListCriteria extends AbstractListCriteria<StorageCo
 			this.statuses = input.stream().map(Status::valueOf).distinct().collect(Collectors.toList());
 			return self();
 		} catch (Exception e) {
-			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, e.getMessage());
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.INVALID_INPUT, e, "Invalid status. Allowed values: " + Arrays.toString(Status.values()));
 		}
 	}
 

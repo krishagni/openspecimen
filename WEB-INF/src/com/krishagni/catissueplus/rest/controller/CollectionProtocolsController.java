@@ -527,10 +527,11 @@ public class CollectionProtocolsController {
 		ResponseEvent<CpWorkflowCfgDetail> resp = cpSvc.getWorkflows(new RequestEvent<>(cpId));
 		resp.throwErrorIfUnsuccessful();
 
+		String filename = "workflow configuration";
 		InputStream in = null;
 		try {
 			CpWorkflowCfgDetail workflowDetail = resp.getPayload();
-			String filename = (workflowDetail.getShortTitle() +  "_workflows.json")
+			filename = (workflowDetail.getShortTitle() +  "_workflows.json")
 				.replaceAll("\\\\", "_")  // replace backslash with _
 				.replaceAll("/", "_")     // replace forward slash with _
 				.replaceAll("\\s+", "_"); // replace whitespace with _
@@ -541,7 +542,7 @@ public class CollectionProtocolsController {
 			Utility.sendToClient(httpResp, filename, "application/json", in);
 			exportSvc.saveJob("cpWf", startTime, Collections.singletonMap("cpId", cpId.toString()));
 		} catch (Exception e) {
-			throw OpenSpecimenException.userError(CommonErrorCode.FILE_SEND_ERROR, e.getMessage());
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.FILE_SEND_ERROR, e, e.getMessage(), filename);
 		} finally {
 			IOUtils.closeQuietly(in);
 		}
@@ -565,7 +566,7 @@ public class CollectionProtocolsController {
 			ObjectMapper mapper = new ObjectMapper();
 			workflows = mapper.readValue(file.getInputStream(), new TypeReference<List<WorkflowDetail>>() {});
 		} catch (Exception e) {
-			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_REQUEST, e.getMessage());
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.INVALID_REQUEST, e);
 		}
 
 		CpWorkflowCfgDetail result = saveWorkflows(cpId, workflows, false);

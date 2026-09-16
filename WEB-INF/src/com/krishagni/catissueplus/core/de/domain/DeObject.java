@@ -145,7 +145,7 @@ public abstract class DeObject {
 		} catch(IllegalArgumentException ex) {
 			throw OpenSpecimenException.userError(FormErrorCode.INVALID_DATA, ex.getMessage());
 		} catch (DataAccessException dae) {
-			throw OpenSpecimenException.userError(CommonErrorCode.SQL_EXCEPTION, dae.getMessage());
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.SQL_EXCEPTION, dae, dae.getMessage());
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
 		}

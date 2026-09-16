@@ -55,7 +55,7 @@ public abstract class AbstractLabelPrinter {
 			in = new FileInputStream(result);
 			IOUtils.copy(in, httpResp.getOutputStream());
 		} catch (IOException e) {
-			throw OpenSpecimenException.userError(CommonErrorCode.FILE_SEND_ERROR, e.getMessage());
+			throw OpenSpecimenException.userErrorWithCause(CommonErrorCode.FILE_SEND_ERROR, e, e.getMessage(), filename);
 		} finally {
 			IOUtils.closeQuietly(in);
 		}
