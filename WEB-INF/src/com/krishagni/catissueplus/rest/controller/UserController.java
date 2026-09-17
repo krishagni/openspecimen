@@ -257,7 +257,9 @@ public class UserController {
 		ResponseEvent<UserDetail> resp = userService.createUser(req);
 		resp.throwErrorIfUnsuccessful();
 		
-		return resp.getPayload();
+		UserDetail result = resp.getPayload();
+		result.setSignupResponse(true);
+		return result;
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")

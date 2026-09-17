@@ -36,6 +36,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
@@ -46,9 +48,11 @@ import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.events.SiteSummary;
+import com.krishagni.catissueplus.core.administrative.events.UserDetail;
 import com.krishagni.catissueplus.core.audit.services.impl.DeleteLogUtil;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.SpecimenUtil;
+import com.krishagni.catissueplus.core.biospecimen.WorkflowConfigUtil;
 import com.krishagni.catissueplus.core.biospecimen.WorkflowUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.AliquotSpecimensRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -64,7 +68,6 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpReportSettings;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig.Workflow;
-import com.krishagni.catissueplus.core.biospecimen.WorkflowConfigUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.DerivedSpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
@@ -132,6 +135,7 @@ import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.common.util.UserDetailsFilter;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
@@ -2123,8 +2127,12 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			filters.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept("id", "cpId", "eventId", "instituteId", "siteId", "statementId"));
 		}
 
+		filters.addFilter("userDetails", UserDetailsFilter.basicFieldsOnly());
 		try {
 			ObjectMapper mapper = new ObjectMapper();
+			Class<?> userMixin = includeIds ? UserDetailsMixin.class : UserDetailsWithoutIdsMixin.class;
+			mapper.addMixIn(UserSummary.class, userMixin);
+			mapper.addMixIn(UserDetail.class, userMixin);
 			return mapper.writer(filters).withDefaultPrettyPrinter().writeValueAsString(cp);
 		} catch (JsonProcessingException e) {
 			throw OpenSpecimenException.serverError(e);
@@ -2967,6 +2975,12 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}
 		return groupId;
 	}
+
+	@JsonFilter("userDetails")
+	private abstract static class UserDetailsMixin { }
+
+	@JsonIgnoreProperties({"id", "cpId", "eventId", "instituteId", "siteId", "statementId"})
+	private abstract static class UserDetailsWithoutIdsMixin extends UserDetailsMixin { }
 
 	private static final String PPID_MSG                     = "cp_ppid";
 

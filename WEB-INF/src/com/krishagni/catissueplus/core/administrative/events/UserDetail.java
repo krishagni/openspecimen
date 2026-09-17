@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -21,6 +22,8 @@ public class UserDetail extends AttributeModifiedSupport {
 	private static final String CLOSED = "Closed";
 
 	private static String regularType;
+
+	private boolean signupResponse;
 
 	private Long id;
 
@@ -69,6 +72,15 @@ public class UserDetail extends AttributeModifiedSupport {
 	private String activityStatus;
 
 	private String userId;
+
+	@JsonIgnore
+	public boolean isSignupResponse() {
+		return signupResponse;
+	}
+
+	public void setSignupResponse(boolean signupResponse) {
+		this.signupResponse = signupResponse;
+	}
 
 	public Long getId() {
 		return id;
