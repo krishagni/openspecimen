@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,6 +49,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErr
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.common.Pair;
+import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.Operation;
@@ -105,6 +107,35 @@ public class AccessCtrlMgr {
 	//          User object access control helper methods                               //
 	//                                                                                  //
 	//////////////////////////////////////////////////////////////////////////////////////
+	public boolean canReadFullUserDetails(Long userId, Long instituteId, String userType) {
+		return canReadFullUserDetails(userId, instituteId, userType, this::canCreateOrUpdateUsers);
+	}
+
+	public boolean canReadFullUserDetails(Long userId, Long instituteId, String userType, BooleanSupplier canCreateOrUpdateUsers) {
+		User currentUser = AuthUtil.getCurrentUser();
+		if (currentUser == null) {
+			return false;
+		}
+
+		Long currUserInstId = currentUser.getInstitute() != null ? currentUser.getInstitute().getId() : null;
+		return currentUser.isAdmin() ||
+			(instituteId != null && currentUser.isInstituteAdmin() && instituteId.equals(currUserInstId)) ||
+			(userId != null && userId.equals(currentUser.getId())) || // self profile
+			(
+				(
+					User.Type.CONTACT.name().equals(userType) || // user being edited is contact
+					(instituteId != null && instituteId.equals(currUserInstId)) // or belongs to the same institute as editor
+				) &&
+				canCreateOrUpdateUsers.getAsBoolean() // and has user create/update rights
+			);
+	}
+
+	@PlusTransactional
+	public boolean canCreateOrUpdateUsers() {
+		return AuthUtil.getCurrentUser() != null &&
+			canUserPerformOp(Resource.USER, new Operation[] {Operation.CREATE, Operation.UPDATE});
+	}
+
 	public void ensureCreateUserRights(User user) {
 		ensureUserObjectRights(user, Operation.CREATE, true);
 		ensureUserEximRights(user, true);
