@@ -2269,6 +2269,8 @@
       "de_date_format_desc": "Date format for parsing date field values in the data entry forms.",
       "de_form_html_markup": "HTML Markup",
       "de_form_html_markup_desc": "Enable to allow HTML decorated custom field labels.",
+      "allowed_html_link_origins": "Allowed HTML Link Origins",
+      "allowed_html_link_origins_desc": "Allow links in HTML to these exact HTTP/HTTPS origins (scheme, hostname and optional port), separated by commas, newlines or tabs. Example: https://images.hospital.org, https://documents.hospital.org:8443.",
       "default_isd_code": "Default ISD Code",
       "default_isd_code_desc": "The ISD code that should be prefixed to all the phone numbers without ISD code when sending/receiving text messages.",
       "deploy_env": "Deployment Environment",

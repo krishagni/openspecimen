@@ -25,6 +25,8 @@ public class ConfigProperty extends BaseEntity {
 	private Set<String> allowedValues;
 	
 	private DataType dataType;
+
+	private String uiType;
 	
 	private boolean secured;
 
@@ -76,6 +78,14 @@ public class ConfigProperty extends BaseEntity {
 
 	public void setDataType(DataType dataType) {
 		this.dataType = dataType;
+	}
+
+	public String getUiType() {
+		return uiType;
+	}
+
+	public void setUiType(String uiType) {
+		this.uiType = uiType;
 	}
 
 	public boolean isSecured() {

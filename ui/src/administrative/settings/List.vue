@@ -134,6 +134,8 @@
                         <os-file-upload ref="fileUploader" v-model="ctx.newValue"
                           :headers="reqHeaders" :auto="false" :url="ctx.selectedSetting.fileUrl"
                           v-else-if="ctx.selectedSetting.type == 'FILE'" />
+                        <os-textarea v-model="ctx.newValue" :rows="5"
+                          v-else-if="ctx.selectedSetting.type == 'STRING' && ctx.selectedSetting.uiType == 'textarea'" />
                         <os-input-text v-model="ctx.newValue" v-else />
                       </div>
                     </div>

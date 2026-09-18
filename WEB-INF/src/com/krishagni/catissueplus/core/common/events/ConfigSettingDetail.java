@@ -23,6 +23,8 @@ public class ConfigSettingDetail implements Comparable<ConfigSettingDetail> {
 	private String value;
 	
 	private DataType type;
+
+	private String uiType;
 	
 	private Set<String> allowedValues;
 	
@@ -66,6 +68,14 @@ public class ConfigSettingDetail implements Comparable<ConfigSettingDetail> {
 
 	public void setType(DataType type) {
 		this.type = type;
+	}
+
+	public String getUiType() {
+		return uiType;
+	}
+
+	public void setUiType(String uiType) {
+		this.uiType = uiType;
 	}
 
 	public Set<String> getAllowedValues() {
@@ -139,6 +149,7 @@ public class ConfigSettingDetail implements Comparable<ConfigSettingDetail> {
 		result.setModule(module.getName());
 		result.setName(property.getName());
 		result.setType(property.getDataType());
+		result.setUiType(property.getUiType());
 		result.setAllowedValues(new HashSet<>(property.getAllowedValues()));
 		result.setDescCode(property.getDescCode());
 		result.setDisplayNameCode(property.getDisplayNameCode());

@@ -8,6 +8,7 @@ import dateFormatter from '@/common/filters/DateFormatter.js';
 
 import alertSvc    from '@/common/services/Alerts.js';
 import exprUtil    from '@/common/services/ExpressionUtil.js';
+import htmlLinkPolicy from '@/common/services/HtmlLinkPolicy.js';
 import http        from '@/common/services/HttpClient.js';
 import i18n        from '@/common/services/I18n.js';
 import pluginReg   from '@/common/services/PluginViewsRegistry.js';
@@ -680,9 +681,15 @@ class Util {
     return sanitizeHtml(
       content,
       {
+        allowedSchemes: ['http', 'https'],
+        allowProtocolRelative: false,
+        transformTags: {
+          a: (tagName, attrs) =>
+            htmlLinkPolicy.transformAnchor(attrs, ui.global?.appProps?.allowedHtmlLinkOrigins, window.location.href)
+        },
         allowedAttributes: {
           "*": ["style"],
-          "a": ["href", "target"]
+          "a": ["href", "target", "rel"]
         },
         allowedStyles: {
           "*": {
