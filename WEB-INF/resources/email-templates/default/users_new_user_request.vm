@@ -7,9 +7,9 @@
             <tr>
               <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
                 <p style="margin:10px 0 0 0">
-                  Hello $user.firstName $user.lastName,
+                  Hello $htmlEncoder.forHtmlContent($user.firstName) $htmlEncoder.forHtmlContent($user.lastName),
                   <br><br>
-                  A new user <b>$newUser.firstName $newUser.lastName</b> has signed up. Please review and process the request at the earliest
+                  A new user <b>$htmlEncoder.forHtmlContent($newUser.firstName) $htmlEncoder.forHtmlContent($newUser.lastName)</b> has signed up. Please review and process the request at the earliest
                   <br><br>
                 </p>
               </td>

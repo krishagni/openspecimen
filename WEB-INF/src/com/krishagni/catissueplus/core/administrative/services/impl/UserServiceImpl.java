@@ -63,6 +63,7 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.PlainTextValidator;
 import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -239,6 +240,8 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			UserDetail detail = req.getPayload();
 			if (isSignupReq) {
 				ensureSignupAllowed();
+				PlainTextValidator.validate(detail, "address");
+
 				detail.setType(User.Type.NONE.name());
 				detail.setInstituteName(ConfigUtil.getInstance().getStrSetting(ADMIN_MOD, DEF_SIGNUP_INST, null));
 				detail.setActivityStatus(Status.ACTIVITY_STATUS_PENDING.getStatus());
