@@ -544,4 +544,14 @@
       baseTableName="CATISSUE_PERMISSIBLE_VALUE" baseColumnNames="PUBLIC_ID"
       referencedTableName="CATISSUE_CDE" referencedColumnNames="PUBLIC_ID" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Widen config setting values">
+    <modifyDataType tableName="OS_CFG_SETTINGS" columnName="VALUE" newDataType="${text.type}(1024)" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add optional config property UI type">
+    <addColumn tableName="OS_CFG_PROPS">
+      <column name="UI_TYPE" type="${text.type}(32)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

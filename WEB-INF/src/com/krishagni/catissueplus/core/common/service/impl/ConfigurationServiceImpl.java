@@ -57,6 +57,7 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.HtmlLinkOrigins;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -150,6 +151,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		}
 
 		String setting = detail.getValue();
+		if ("common".equals(module) && HtmlLinkOrigins.SETTING.equals(prop)) {
+			try {
+				setting = String.join("\n", HtmlLinkOrigins.parse(setting));
+			} catch (IllegalArgumentException e) {
+				return ResponseEvent.userError(ConfigErrorCode.INVALID_SETTING_VALUE, e.getMessage());
+			}
+		}
+
 		if (!isValidSetting(existing.getProperty(), setting)) {
 			return ResponseEvent.userError(ConfigErrorCode.INVALID_SETTING_VALUE, setting);
 		}
@@ -596,6 +605,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		props.put("queryDiagnosticsEnabled", Utility.isMySQL());
 		props.put("searchDelay",             getIntSetting("common", "search_delay", 1000));
 		props.put("allowHtmlMarkup",         getBoolSetting("common", "de_form_html_markup", true));
+
+		try {
+			props.put("allowedHtmlLinkOrigins", HtmlLinkOrigins.parse(getStrSetting("common", HtmlLinkOrigins.SETTING)));
+		} catch (IllegalArgumentException e) {
+			logger.error("Invalid allowed HTML link origins setting; external HTML links are disabled.");
+			props.put("allowedHtmlLinkOrigins", Collections.emptyList());
+		}
+
 		props.put("auditEnabled",            appProps.getProperty("app.audit_enabled"));
 		props.put("localAccountSignups",     getBoolSetting("administrative", "local_account_signups", true));
 		props.put("caseInsensitiveSearch",   !Utility.isMySQL());

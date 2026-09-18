@@ -39,7 +39,9 @@ public enum CommonErrorCode implements ErrorCode {
 
 	INVALID_EMAIL_ID,
 
-	INV_FILE_PATH;
+	INV_FILE_PATH,
+
+	PLAIN_TEXT_REQUIRED;
 
 	@Override
 	public String code() {

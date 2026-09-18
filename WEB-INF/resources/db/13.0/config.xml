@@ -74,4 +74,21 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Allowed origins for user supplied HTML links">
+    <sql>
+      call add_cfg_prop(
+        'common', 'allowed_html_link_origins',
+        'allowed_html_link_origins', 'allowed_html_link_origins_desc',
+        'STRING', ''
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Use textarea for allowed HTML link origins">
+    <update tableName="OS_CFG_PROPS">
+      <column name="UI_TYPE" value="textarea" />
+      <where>name = 'allowed_html_link_origins' and module_id = (select identifier from os_modules where name = 'common')</where>
+    </update>
+  </changeSet>
 </databaseChangeLog>

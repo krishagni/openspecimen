@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.owasp.encoder.Encode;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.integration.mail.inbound.ImapMailReceiver;
@@ -276,6 +277,7 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 		props.put("adminEmailAddress", adminEmailId);
 		props.put("adminPhone", cfgSvc.getStrSetting("email", "admin_phone_no", "Not Specified"));
 		props.put("urlEncoder", URLEncoder.class);
+		props.put("htmlEncoder", Encode.class);
 		String subject = StringUtils.isNotBlank(tmplSubj) ? tmplSubj : getSubject(tmplKey, (Object[]) props.get("$subject"));
 		String content = templateService.render(getBaseTmpl(), props);
 

@@ -28,6 +28,8 @@
       </type>
     </property>
 
+    <property name="uiType" column="UI_TYPE" length="32" />
+
     <set name="allowedValues" table="OS_CFG_PROP_ALLOWED_VALUES" cascade="all-delete-orphan">
       <key column="PROPERTY_ID"/>
       <element column="VALUE" type="string"/>
