@@ -2125,7 +2125,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 	private FacetDetail getFacetDetail(GetFacetValuesOp op, String facet, String restriction) {
 		String[] fieldParts = facet.split("\\.");
-		String rootForm = fieldParts[0];
+		String rootForm = StringUtils.defaultIfBlank(op.getDrivingForm(), fieldParts[0]);
 
 		int idx = fieldParts.length - 1;
 		while (idx >= 0) {
@@ -2184,7 +2184,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		String restrictionCond = "";
 		if (StringUtils.isNotBlank(op.getRestriction())) {
 			restrictionCond = " and (" + op.getRestriction() + ")";
-			rootForm = qs != null ? qs.getRootForm() : cprForm;
+			rootForm = qs != null ? qs.getRootForm() : StringUtils.defaultIfBlank(op.getDrivingForm(), cprForm);
 		}
 		aqlFmtArgs.add(restrictionCond);
 
