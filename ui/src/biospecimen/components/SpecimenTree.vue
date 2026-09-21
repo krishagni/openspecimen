@@ -280,6 +280,13 @@ export default {
     },
 
     _flattenSpecimens: function(specimens, depth, parentUid) {
+      let {defaultExpandDepth} = this.treeCfg || {};
+      if (defaultExpandDepth == undefined || isNaN(defaultExpandDepth)) {
+        defaultExpandDepth = -1;
+      }
+
+      const expanded = defaultExpandDepth < 0 || depth < defaultExpandDepth;
+      const show = defaultExpandDepth < 0 || depth == 0 || depth <= defaultExpandDepth;
       let idx = 0;
       let result = [];
       for (const specimen of specimens) {
@@ -299,7 +306,7 @@ export default {
           Array.prototype.push.apply(result, aliquots);
         } else {
           const uid = parentUid !== undefined && parentUid !== null ? parentUid + '_' + idx : idx;
-          const item = {cpr: this.cpr, visit: this.visit, specimen, depth, expanded: true, show: true, uid, parentUid};
+          const item = {cpr: this.cpr, visit: this.visit, specimen, depth, expanded, show, uid, parentUid};
           result.push(item);
       
           const flattened = this._flattenSpecimens(children || [], depth + 1, uid);

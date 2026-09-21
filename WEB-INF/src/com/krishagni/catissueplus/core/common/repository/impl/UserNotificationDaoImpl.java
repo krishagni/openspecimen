@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 
 import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.domain.UserNotification;
@@ -59,9 +60,22 @@ public class UserNotificationDaoImpl extends AbstractDao<UserNotification> imple
 			return 0;
 		}
 
+		//
+		// Oracle limits each IN list to 1000 expressions. Therefore we partition the notifIds
+		// into batches of 1000s
+		//
+		int deletedNotifs = 0;
+		for (List<Long> batch : ListUtils.partition(notifIds, 1000)) {
+			getCurrentSession().createNamedMutationQuery(DELETE_NOTIF_USERS)
+				.setParameterList("notifIds", batch)
+				.executeUpdate();
 
-		getCurrentSession().createNamedMutationQuery(DELETE_NOTIF_USERS).setParameterList("notifIds", notifIds).executeUpdate();
-		return getCurrentSession().createNamedMutationQuery(DELETE_NOTIFS).setParameterList("notifIds", notifIds).executeUpdate();
+			deletedNotifs += getCurrentSession().createNamedMutationQuery(DELETE_NOTIFS)
+				.setParameterList("notifIds", batch)
+				.executeUpdate();
+		}
+
+		return deletedNotifs;
 	}
 
 	private Criteria<UserNotification> getUserNotificationsListCriteria(UserNotifsListCriteria crit) {

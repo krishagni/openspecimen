@@ -5,6 +5,8 @@ import java.util.List;
 public class GetFacetValuesOp {
 	private String querySpace;
 
+	private String drivingForm;
+
 	private Long cpId;
 
 	private Long cpGroupId;
@@ -28,6 +30,14 @@ public class GetFacetValuesOp {
 
 	public void setQuerySpace(String querySpace) {
 		this.querySpace = querySpace;
+	}
+
+	public String getDrivingForm() {
+		return drivingForm;
+	}
+
+	public void setDrivingForm(String drivingForm) {
+		this.drivingForm = drivingForm;
 	}
 
 	public Long getCpId() {

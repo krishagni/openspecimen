@@ -3,8 +3,11 @@ package com.krishagni.catissueplus.core.de.domain;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.hibernate.envers.Audited;
@@ -20,6 +23,10 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
+import com.krishagni.catissueplus.core.common.errors.ErrorCode;
+import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.repository.DaoFactory;
 
@@ -81,6 +88,10 @@ public class SavedQuery extends BaseEntity {
 	@Autowired
 	@JsonIgnore
 	private DaoFactory daoFactory;
+
+	@Autowired
+	@JsonIgnore
+	private com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory biospecimenDaoFactory;
 
 	public String getTitle() {
 		return title;
@@ -300,30 +311,38 @@ public class SavedQuery extends BaseEntity {
 	}
 	
 	public String getQueryDefJson(boolean includeTitle) {
-		SavedQuery query = new SavedQuery();
-		
+		return getQueryDefJson(includeTitle, false);
+	}
+
+	public String getQueryDefJson(boolean includeTitle, boolean export) {
+		Map<String, Object> query = new LinkedHashMap<>();
 		if (includeTitle) {
-			query.title = title;
+			query.put("title", title);
 		}
-		
-		query.cpId = cpId;
-		query.cpGroupId = cpGroupId;
-		query.selectList = selectList;
-		query.filters = filters;
-		query.queryExpression = queryExpression;
-		query.drivingForm = drivingForm;
-		query.folders = null;
-		query.havingClause = havingClause;
-		query.reporting = reporting;
-		query.wideRowMode = wideRowMode;
-		query.outputColumnExprs = outputColumnExprs;
-		query.caseSensitive = caseSensitive;
-		
+
+		if (export) {
+			query.put("cpShortTitle", getCpShortTitle());
+			query.put("cpGroupName", getCpGroupName());
+		} else {
+			query.put("cpId", cpId);
+			query.put("cpGroupId", cpGroupId);
+		}
+
+		query.put("selectList", selectList);
+		query.put("filters", filters);
+		query.put("queryExpression", queryExpression);
+		query.put("drivingForm", drivingForm);
+		query.put("havingClause", havingClause);
+		query.put("reporting", reporting);
+		query.put("wideRowMode", wideRowMode);
+		query.put("outputColumnExprs", outputColumnExprs);
+		query.put("caseSensitive", caseSensitive);
+
 		try {
 			return getWriteMapper().writeValueAsString(query);
 		} catch (Exception e) {
 			throw new RuntimeException("Error marshalling saved query to JSON", e);
-		}				
+		}
 	}
 
 	public void setQueryDefJson(String queryDefJson) {
@@ -451,6 +470,41 @@ public class SavedQuery extends BaseEntity {
 		return Arrays.stream(new String[] {
 			"id", "title", "cpId", "cpGroupId", "queryDefJson", "deletedOn", "subQueries", "dependentQueries"
 		}).collect(Collectors.toSet());
+	}
+
+	private String getCpShortTitle() {
+		CollectionProtocol protocol = getObject(cpId, cp, this::getCpById, CpErrorCode.NOT_FOUND);
+		return protocol != null ? protocol.getShortTitle() : null;
+	}
+
+	private CollectionProtocol getCpById(Long id) {
+		return biospecimenDaoFactory.getCollectionProtocolDao().getById(id);
+	}
+
+	private String getCpGroupName() {
+		CollectionProtocolGroup group = getObject(cpGroupId, cpGroup, this::getCpGroupById, CpGroupErrorCode.NOT_FOUND);
+		return group != null ? group.getName() : null;
+	}
+
+	private CollectionProtocolGroup getCpGroupById(Long id) {
+		return biospecimenDaoFactory.getCpGroupDao().getById(id);
+	}
+
+	private <T extends BaseEntity> T getObject(Long id, T dbObj, Function<Long, T> dbGetter, ErrorCode errorCode) {
+		if (id == null || id == -1L) {
+			return null;
+		}
+
+		T result = dbObj;
+		if (result == null || !Objects.equals(id, dbObj.getId())) {
+			result = dbGetter.apply(id);
+		}
+
+		if (result == null) {
+			throw OpenSpecimenException.userError(errorCode, id);
+		}
+
+		return result;
 	}
 
 	private ObjectMapper getWriteMapper() {
