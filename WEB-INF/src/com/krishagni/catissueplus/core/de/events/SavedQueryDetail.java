@@ -9,7 +9,11 @@ import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 public class SavedQueryDetail extends SavedQuerySummary {
 	private Long cpId;
 
+	private String cpShortTitle;
+
 	private Long cpGroupId;
+
+	private String cpGroupName;
 	
 	private String drivingForm;
 
@@ -39,12 +43,28 @@ public class SavedQueryDetail extends SavedQuerySummary {
 		this.cpId = cpId;
 	}
 
+	public String getCpShortTitle() {
+		return cpShortTitle;
+	}
+
+	public void setCpShortTitle(String cpShortTitle) {
+		this.cpShortTitle = cpShortTitle;
+	}
+
 	public Long getCpGroupId() {
 		return cpGroupId;
 	}
 
 	public void setCpGroupId(Long cpGroupId) {
 		this.cpGroupId = cpGroupId;
+	}
+
+	public String getCpGroupName() {
+		return cpGroupName;
+	}
+
+	public void setCpGroupName(String cpGroupName) {
+		this.cpGroupName = cpGroupName;
 	}
 
 	public String getDrivingForm() {

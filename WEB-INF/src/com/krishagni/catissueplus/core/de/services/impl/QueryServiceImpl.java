@@ -38,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
@@ -49,18 +50,23 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.util.HtmlUtils;
-
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTaskManager;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -70,6 +76,7 @@ import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr.ParticipantRe
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
+import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
@@ -130,11 +137,11 @@ import edu.common.dynamicextensions.query.QueryException;
 import edu.common.dynamicextensions.query.QueryParserException;
 import edu.common.dynamicextensions.query.QueryRejectedException;
 import edu.common.dynamicextensions.query.QueryResponse;
-import edu.common.dynamicextensions.query.QueryRiskAssessmentConfig;
 import edu.common.dynamicextensions.query.QueryResultCsvExporter;
 import edu.common.dynamicextensions.query.QueryResultData;
 import edu.common.dynamicextensions.query.QueryResultExporter;
 import edu.common.dynamicextensions.query.QueryResultScreener;
+import edu.common.dynamicextensions.query.QueryRiskAssessmentConfig;
 import edu.common.dynamicextensions.query.QuerySpace;
 import edu.common.dynamicextensions.query.ResultColumn;
 import edu.common.dynamicextensions.query.WideRowMode;
@@ -177,6 +184,9 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	private static final ExecutorService exportThreadPool = Executors.newFixedThreadPool(EXPORT_THREAD_POOL_SIZE);
 
 	private DaoFactory daoFactory;
+
+	@Autowired
+	private com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory biospecimenDaoFactory;
 
 	private UserDao userDao;
 	
@@ -1160,7 +1170,9 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			}
 
 			AccessCtrlMgr.getInstance().ensureReadQueryRights();
-			return ResponseEvent.response(query.getQueryDefJson(true));
+			return ResponseEvent.response(query.getQueryDefJson(true, true));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
@@ -1323,8 +1335,8 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	private SavedQuery getSavedQuery(SavedQueryDetail detail) {
 		SavedQuery savedQuery = new SavedQuery();		
 		savedQuery.setTitle(detail.getTitle());
-		savedQuery.setCpId(detail.getCpId());
-		savedQuery.setCpGroupId(detail.getCpGroupId());
+		savedQuery.setCpId(getCpId(detail));
+		savedQuery.setCpGroupId(getCpGroupId(detail));
 		savedQuery.setSelectList(detail.getSelectList());
 		savedQuery.setFilters(detail.getFilters());
 		savedQuery.setSubQueries(Arrays.stream(detail.getFilters())
@@ -1344,6 +1356,42 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		savedQuery.setOutputColumnExprs(detail.isOutputColumnExprs());
 		savedQuery.setCaseSensitive(detail.isCaseSensitive());
 		return savedQuery;
+	}
+
+	private Long getCpId(SavedQueryDetail detail) {
+		CollectionProtocol cp = getObject(detail.getCpId(), detail.getCpShortTitle(), this::getCp, CpErrorCode.NOT_FOUND);
+		return cp != null ? cp.getId() : null;
+	}
+
+	private CollectionProtocol getCp(Long cpId, String cpShortTitle) {
+		return StringUtils.isNotBlank(cpShortTitle)
+			? biospecimenDaoFactory.getCollectionProtocolDao().getCpByShortTitle(cpShortTitle)
+			: biospecimenDaoFactory.getCollectionProtocolDao().getById(cpId);
+	}
+
+	private Long getCpGroupId(SavedQueryDetail detail) {
+		CollectionProtocolGroup group = getObject(detail.getCpGroupId(), detail.getCpGroupName(), this::getCpGroup, CpGroupErrorCode.NOT_FOUND);
+		return group != null ? group.getId() : null;
+	}
+
+	private CollectionProtocolGroup getCpGroup(Long id, String name) {
+		return StringUtils.isNotBlank(name)
+			? biospecimenDaoFactory.getCpGroupDao().getByName(name)
+			: biospecimenDaoFactory.getCpGroupDao().getById(id);
+	}
+
+	private <T extends BaseEntity> T getObject(Long id, String name, BiFunction<Long, String, T> dbGetter, ErrorCode errorCode) {
+		boolean useName = StringUtils.isNotBlank(name);
+		if (!useName && (id == null || id == -1L)) {
+			return null;
+		}
+
+		T object = dbGetter.apply(id, name);
+		if (object == null) {
+			throw OpenSpecimenException.userError(errorCode, useName ? name : id);
+		}
+
+		return object;
 	}
 
 	private String getAql(SavedQueryDetail queryDetail) {
