@@ -9,36 +9,26 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.krishagni.catissueplus.core.auth.domain.factory.AuthProviderErrorCode;
 import com.krishagni.catissueplus.core.auth.services.AuthenticationService;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
-public class AuthDomain {
+public class AuthDomain extends BaseEntity {
 	private static final LogUtil logger = LogUtil.getLogger(AuthDomain.class);
 
 	private static Map<Long, AuthenticationService> authProviderMap = new HashMap<>();
 
-	private Long id;
-
 	private String name;
 
 	private AuthProvider authProvider;
-
 
 	private boolean allowLogins = true;
 
 	private boolean legacySaml = false;
 
 	private String activityStatus;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getName() {
 		return name;

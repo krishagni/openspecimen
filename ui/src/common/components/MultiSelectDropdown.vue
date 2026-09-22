@@ -288,13 +288,21 @@ export default {
         return null;
       }
 
-      if (typeof this.displayProp == 'function') {
-        return (selected || []).map(s => this.displayProp(s)).join(', ');
-      } else if (this.displayProp) {
-        return (selected || []).map(s => (typeof s == 'object' && s[this.displayProp]) || s).join(', ');
-      } else {
-        return (selected || []).join(', ');
-      }
+      return selected.map(value => {
+        const option = this.selectProp
+          ? this.ctx.options.find(option => option[this.selectProp] === value)
+          : value;
+
+        if (option == null) {
+          return value;
+        } else if (typeof this.displayProp == 'function') {
+          return this.displayProp(option);
+        } else if (this.displayProp) {
+          return (typeof option == 'object' && option[this.displayProp]) || option;
+        } else {
+          return value;
+        }
+      }).join(', ');
     },
 
     showClear: function() {

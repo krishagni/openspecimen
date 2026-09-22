@@ -27,6 +27,7 @@ export default {
           "expr": "!!item.distributedQty"
         }
       },  
+      "enableCopyFirstToAll": true
     },
     {
       "name": "item.location",
@@ -45,28 +46,33 @@ export default {
       "uiStyle": {
         "min-width": "300px"
       },
+      "enableCopyFirstToAll": true
     },
     {
       "name": "item.user",
       "labelCode": "orders.user",
-      "type": "user"
+      "type": "user",
+      "enableCopyFirstToAll": true
     },
     {
       "name": "item.time",
       "labelCode": "orders.date_time",
       "type": "datePicker",
-      "showTime": true
+      "showTime": true,
+      "enableCopyFirstToAll": true
     },
     {
       "name": "item.incrFreezeThaw",
       "labelCode": "orders.freeze_thaw",
       "type": "number",
-      "maxFractionDigits": 0
+      "maxFractionDigits": 0,
+      "enableCopyFirstToAll": true
     },
     {
       "name": "item.comments",
       "labelCode": "orders.comments",
-      "type": "textarea"
+      "type": "textarea",
+      "enableCopyFirstToAll": true
     }
   ]
 }
