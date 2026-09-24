@@ -127,14 +127,14 @@ public class BiospecimenDaoHelper {
 				restriction = "(Specimen.lineage = \"New\" and " + restriction + ")";
 			}
 
-			if (aql.length() > 0) {
+			if (!aql.isEmpty()) {
 				aql.append(" or ");
 			}
 
 			aql.append(restriction);
 		}
 
-		if (aql.length() > 0) {
+		if (!aql.isEmpty()) {
 			aql.insert(0, "(").append(")");
 		}
 
