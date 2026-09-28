@@ -2299,6 +2299,8 @@
       "online_import_job_size_limit_desc": "Maximum records allowed in online import jobs. Jobs that exceed this limit are queued for execution during the off-peak hours.",
       "locale": "Locale",
       "locale_desc": "Locale in which the server has to be deployed. By default, it assumes the server's locale.",
+      "logging_level": "Logging Level",
+      "logging_level_desc": "Minimum severity of messages written to the OpenSpecimen log. Use DEBUG or TRACE temporarily when troubleshooting because they produce significantly more log output.",
       "log_files_retain_period": "Log Files Retain Period",
       "log_files_retain_period_desc": "Number of days to retain the log files after which they are deleted.",
       "max_audit_report_period": "Audit Report Period",

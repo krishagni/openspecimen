@@ -23,6 +23,10 @@ public class LogUtil {
         Configurator.setRootLevel(Level.INFO);
     }
 
+    public static void setLevel(String level) {
+        Configurator.setRootLevel(Level.getLevel(level));
+    }
+
     public static void configure(URL url) {
         try {
             LoggerContext context = (LoggerContext) LogManager.getContext(false);
