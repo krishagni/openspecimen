@@ -91,4 +91,90 @@
       <where>name = 'allowed_html_link_origins' and module_id = (select identifier from os_modules where name = 'common')</where>
     </update>
   </changeSet>
+
+  <changeSet author="vpawar" id="OpenSpecimen logging level setting">
+    <sql>
+      call add_cfg_prop(
+        'common', 'logging_level',
+        'logging_level', 'logging_level_desc',
+        'STRING', 'INFO'
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="OpenSpecimen logging level allowed values">
+    <sql>
+      insert into
+        os_cfg_prop_allowed_values (property_id, value)
+      select
+        identifier, 'OFF'
+      from
+        os_cfg_props
+      where
+        name = 'logging_level';
+
+      insert into
+        os_cfg_prop_allowed_values (property_id, value)
+      select
+        identifier, 'FATAL'
+      from
+        os_cfg_props
+      where
+        name = 'logging_level';
+
+      insert into
+        os_cfg_prop_allowed_values (property_id, value)
+      select
+        identifier, 'ERROR'
+      from
+        os_cfg_props
+      where
+        name = 'logging_level';
+
+      insert into
+        os_cfg_prop_allowed_values (property_id, value)
+      select
+        identifier, 'WARN'
+      from
+        os_cfg_props
+      where
+        name = 'logging_level';
+
+      insert into
+        os_cfg_prop_allowed_values (property_id, value)
+      select
+        identifier, 'INFO'
+      from
+        os_cfg_props
+      where
+        name = 'logging_level';
+
+      insert into
+        os_cfg_prop_allowed_values (property_id, value)
+      select
+        identifier, 'DEBUG'
+      from
+        os_cfg_props
+      where
+        name = 'logging_level';
+
+      insert into
+        os_cfg_prop_allowed_values (property_id, value)
+      select
+        identifier, 'TRACE'
+      from
+        os_cfg_props
+      where
+        name = 'logging_level';
+
+      insert into
+        os_cfg_prop_allowed_values (property_id, value)
+      select
+        identifier, 'ALL'
+      from
+        os_cfg_props
+      where
+        name = 'logging_level';
+    </sql>
+  </changeSet>
 </databaseChangeLog>

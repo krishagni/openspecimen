@@ -69,6 +69,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 	private static final LogUtil logger = LogUtil.getLogger(ConfigurationServiceImpl.class);
 
 	private static final Pattern DATE_FORMAT = Pattern.compile("(?<day>d+)|(?<month>M+)|(?<year>y+)|(?<week>EEE+)");
+
+	private static final String LOG_LEVEL = "logging_level";
 	
 	private Map<String, List<ConfigChangeListener>> changeListeners = new ConcurrentHashMap<>();
 	
@@ -151,6 +153,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		}
 
 		String setting = detail.getValue();
+		if ("common".equals(module) && LOG_LEVEL.equals(prop) && StringUtils.isBlank(setting)) {
+			return ResponseEvent.userError(ConfigErrorCode.INVALID_SETTING_VALUE, setting);
+		}
+
 		if ("common".equals(module) && HtmlLinkOrigins.SETTING.equals(prop)) {
 			try {
 				setting = String.join("\n", HtmlLinkOrigins.parse(setting));
@@ -663,11 +669,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		reload();
 		
 		setLocale();
+		setLoggingLevel();
 		registerChangeListener("common", new ConfigChangeListener() {			
 			@Override
 			public void onConfigChange(String name, String value) {				
 				if (name.equals("locale")) {
 					setLocale();
+				} else if (StringUtils.isBlank(name) || name.equals(LOG_LEVEL)) {
+					setLoggingLevel();
 				}
 			}
 		});
@@ -796,6 +805,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		}
 
 		logger.info("App is using the locale: " + newLocale.toString());
+	}
+
+	private void setLoggingLevel() {
+		LogUtil.setLevel(getStrSetting("common", LOG_LEVEL, "INFO"));
 	}
 	
 	private boolean isAutoEmpiEnabled() {
