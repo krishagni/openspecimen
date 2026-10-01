@@ -1,5 +1,5 @@
 <template>
-  <router-view :query="query" :key="query.id" v-if="query" @query-saved="reloadQuery" />
+  <router-view :query="query" :update-query="reloadQuery" :key="query.id" v-if="query" @query-saved="reloadQuery" />
 </template>
 
 <script>

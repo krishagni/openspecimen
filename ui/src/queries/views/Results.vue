@@ -46,65 +46,81 @@
     </os-page-head>
 
     <os-page-body>
-      <os-page-toolbar>
-        <template #default>
-          <os-menu :label="$t('queries.actions')" :options="actionsMenuOpts" />
+      <div class="results-workspace" :class="{'with-right-panel': ctx.rightPanel}">
+        <section class="results-column">
+          <os-page-toolbar>
+            <template #default>
+              <os-menu :label="$t('queries.actions')" :options="actionsMenuOpts" />
 
-          <span v-if="ctx.showAddSpecimens && ctx.selectedRows.length > 0">
-            <os-specimen-actions label="queries.specimen_actions"
-              :specimens="selectedSpecimens" @reloadSpecimens="rerun" @route-change="saveQueryLocally($event)" />
+              <span v-if="ctx.showAddSpecimens && ctx.selectedRows.length > 0">
+                <os-specimen-actions label="queries.specimen_actions"
+                  :specimens="selectedSpecimens" @reloadSpecimens="rerun" @route-change="saveQueryLocally($event)" />
 
-            <os-add-to-cart :specimens="selectedSpecimens" />
-          </span>
+                <os-add-to-cart :specimens="selectedSpecimens" />
+              </span>
 
-          <os-plugin-views page="query-results" view="toolbar" :view-props="{query}" />
+              <os-plugin-views page="query-results" view="toolbar" :view-props="{query}"
+                @toggle-right-panel="toggleRightPanel" />
 
-          <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-            url="https://openspecimen.atlassian.net/l/cp/WNtmFmh3" :new-tab="true" />
-        </template>
+              <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
+                url="https://openspecimen.atlassian.net/l/cp/WNtmFmh3" :new-tab="true" />
+            </template>
 
-        <template #right v-if="selectedSpecimens.length > 0">
-          <os-message class="selected-rows-msg" type="info">
-            <span v-t="{path: 'queries.specimens_selected', args: {count: selectedSpecimens.length}}" />
-          </os-message>
-        </template>
-      </os-page-toolbar>
+            <template #right v-if="selectedSpecimens.length > 0">
+              <os-message class="selected-rows-msg" type="info">
+                <span v-t="{path: 'queries.specimens_selected', args: {count: selectedSpecimens.length}}" />
+              </os-message>
+            </template>
+          </os-page-toolbar>
 
-      <os-grid v-if="query.selectList && query.selectList.length > 0">
-        <os-grid-column :width="3" v-show="ctx.hasFacets">
-          <Facets :query="query" @facets-loaded="onFacetsLoad"
-            @facets-applied="applyFacets" @facets-changed="onFacetsChange" />
-        </os-grid-column>
+          <main class="results-content">
+            <os-grid v-if="query.selectList && query.selectList.length > 0">
+              <os-grid-column :width="3" v-show="showFacets">
+                <Facets :query="query" @facets-loaded="onFacetsLoad"
+                  @facets-applied="applyFacets" @facets-changed="onFacetsChange" />
+              </os-grid-column>
 
-        <os-grid-column class="results-panel" :width="ctx.hasFacets ? 9 : 12" :style="{'--ag-spacing': '6px'}">
-          <os-message type="warn" v-if="ctx.pendingFacetChanges">
-            <span v-t="'queries.pending_facet_changes'">Filter changes are pending. Click Apply to update the results.</span>
-          </os-message>
+              <os-grid-column class="results-panel" :width="showFacets ? 9 : 12" :style="{'--ag-spacing': '6px'}">
+                <os-message type="warn" v-if="ctx.pendingFacetChanges">
+                  <span v-t="'queries.pending_facet_changes'">Filter changes are pending. Click Apply to update the results.</span>
+                </os-message>
 
-          <os-message type="info" v-if="ctx.loadingRecords">
-            <span v-t="'queries.loading_records'">Loading records...</span>
-          </os-message>
+                <os-message type="info" v-if="ctx.loadingRecords">
+                  <span v-t="'queries.loading_records'">Loading records...</span>
+                </os-message>
 
-          <os-message type="warn" v-if="!ctx.loadingRecords && ctx.dbHasMoreRecords">
-            <span v-t="'queries.export_to_get_all'"></span>
-            <a href="https://openspecimen.atlassian.net/wiki/x/ogYR" target="_blank">
-              <span>&nbsp;</span>
-              <span v-t="'queries.click_export_has_more_records'"></span>
-            </a>
-          </os-message>
+                <os-message type="warn" v-if="!ctx.loadingRecords && ctx.dbHasMoreRecords">
+                  <span v-t="'queries.export_to_get_all'"></span>
+                  <a href="https://openspecimen.atlassian.net/wiki/x/ogYR" target="_blank">
+                    <span>&nbsp;</span>
+                    <span v-t="'queries.click_export_has_more_records'"></span>
+                  </a>
+                </os-message>
 
-          <AgGridVue class="results-grid" :theme="theme"
-            :row-data="ctx.records" :column-defs="ctx.columns" :suppressFieldDotNotation="true"
-            :rowSelection="rowSelection" :pinnedBottomRowData="ctx.footerRow" :enableCellTextSelection="true"
-            :tooltipShowMode="'whenTruncated'" :tooltipShowDelay="500"
-            @gridReady="onGridReady" @selectionChanged="onRowSelection"
-            v-if="!ctx.loadingRecords" />
-        </os-grid-column>
-      </os-grid>
-      <div v-else>
-        <os-message type="info">
-          <span v-t="'queries.select_columns'">Select one or more columns to show the records...</span>
-        </os-message>
+                <AgGridVue class="results-grid" :theme="theme"
+                  :row-data="ctx.records" :column-defs="ctx.columns" :suppressFieldDotNotation="true"
+                  :rowSelection="rowSelection" :pinnedBottomRowData="ctx.footerRow" :enableCellTextSelection="true"
+                  :tooltipShowMode="'whenTruncated'" :tooltipShowDelay="500"
+                  @gridReady="onGridReady" @selectionChanged="onRowSelection"
+                  v-if="!ctx.loadingRecords" />
+              </os-grid-column>
+            </os-grid>
+            <div v-else>
+              <os-message type="info">
+                <span v-t="'queries.select_columns'">Select one or more columns to show the records...</span>
+              </os-message>
+            </div>
+          </main>
+        </section>
+
+        <aside class="query-right-panel" :aria-busy="rightPanelDisabled" v-if="ctx.rightPanel">
+          <div class="right-panel-content" :inert="rightPanelDisabled ? '' : null">
+            <os-plugin-views page="query-results" view="right-panel" :view-names="[ctx.rightPanel]"
+              :view-props="{query, appliedFacets: ctx.appliedFacets}"
+              @update-query="updateQueryFromRightPanel" @toggle-right-panel="toggleRightPanel" />
+          </div>
+          <div class="right-panel-mask" v-if="rightPanelDisabled"></div>
+        </aside>
       </div>
 
     </os-page-body>
@@ -144,7 +160,7 @@ import Facets     from './Facets.vue';
 import SaveQuery  from './SaveQuery.vue';
 
 export default {
-  props: ['query'],
+  props: ['query', 'updateQuery'],
 
   emits: ['query-saved'],
 
@@ -195,7 +211,11 @@ export default {
 
         pendingFacetChanges: false,
 
-        appliedFacets: []
+        appliedFacets: [],
+
+        updatingQuery: false,
+
+        rightPanel: null
       }
     }
   },
@@ -246,10 +266,28 @@ export default {
 
     selectedSpecimens: function() {
       return this.ctx.selectedRows.map(row => ({id: +row['$specimenId'], cpId: +row['$cpId']}));
+    },
+
+    rightPanelDisabled: function() {
+      return this.ctx.pendingFacetChanges || this.ctx.loadingRecords || this.ctx.loadingCounters || this.ctx.updatingQuery;
+    },
+
+    showFacets: function() {
+      return this.ctx.hasFacets && !this.ctx.rightPanel;
     }
   },
 
   methods: {
+    toggleRightPanel: function({panelName} = {}) {
+      panelName = panelName || this.ctx.rightPanel;
+      if (!panelName || this.rightPanelDisabled) {
+        return;
+      }
+
+      this.ctx.rightPanel = this.ctx.rightPanel == panelName ? null : panelName;
+      this._resizeResultsGrid();
+    },
+
     saveQueryLocally: function(route) {
       window['osQuery'] = {route, query: JSON.stringify(this.query)};
     },
@@ -360,6 +398,15 @@ export default {
       }
 
       return this.$refs.discardFacetChangesDialog.open().then(resp => resp == 'proceed');
+    },
+
+    updateQueryFromRightPanel: async function({query, resolve = () => {}, reject = () => {}}) {
+      try {
+        await this._updateQuery(query);
+        resolve(query);
+      } catch (error) {
+        reject(error);
+      }
     },
 
     _loadCounters: async function(facets) {
@@ -498,6 +545,43 @@ export default {
 
     _getAppliedFacets: function() {
       return this.ctx.appliedFacets;
+    },
+
+    _updateQuery: async function(query) {
+      if (this.rightPanelDisabled) {
+        throw new Error('The query cannot be updated while results are loading or facet changes are pending.');
+      }
+
+      this.ctx.updatingQuery = true;
+      const previous = this.query;
+      try {
+        await this.updateQuery(query);
+        await this.$nextTick();
+        this.ctx.selectedRows = [];
+        this.ctx.allRowsSelected = false;
+
+        const results = await Promise.allSettled(
+          [this._loadCounters(this._getAppliedFacets()), this._loadRecords(this._getAppliedFacets())]);
+        const failed = results.find(result => result.status == 'rejected');
+        if (failed) {
+          throw failed.reason;
+        }
+      } catch (error) {
+        await this.updateQuery(previous);
+        await this.$nextTick();
+        await Promise.allSettled([
+          this._loadCounters(this._getAppliedFacets()), this._loadRecords(this._getAppliedFacets())
+        ]);
+        throw error;
+      } finally {
+        this.ctx.loadingCounters = false;
+        this.ctx.loadingRecords = false;
+        this.ctx.updatingQuery = false;
+      }
+    },
+
+    _resizeResultsGrid: function() {
+      this.$nextTick(() => window.dispatchEvent(new Event('resize')));
     }
   }
 }
@@ -526,6 +610,57 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+.results-workspace {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.results-column {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.results-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.query-right-panel {
+  flex: 0 0 min(32rem, 40%);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.right-panel-content {
+  height: 100%;
+}
+
+.right-panel-mask {
+  background: rgba(255, 255, 255, 0.55);
+  cursor: wait;
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+@media (max-width: 62rem) {
+  .results-workspace.with-right-panel .results-column {
+    display: none;
+  }
+
+  .query-right-panel {
+    flex-basis: 100%;
+  }
 }
 
 .results-panel :deep(.os-message) {
