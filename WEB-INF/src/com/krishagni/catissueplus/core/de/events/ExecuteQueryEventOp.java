@@ -3,6 +3,8 @@ package com.krishagni.catissueplus.core.de.events;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class ExecuteQueryEventOp  {
 
 	private String querySpace;
@@ -159,6 +161,7 @@ public class ExecuteQueryEventOp  {
 		this.synchronous = synchronous;
 	}
 
+	@JsonIgnore
 	public boolean isDisableAccessChecks() {
 		return disableAccessChecks;
 	}
@@ -167,6 +170,7 @@ public class ExecuteQueryEventOp  {
 		this.disableAccessChecks = disableAccessChecks;
 	}
 
+	@JsonIgnore
 	public boolean isDisableAuditing() {
 		return disableAuditing;
 	}
@@ -191,6 +195,7 @@ public class ExecuteQueryEventOp  {
 		this.reportName = reportName;
 	}
 
+	@JsonIgnore
 	public String getQueryUid() {
 		return queryUid;
 	}
@@ -199,6 +204,7 @@ public class ExecuteQueryEventOp  {
 		this.queryUid = queryUid;
 	}
 
+	@JsonIgnore
 	public boolean isUseReportingDataSource() {
 		return useReportingDataSource;
 	}
