@@ -328,14 +328,16 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, Ini
 		try {
 			ShipmentDetail detail = req.getPayload();
 			Shipment existing = getShipment(detail.getId(), detail.getName());
+			boolean delete = com.krishagni.catissueplus.core.common.util.Status.isDisabledStatus(detail.getActivityStatus());
+			if (delete) {
+				return ResponseEvent.response(ShipmentDetail.from(deleteShipment(existing)));
+			} else {
+				AccessCtrlMgr.getInstance().ensureUpdateShipmentTransitionRights(existing);
+			}
 
 			Shipment newShipment = shipmentFactory.createShipment(detail, null);
 			if (existing.getType() != newShipment.getType()) {
 				return ResponseEvent.userError(ShipmentErrorCode.CANNOT_CHG_TYPE);
-			}
-
-			if (newShipment.isDeleted()) {
-				return ResponseEvent.response(ShipmentDetail.from(deleteShipment(existing)));
 			}
 
 			AccessCtrlMgr.getInstance().ensureUpdateShipmentRights(newShipment);
