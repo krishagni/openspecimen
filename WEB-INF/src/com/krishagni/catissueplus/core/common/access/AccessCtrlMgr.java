@@ -1774,6 +1774,10 @@ public class AccessCtrlMgr {
 		ensureShipmentRights(shipment, Operation.UPDATE);
 	}
 
+	public void ensureUpdateShipmentTransitionRights(Shipment shipment) {
+		ensureShipmentRights(shipment, Operation.UPDATE, true);
+	}
+
 	public void ensureDeleteShipmentRights(Shipment shipment) {
 		ensureShipmentRights(shipment, Operation.DELETE);
 	}
@@ -1783,6 +1787,10 @@ public class AccessCtrlMgr {
 	}
 
 	private void ensureShipmentRights(Shipment shipment, Operation op) {
+		ensureShipmentRights(shipment, op, false);
+	}
+
+	private void ensureShipmentRights(Shipment shipment, Operation op, boolean allowReceiverForShipped) {
 		if (AuthUtil.isAdmin()) {
 			return;
 		}
@@ -1804,12 +1812,11 @@ public class AccessCtrlMgr {
 			allowed = true; // sender can update/delete
 		}
 
-		if (!allowed && shipment.isReceived() && isAccessAllowedOnSite(allowedSites, shipment.getReceivingSite())) {
-			allowed = true; // receiver can update / delete
-		}
-
-		if (!allowed && shipment.isRequest() && shipment.isRequested() && isAccessAllowedOnSite(allowedSites, shipment.getReceivingSite())) {
-			allowed = true; // requester/receiver can modify submitted requests
+		boolean receivingSiteAllowed = shipment.isReceived() ||
+			(shipment.isRequest() && shipment.isRequested()) ||
+			(allowReceiverForShipped && shipment.isShipped());
+		if (!allowed && receivingSiteAllowed && isAccessAllowedOnSite(allowedSites, shipment.getReceivingSite())) {
+			allowed = true;
 		}
 
 		if (!allowed) {
