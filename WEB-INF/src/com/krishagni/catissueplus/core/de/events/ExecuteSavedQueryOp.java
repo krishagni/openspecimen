@@ -3,6 +3,8 @@ package com.krishagni.catissueplus.core.de.events;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class ExecuteSavedQueryOp {
 	private Long savedQueryId;
 
@@ -83,6 +85,7 @@ public class ExecuteSavedQueryOp {
 		this.maxResults = maxResults;
 	}
 
+	@JsonIgnore
 	public boolean isUseReportingDataSource() {
 		return useReportingDataSource;
 	}

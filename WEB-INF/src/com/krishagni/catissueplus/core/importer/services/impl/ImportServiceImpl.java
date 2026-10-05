@@ -223,7 +223,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 			//
 			// 2. Generate unique file ID
 			//
-			String fileId = UUID.randomUUID().toString();
+			String fileId = AuthUtil.getCurrentUser().getId() + "-" + UUID.randomUUID();
 			
 			//
 			// 3. Copy uploaded file to import directory
@@ -636,6 +636,32 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 	}
 	
 	private String getFilePath(String fileId) {
+		if (StringUtils.isBlank(fileId)) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Invalid file ID.");
+		}
+
+		int separatorIdx = fileId.indexOf('-');
+		if (separatorIdx <= 0 || separatorIdx == fileId.length() - 1) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Invalid file ID.");
+		}
+
+		Long userId = null;
+		UUID uuid = null;
+		try {
+			userId = Long.valueOf(fileId.substring(0, separatorIdx));
+			String uuidToken = fileId.substring(separatorIdx + 1);
+			uuid = UUID.fromString(uuidToken);
+			if (!uuid.toString().equals(uuidToken)) {
+				throw new IllegalArgumentException("Non-canonical UUID");
+			}
+		} catch (IllegalArgumentException e) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Invalid file ID.");
+		}
+
+		if (!userId.equals(AuthUtil.getCurrentUser().getId())) {
+			throw OpenSpecimenException.userError(ImportJobErrorCode.ACCESS_DENIED);
+		}
+
 		return Utility.getFile(getImportDir(), fileId).getAbsolutePath();
 	}
 	

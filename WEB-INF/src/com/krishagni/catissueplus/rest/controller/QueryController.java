@@ -53,6 +53,9 @@ public class QueryController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
 	public QueryExecResult executeQuery(@RequestBody ExecuteQueryEventOp opDetail) {
+		opDetail.setDisableAccessChecks(false);
+		opDetail.setDisableAuditing(false);
+		opDetail.setQueryUid(null);
 		opDetail.setUseReportingDataSource(true);
 		return response(querySvc.executeQuery(request(opDetail)));
 	}
@@ -92,6 +95,9 @@ public class QueryController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public QueryDataExportResult exportQueryData(@RequestBody ExecuteQueryEventOp opDetail) {
+		opDetail.setDisableAccessChecks(false);
+		opDetail.setDisableAuditing(false);
+		opDetail.setQueryUid(null);
 		opDetail.setUseReportingDataSource(true);
 		return response(querySvc.exportQueryData(request(opDetail)));
 	}	
@@ -126,6 +132,7 @@ public class QueryController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<FacetDetail> getFacetValues(@RequestBody GetFacetValuesOp op) {
+		op.setDisableAccessChecks(false);
 		op.setUseReportingDataSource(true);
 		return response(querySvc.getFacetValues(request(op)));
 	}

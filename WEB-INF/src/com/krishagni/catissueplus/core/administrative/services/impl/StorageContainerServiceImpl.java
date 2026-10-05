@@ -639,6 +639,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		try {
 			PositionsDetail op = req.getPayload();
 			StorageContainer container = getContainer(op.getContainerId(), op.getContainerName());
+			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			if (container.isArchived()) {
 				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
 			}

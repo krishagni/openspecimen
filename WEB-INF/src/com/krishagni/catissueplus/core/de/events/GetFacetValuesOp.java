@@ -2,6 +2,8 @@ package com.krishagni.catissueplus.core.de.events;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class GetFacetValuesOp {
 	private String querySpace;
 
@@ -80,6 +82,7 @@ public class GetFacetValuesOp {
 		this.restriction = restriction;
 	}
 
+	@JsonIgnore
 	public boolean isDisableAccessChecks() {
 		return disableAccessChecks;
 	}
@@ -88,6 +91,7 @@ public class GetFacetValuesOp {
 		this.disableAccessChecks = disableAccessChecks;
 	}
 
+	@JsonIgnore
 	public boolean isUseReportingDataSource() {
 		return useReportingDataSource;
 	}
