@@ -395,12 +395,15 @@ public class RbacServiceImpl implements RbacService {
 				return ResponseEvent.userError(RbacErrorCode.SUBJECT_ID_REQUIRED);
 			}
 			
-			Subject subject = daoFactory.getSubjectDao().getById(subjectId);
-			if (subject == null) {
+			User user = userDao.getById(subjectId);
+			if (user == null) {
 				return ResponseEvent.userError(RbacErrorCode.SUBJECT_NOT_FOUND);
 			}
-			
-			return ResponseEvent.response(SubjectRoleDetail.from(subject.getRoles()));
+
+			AccessCtrlMgr.getInstance().ensureReadUserRolesRights(user);
+			return ResponseEvent.response(SubjectRoleDetail.from(user.getRoles()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}

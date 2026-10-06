@@ -164,6 +164,31 @@ public class AccessCtrlMgr {
 		ensureUserEximRights(user, true);
 	}
 
+	public void ensureReadUserRolesRights(User user) {
+		User currentUser = AuthUtil.getCurrentUser();
+		if (currentUser == null) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
+		if (currentUser.isAdmin() || currentUser.equals(user)) {
+			return;
+		}
+
+		if (!currentUser.getInstitute().equals(user.getInstitute())) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
+		if (currentUser.isInstituteAdmin()) {
+			return;
+		}
+
+		if (canUserPerformOp(currentUser.getId(), Resource.USER, new Operation[] { Operation.UPDATE })) {
+			return;
+		}
+
+		throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+	}
+
 	public void ensureCreateUpdateUserRolesRights(User user, Site roleSite, CollectionProtocol roleCp) {
 		//
 		// Constraint 1: The site on which the role is assigned should belong to the user institute

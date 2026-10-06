@@ -145,11 +145,16 @@ public class ParticipantServiceImpl implements ParticipantService, ObjectAccesso
 	public ResponseEvent<List<MatchedParticipantsList>> getMatchingParticipants(RequestEvent<List<ParticipantDetail>> req) {
 		try {
 			List<MatchedParticipantsList> result = new ArrayList<>();
+			boolean unrestrictedAccess = AccessCtrlMgr.getInstance().canCreateUpdateParticipant();
 
 			for (ParticipantDetail inputCrit : req.getPayload()) {
 				List<MatchedParticipant> matchedParticipants = lookupFactory.getLookupLogic().getMatchingParticipants(inputCrit);
-				if (inputCrit.isReqRegInfo()) {
-					addRegInfo(matchedParticipants);
+				if (unrestrictedAccess) {
+					if (inputCrit.isReqRegInfo()) {
+						addRegInfo(matchedParticipants);
+					}
+				} else {
+					matchedParticipants = getAccessibleMatches(inputCrit, matchedParticipants);
 				}
 
 				result.add(MatchedParticipantsList.from(inputCrit, matchedParticipants));
@@ -273,23 +278,51 @@ public class ParticipantServiceImpl implements ParticipantService, ObjectAccesso
 		return result;
 	}
 
-	//
-	// TODO: We are assuming there won't be many matched participants;
-	// If this is slow then we need to issue a single query to obtain
-	// reg info of all matched participants at one go
-	//
+	private List<MatchedParticipant> getAccessibleMatches(ParticipantDetail criteria, List<MatchedParticipant> matchedParticipants) {
+		List<MatchedParticipant> result = new ArrayList<>();
+		for (MatchedParticipant match : matchedParticipants) {
+			MatchedParticipant accessibleMatch = getAccessibleMatch(criteria.isReqRegInfo(), match);
+			if (accessibleMatch != null) {
+				result.add(accessibleMatch);
+			}
+		}
+
+		return result;
+	}
+
+	private MatchedParticipant getAccessibleMatch(boolean reqRegInfo, MatchedParticipant match) {
+		ParticipantDetail detail = match.getParticipant();
+		if (detail.getId() == null) {
+			return null;
+		}
+
+		Participant participant = daoFactory.getParticipantDao().getById(detail.getId());
+		if (participant == null) {
+			return null;
+		}
+
+		try {
+			boolean phiAccess = AccessCtrlMgr.getInstance().ensureReadParticipantRights(participant);
+			List<CollectionProtocolRegistration> cprs = reqRegInfo ? getCprs(participant) : null;
+			detail = ParticipantDetail.from(participant, !phiAccess, cprs);
+			return new MatchedParticipant(detail, match.getMatchedAttrs());
+		} catch (OpenSpecimenException ose) {
+			return null;
+		}
+	}
+
 	private void addRegInfo(List<MatchedParticipant> matchedParticipants) {
 		matchedParticipants.forEach(this::addRegInfo);
 	}
 
 	private void addRegInfo(MatchedParticipant matchedParticipant) {
 		ParticipantDetail detail = matchedParticipant.getParticipant();
-		if (detail.getId() == null) {
-			return;
+		if (detail.getId() != null) {
+			Participant participant = daoFactory.getParticipantDao().getById(detail.getId());
+			if (participant != null) {
+				detail.setRegisteredCps(ParticipantDetail.getCprSummaries(getCprs(participant)));
+			}
 		}
-
-		Participant participant = daoFactory.getParticipantDao().getById(detail.getId());
-		detail.setRegisteredCps(ParticipantDetail.getCprSummaries(getCprs(participant)));
 	}
 
 	private List<CollectionProtocolRegistration> getCprs(Participant participant) {
