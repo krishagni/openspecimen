@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
-import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
@@ -54,7 +53,9 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 	// transient variables specifying action to be performed
 	//
 	private boolean forceDelete;
-	
+
+	private boolean hasPhi;
+
 	public Long getId() {
 		return id;
 	}
@@ -192,6 +193,14 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 		this.forceDelete = forceDelete;
 	}
 
+	public boolean getHasPhi() {
+		return hasPhi;
+	}
+
+	public void setHasPhi(boolean hasPhi) {
+		this.hasPhi = hasPhi;
+	}
+
 	public static CollectionProtocolRegistrationDetail from(CollectionProtocolRegistration cpr, boolean excludePhi) {
 		return from(cpr, excludePhi, null);
 	}
@@ -199,6 +208,7 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 	public static CollectionProtocolRegistrationDetail from(CollectionProtocolRegistration cpr, boolean excludePhi, List<CollectionProtocolRegistration> otherCprs) {
 		CollectionProtocolRegistrationDetail detail = new CollectionProtocolRegistrationDetail();
 		detail.setParticipant(ParticipantDetail.from(cpr.getParticipant(), excludePhi, otherCprs));
+		detail.setHasPhi(cpr.hasPhi());
 		detail.setId(cpr.getId());
 		detail.setActivityStatus(cpr.getActivityStatus());
 		detail.setDataEntryStatus(cpr.getDataEntryStatus().name());

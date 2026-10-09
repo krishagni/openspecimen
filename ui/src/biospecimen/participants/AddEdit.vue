@@ -12,14 +12,14 @@
           <span class="custom-title" v-else>
             <span v-t="{path: 'common.buttons.update'}">Update</span>
             <os-dynamic-template v-if="ctx.header.leftTitle" :template="ctx.header.leftTitle"
-              :cp="dataCtx.cp" :cpr="cpr" :hasPhiAccess="true" />
+              :cp="dataCtx.cp" :cpr="cpr" :hasPhiAccess="phiAccess" />
           </span>
         </h3>
       </span>
 
       <template #right v-if="ctx.header.rightTitle">
         <h3>
-          <os-dynamic-template :template="ctx.header.rightTitle" :cp="dataCtx.cp" :cpr="cpr" :hasPhiAccess="true" />
+          <os-dynamic-template :template="ctx.header.rightTitle" :cp="dataCtx.cp" :cpr="cpr" :hasPhiAccess="phiAccess" />
         </h3>
       </template>
     </os-page-head>
@@ -206,6 +206,8 @@ export default {
       ctx: {
         addEditFs: {rows: []},
 
+        cprFields: [],
+
         lookupFields: [],
 
         lookupFs: {rows: []},
@@ -239,13 +241,18 @@ export default {
 
   async created() {
     const cpr = this.dataCtx.cpr;
+    const cpCtx = this.cpViewCtx;
+    if (cpr.id && !this.isUpdateAllowed) {
+      routerSvc.goto('HomePage');
+      return;
+    }
+
     if (!cpr.id && this.participantId > 0) {
       cpr.participant = await cprSvc.getParticipant(this.participantId);
       this.ctx.step = 'register';
     }
 
     const p = cpr.participant || {};
-    const cpCtx = this.cpViewCtx;
     const {ecDocSvc, ecValidationSvc} = this.$osSvc;
     if (ecDocSvc && !cpr.id && cpCtx.isProceedToConsentAllowed() && !this.dataCtx.cp.visitLevelConsents) {
       const {count} = await ecDocSvc.getCpDocumentsCount(this.dataCtx.cp.id, {includeOnlyActive: true});
@@ -280,6 +287,12 @@ export default {
 
     Promise.all(promises).then(
       ([fields, layout, twoStep, addOnLookupFail, lockedFields, cpEvents, eventsRules]) => {
+        this.ctx.cprFields = fields;
+        if (!this.phiAccess) {
+          fields = cprSvc.getDeidentifiedFields(fields);
+          layout = cprSvc.getDeidentifiedLayout(layout, fields);
+        }
+
         const formSchema = this.ctx.addEditFs = formUtil.getFormSchema(fields, layout);
         if (!cpr.id || cpr.id <= 0) {
           formUtil.setDefaultValues(formSchema, this.dataCtx);
@@ -327,6 +340,18 @@ export default {
   computed: {
     name: function() {
       return cprSvc.getFormattedTitle(this.dataCtx.cpr);
+    },
+
+    phiAccess: function() {
+      const cpr = this.dataCtx.cpr;
+      return (cpr.id && cpr.id > 0)
+        ? this.cpViewCtx.isUpdateParticipantPhiAllowed(cpr)
+        : this.cpViewCtx.isCreateParticipantPhiAllowed(cpr);
+    },
+
+    isUpdateAllowed: function() {
+      const cpr = this.dataCtx.cpr;
+      return !!cpr.id && this.cpViewCtx.isUpdateParticipantAllowed(cpr);
     },
 
     pname: function() {
@@ -570,6 +595,10 @@ export default {
 
     _saveOrUpdate: function(cpr) {
       const toSave = util.clone(cpr);
+      if (!this.phiAccess) {
+        cprSvc.removePhi(toSave, this.ctx.cprFields);
+      }
+
       toSave.participant.source = 'OpenSpecimen';
       cprSvc.saveOrUpdate(toSave).then(savedCpr => this._navToNextView(savedCpr));
     },

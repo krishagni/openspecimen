@@ -312,6 +312,11 @@ public class CollectionProtocolRegistration extends BaseExtensionEntity {
 		setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 	}
 
+	public boolean hasPhi() {
+		return (getParticipant() != null && getParticipant().hasPhi()) ||
+			(getExtension() != null && getExtension().hasPhiData());
+	}
+
 	public List<DependentEntityDetail> getDependentEntities() {
 		return DependentEntityDetail.singletonList(Visit.getEntityName(), getActiveVisits()); 
 	}

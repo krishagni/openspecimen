@@ -493,7 +493,22 @@ public class AccessCtrlMgr {
 	}
 
 	public Set<Long> getRegisterEnabledCpIds(List<String> siteNames) {
-		return getEligibleCpIds(Resource.PARTICIPANT.getName(), new String[] {Operation.CREATE.getName()}, siteNames);
+		String[] ops = new String[] {Operation.CREATE.getName()};
+		Set<Long> cpIds = getEligibleCpIds(Resource.PARTICIPANT.getName(), ops, siteNames);
+		if (cpIds == null) {
+			//
+			// null means all CPs
+			//
+			return null;
+		}
+
+		Set<Long> deidCpIds = getEligibleCpIds(Resource.PARTICIPANT_DEID.getName(), ops, siteNames);
+		if (deidCpIds == null) {
+			return null;
+		}
+
+		cpIds.addAll(deidCpIds);
+		return cpIds;
 	}
 
 	public Set<Long> getReadAccessGroupCpIds(Long groupId) {
@@ -722,6 +737,10 @@ public class AccessCtrlMgr {
 		return ensureParticipantObjectRights(participant, Operation.UPDATE);
 	}
 
+	public boolean ensureUpdateParticipantWithDeidRights(Participant participant) {
+		return ensureParticipantObjectRights(participant, Operation.UPDATE, true);
+	}
+
 	public List<CollectionProtocolRegistration> getAccessibleCprs(Collection<CollectionProtocolRegistration> cprs) {
 		return getAccessibleCprs(cprs, Operation.READ);
 	}
@@ -745,6 +764,19 @@ public class AccessCtrlMgr {
 	public boolean ensureCreateCprRights(CollectionProtocolRegistration cpr) {
 		boolean phiAccess = ensureCprObjectRights(cpr, Operation.CREATE);
 		ensureCprEximRights(cpr);
+		return phiAccess;
+	}
+
+	public boolean ensureCreateOrUpdateCprRights(CollectionProtocolRegistration existing, CollectionProtocolRegistration cpr) {
+		if (existing == null) {
+			return ensureCprObjectRightsWithDeid(cpr, Operation.CREATE);
+		}
+
+		boolean phiAccess = ensureCprObjectRightsWithDeid(existing, Operation.UPDATE);
+		if (isCprAccessScopeChanged(existing, cpr)) {
+			phiAccess &= ensureCprObjectRightsWithDeid(cpr, Operation.UPDATE);
+		}
+
 		return phiAccess;
 	}
 
@@ -799,32 +831,61 @@ public class AccessCtrlMgr {
 	}
 
 	private boolean ensureParticipantObjectRights(Participant p, Operation op) {
+		return ensureParticipantObjectRights(p, op, op == Operation.READ);
+	}
+
+	private boolean ensureParticipantObjectRights(Participant p, Operation op, boolean allowDeid) {
+		boolean deidAccess = false;
 		for (CollectionProtocolRegistration cpr : p.getCprs()) {
 			try {
-				return ensureCprObjectRights(cpr, op);
+				if (ensureCprObjectRights(cpr, op, allowDeid)) {
+					return true;
+				}
+
+				deidAccess = true;
 			} catch (OpenSpecimenException ose) {
 
 			}
+		}
+
+		if (deidAccess) {
+			return false;
 		}
 
 		throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 	}
 
 	private boolean ensureCprObjectRights(CollectionProtocolRegistration cpr, Operation op) {
+		return ensureCprObjectRights(cpr, op, op == Operation.READ);
+	}
+
+	private boolean ensureCprObjectRightsWithDeid(CollectionProtocolRegistration cpr, Operation op) {
+		boolean phiAccess = ensureCprObjectRights(cpr, op, true);
+		ensureCprEximRights(cpr, phiAccess);
+		return phiAccess;
+	}
+
+	private boolean ensureCprObjectRights(CollectionProtocolRegistration cpr, Operation op, boolean allowDeid) {
+		return ensureCprObjectRights(cpr, op, Resource.PARTICIPANT, allowDeid);
+	}
+
+	private boolean ensureCprObjectRights(
+		CollectionProtocolRegistration cpr, Operation op, Resource resourceType, boolean allowDeid) {
+
 		if (AuthUtil.isAdmin()) {
 			return true;
 		}
 
-		boolean phiAccess = true;
+		boolean phiAccess = resourceType == Resource.PARTICIPANT;
 		Long cpId = cpr.getCollectionProtocol().getId();
-		String resource = Resource.PARTICIPANT.getName();
+		String resource = resourceType.getName();
 		Long userId = AuthUtil.getCurrentUser().getId();
 		String[] ops = {op.getName()};
 
 		List<SubjectAccess> accessList = daoFactory.getSubjectDao().getAccessList(userId, cpId, resource, ops);
 		Set<Site> cpSites = cpr.getCollectionProtocol().getRepositories();
 		boolean allowed = isAccessAllowedOnAnySite(accessList, cpSites);
-		if (!allowed && op == Operation.READ) {
+		if (!allowed && allowDeid && resourceType == Resource.PARTICIPANT) {
 			phiAccess = false;
 			resource = Resource.PARTICIPANT_DEID.getName();
 			accessList = daoFactory.getSubjectDao().getAccessList(userId, cpId, resource, ops);
@@ -852,9 +913,19 @@ public class AccessCtrlMgr {
 		return phiAccess;
 	}
 
+	private boolean isCprAccessScopeChanged(CollectionProtocolRegistration existing, CollectionProtocolRegistration cpr) {
+		return !Objects.equals(existing.getCollectionProtocol(), cpr.getCollectionProtocol()) ||
+			!Objects.equals(existing.getParticipant().getMrnSites(), cpr.getParticipant().getMrnSites());
+	}
+
 	private void ensureCprEximRights(CollectionProtocolRegistration cpr) {
+		ensureCprEximRights(cpr, true);
+	}
+
+	private void ensureCprEximRights(CollectionProtocolRegistration cpr, boolean phiAccess) {
 		if (isImportOp() || isExportOp()) {
-			ensureCprObjectRights(cpr, Operation.EXIM);
+			Resource resource = phiAccess ? Resource.PARTICIPANT : Resource.PARTICIPANT_DEID;
+			ensureCprObjectRights(cpr, Operation.EXIM, resource, false);
 		}
 	}
 

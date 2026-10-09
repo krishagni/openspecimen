@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -292,6 +293,10 @@ public class ExtensionDetail implements Serializable {
 
 		@SuppressWarnings({"unchecked" })
 		public static AttrDetail from(Attr attr, boolean excludePhi) {
+			if (excludePhi && attr.isPhi()) {
+				return null;
+			}
+
 			AttrDetail detail = new AttrDetail();
 			detail.setName(attr.getName());
 			detail.setUdn(attr.getUdn());
@@ -308,9 +313,6 @@ public class ExtensionDetail implements Serializable {
 						detail.setValue(sfAttrs.stream().map(sfAttr -> from(sfAttr, excludePhi)).collect(Collectors.toList()));
 					}
 				}
-			} else if (excludePhi && attr.isPhi()) {
-//				detail.setValue("###");
-//				detail.setDisplayValue("###");
 			} else {
 				detail.setValue(attr.getValue());
 				detail.setDisplayValue(attr.getDisplayValue());
@@ -320,7 +322,10 @@ public class ExtensionDetail implements Serializable {
 		}
 		
 		public static List<AttrDetail> from(List<Attr> attrs, boolean excludePhi) {
-			return attrs.stream().map(attr -> from(attr, excludePhi)).collect(Collectors.toList());
+			return attrs.stream()
+				.map(attr -> from(attr, excludePhi))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
 		}
 	}
 }
