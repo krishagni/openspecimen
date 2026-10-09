@@ -132,7 +132,8 @@ class FieldFactory {
       udn: field.udn && (namePrefix + field.udn),
       label: field.caption,
       tooltip: field.toolTip,
-      showWhen: field.showWhen
+      showWhen: field.showWhen,
+      phi: field.phi == true
     };
 
     if (field.type == 'stringTextField') {

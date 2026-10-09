@@ -67,41 +67,6 @@ public class ParticipantServiceImpl implements ParticipantService, ObjectAccesso
 	}
 
 	@Override
-	@PlusTransactional
-	public ResponseEvent<ParticipantDetail> createParticipant(RequestEvent<ParticipantDetail> req) {
-		try {
-			Participant participant = participantFactory.createParticipant(req.getPayload());
-			participant = createParticipant(participant);
-			return ResponseEvent.response(ParticipantDetail.from(participant, false));
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}
-	}
-	
-	@Override
-	@PlusTransactional
-	public ResponseEvent<ParticipantDetail> updateParticipant(RequestEvent<ParticipantDetail> req) {
-		try {
-			ParticipantDetail detail = req.getPayload();
-			Participant existing = getParticipant(detail, true);
-			if (existing == null) {
-				return ResponseEvent.userError(ParticipantErrorCode.NOT_FOUND);
-			}
-
-			
-			Participant participant = participantFactory.createParticipant(detail);
-			updateParticipant(existing, participant);			
-			return ResponseEvent.response(ParticipantDetail.from(existing, false));
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}
-	}
-	
-	@Override
 	public ResponseEvent<ParticipantDetail> patchParticipant(RequestEvent<ParticipantDetail> req) {
 		try {
 			ParticipantDetail detail = req.getPayload();
@@ -111,6 +76,7 @@ public class ParticipantServiceImpl implements ParticipantService, ObjectAccesso
 			}
 			
 			Participant participant = participantFactory.createParticipant(existing, detail);
+			ensurePhiAccess(existing, participant);
 			updateParticipant(existing, participant);			
 			return ResponseEvent.response(ParticipantDetail.from(existing, false));
 		} catch (OpenSpecimenException ose) {
@@ -168,15 +134,23 @@ public class ParticipantServiceImpl implements ParticipantService, ObjectAccesso
 		}
 	}
 	
-	public Participant createParticipant(Participant participant) {
+	@Override
+	public Participant getMatchingParticipant(ParticipantDetail detail) {
+		return getParticipant(detail, false);
+	}
+
+	@Override
+	public Participant createParticipant(Participant participant, boolean generateEmpi) {
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		ParticipantUtil.ensureUniqueUid(daoFactory, participant.getUid(), ose);
 		ParticipantUtil.ensureUniquePmis(daoFactory, PmiDetail.from(participant.getPmis(), false), participant, ose);
 		ParticipantUtil.ensureUniqueEmpi(daoFactory, participant.getEmpi(), ose);
 
 		ose.checkAndThrow();
+		if (generateEmpi) {
+			participant.setEmpiIfEmpty();
+		}
 
-		participant.setEmpiIfEmpty();
 		daoFactory.getParticipantDao().saveOrUpdate(participant, true);
 		return participant;
 	}
@@ -209,15 +183,19 @@ public class ParticipantServiceImpl implements ParticipantService, ObjectAccesso
 	}
 
 	@Override
-	public ParticipantDetail saveOrUpdateParticipant(ParticipantDetail detail) {
+	public ParticipantDetail saveOrUpdateParticipant(ParticipantDetail detail, boolean generateEmpi, boolean checkUpdateAccess) {
 		Participant existing = getParticipant(detail, false);
 
 		if (existing == null) {
 			Participant participant = participantFactory.createParticipant(detail);
-			participant = createParticipant(participant);
+			participant = createParticipant(participant, generateEmpi);
 			return ParticipantDetail.from(participant, false);
 		} else {
 			Participant participant = participantFactory.createParticipant(existing, detail);
+			if (checkUpdateAccess) {
+				ensurePhiAccess(existing, participant);
+			}
+
 			updateParticipant(existing, participant);
 			return ParticipantDetail.from(existing, false);
 		}
@@ -260,7 +238,21 @@ public class ParticipantServiceImpl implements ParticipantService, ObjectAccesso
 		
 		return result;
 	}
-	
+
+	private void ensurePhiAccess(Participant existing, Participant participant) {
+		boolean phiAccess = AccessCtrlMgr.getInstance().ensureUpdateParticipantWithDeidRights(existing);
+		if (phiAccess) {
+			return;
+		}
+
+		if (existing.hasPhi() || participant.hasPhi()) {
+			String cpShortTitle = existing.getCprs().stream()
+				.map(CollectionProtocolRegistration::getCpShortTitle)
+				.findFirst().orElse("");
+			throw OpenSpecimenException.userError(ParticipantErrorCode.CANNOT_UPDATE_PHI, cpShortTitle);
+		}
+	}
+
 	private Participant getByPmis(ParticipantDetail detail) {
 		Participant result = null;
 		

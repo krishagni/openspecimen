@@ -15,10 +15,6 @@ public interface ParticipantService {
 
 	ResponseEvent<ParticipantDetail> getParticipant(RequestEvent<Long> req);
 
-	ResponseEvent<ParticipantDetail> createParticipant(RequestEvent<ParticipantDetail> req);
-
-	ResponseEvent<ParticipantDetail> updateParticipant(RequestEvent<ParticipantDetail> req);
-	
 	ResponseEvent<ParticipantDetail> patchParticipant(RequestEvent<ParticipantDetail> req);
 	
 	ResponseEvent<ParticipantDetail>  delete(RequestEvent<Long> req);
@@ -26,9 +22,11 @@ public interface ParticipantService {
 	//
 	// Internal APIs
 	//
-	Participant createParticipant(Participant participant);
+	Participant getMatchingParticipant(ParticipantDetail participant);
+
+	Participant createParticipant(Participant participant, boolean generateEmpi);
 	
 	void updateParticipant(Participant existing, Participant newParticipant);
 	
-	ParticipantDetail saveOrUpdateParticipant(ParticipantDetail participant);
+	ParticipantDetail saveOrUpdateParticipant(ParticipantDetail participant, boolean generateEmpi, boolean checkUpdateAccess);
 }

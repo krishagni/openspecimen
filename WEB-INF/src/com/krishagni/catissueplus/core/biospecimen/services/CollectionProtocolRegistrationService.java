@@ -26,7 +26,7 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 
 public interface CollectionProtocolRegistrationService {
 	public ResponseEvent<CollectionProtocolRegistrationDetail> getRegistration(RequestEvent<RegistrationQueryCriteria> req);
-	
+
 	public ResponseEvent<CollectionProtocolRegistrationDetail> createRegistration(RequestEvent<CollectionProtocolRegistrationDetail> req);
 
 	public ResponseEvent<CollectionProtocolRegistrationDetail> updateRegistration(RequestEvent<CollectionProtocolRegistrationDetail> req);
@@ -67,4 +67,3 @@ public interface CollectionProtocolRegistrationService {
 
 	public ResponseEvent<ConsentDetail> getConsents(RequestEvent<RegistrationQueryCriteria> req);
 }
-

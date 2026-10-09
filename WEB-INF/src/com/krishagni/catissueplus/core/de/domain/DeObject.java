@@ -198,6 +198,10 @@ public abstract class DeObject {
 	public boolean hasPhiFields() {
 		return getForm().hasPhiFields();
 	}
+
+	public boolean hasPhiData() {
+		return hasPhiData(getAttrs());
+	}
 	
 	public void anonymize() {
 		if (!hasPhiFields()) {
@@ -752,6 +756,54 @@ public abstract class DeObject {
 		}
 
 		return formCtxt;
+	}
+
+	@SuppressWarnings("unchecked")
+	private boolean hasPhiData(List<Attr> attrs) {
+		for (Attr attr : attrs) {
+			if (attr.isSubForm()) {
+				Object value = attr.getValue();
+				if (value instanceof List<?> rows) {
+					if (!rows.isEmpty() && rows.get(0) instanceof Attr) {
+						//
+						// one-to-one: List<Attr>
+						//
+						if (hasPhiData((List<Attr>) rows)) {
+							return true;
+						}
+					} else {
+						//
+						// one-to-many: List<List<Attr>>
+						//
+						for (Object row : rows) {
+							if (row instanceof List<?> && hasPhiData((List<Attr>) row)) {
+								return true;
+							}
+						}
+					}
+				}
+			} else if (attr.isPhi() && hasValue(attr.getValue())) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean hasValue(Object value) {
+		if (value == null) {
+			return false;
+		} else if (value instanceof String) {
+			return StringUtils.isNotBlank((String) value);
+		} else if (value instanceof Collection<?>) {
+			return CollectionUtils.isNotEmpty((Collection<?>) value);
+		} else if (value instanceof Map<?, ?>) {
+			return MapUtils.isNotEmpty((Map<?, ?>) value);
+		} else if (value.getClass().isArray()) {
+			return java.lang.reflect.Array.getLength(value) > 0;
+		}
+
+		return true;
 	}
 
 	//

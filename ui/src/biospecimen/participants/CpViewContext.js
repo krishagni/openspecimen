@@ -323,12 +323,32 @@ export default class CpViewContext {
     return this.access && this.access.createParticipant;
   }
 
-  isUpdateParticipantAllowed(cpr) {
-    if (!this.access || !this.access.updateParticipant) {
+  isCreateParticipantPhiAllowed(cpr) {
+    if (!this.access || !this.access.createParticipantPhi) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'ParticipantPhi', ['Create']);
+  }
+
+  isUpdateParticipantPhiAllowed(cpr) {
+    if (!this.access || !this.access.updateParticipantPhi) {
       return false;
     }
 
     return this._isAccessBasedOnMrnAllowed(cpr, 'ParticipantPhi', ['Update']);
+  }
+
+  isUpdateParticipantAllowed(cpr) {
+    if (!cpr) {
+      return this.access && this.access.updateParticipantPhi;
+    } else if (this.isUpdateParticipantPhiAllowed(cpr)) {
+      return true;
+    } else if (cpr.hasPhi || !this.access || !this.access.updateParticipantDeid) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'ParticipantDeid', ['Update']);
   }
 
   isDeleteParticipantAllowed(cpr) {
@@ -639,10 +659,15 @@ export default class CpViewContext {
   }
 
   _loadAccessRights() {
+    const createParticipantPhi = this._isAllowed('ParticipantPhi', ['Create']);
     this.access = {
-      createParticipant: this._isAllowed('ParticipantPhi', ['Create']),
+      createParticipant: createParticipantPhi || this._isAllowed('ParticipantDeid', ['Create']),
 
-      updateParticipant: this._isAllowed('ParticipantPhi', ['Update']),
+      createParticipantPhi,
+
+      updateParticipantPhi: this._isAllowed('ParticipantPhi', ['Update']),
+
+      updateParticipantDeid: this._isAllowed('ParticipantDeid', ['Update']),
 
       deleteParticipant: this._isAllowed('ParticipantPhi', ['Delete']),
 

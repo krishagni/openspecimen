@@ -425,6 +425,14 @@ public class Participant extends BaseEntity {
 		return name.toString();
 	}
 
+	public boolean hasPhi() {
+		return StringUtils.isNotBlank(firstName) || StringUtils.isNotBlank(middleName) ||
+			StringUtils.isNotBlank(lastName) || birthDate != null || deathDate != null ||
+			StringUtils.isNotBlank(emailAddress) || StringUtils.isNotBlank(phoneNumber) ||
+			StringUtils.isNotBlank(uid) || StringUtils.isNotBlank(empi) ||
+			pmis.stream().anyMatch(pmi -> StringUtils.isNotBlank(pmi.getMedicalRecordNumber()));
+	}
+
 	public static String getEntityName() {
 		return ENTITY_NAME;
 	}
