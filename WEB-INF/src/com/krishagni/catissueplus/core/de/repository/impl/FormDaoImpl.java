@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
@@ -278,18 +279,20 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 
 	@Override
 	public Map<Long, List<UserGroupSummary>> getNotifUsers(Collection<Long> contextIds) {
-		List<Object[]> rows = createNamedQuery(GET_NOTIF_USERS, Object[].class)
-			.setParameterList("contextIds", contextIds)
-			.list();
-
 		Map<Long, List<UserGroupSummary>> result = new HashMap<>();
-		for (Object[] row : rows) {
-			int idx = -1;
-			List<UserGroupSummary> groups = result.computeIfAbsent((Long) row[++idx], (k) -> new ArrayList<>());
-			UserGroupSummary group = new UserGroupSummary();
-			group.setId((Long) row[++idx]);
-			group.setName((String) row[++idx]);
-			groups.add(group);
+		for (List<Long> batch : ListUtils.partition(new ArrayList<>(contextIds), 1000)) {
+			List<Object[]> rows = createNamedQuery(GET_NOTIF_USERS, Object[].class)
+				.setParameterList("contextIds", batch)
+				.list();
+
+			for (Object[] row : rows) {
+				int idx = -1;
+				List<UserGroupSummary> groups = result.computeIfAbsent((Long) row[++idx], (k) -> new ArrayList<>());
+				UserGroupSummary group = new UserGroupSummary();
+				group.setId((Long) row[++idx]);
+				group.setName((String) row[++idx]);
+				groups.add(group);
+			}
 		}
 
 		return result;
