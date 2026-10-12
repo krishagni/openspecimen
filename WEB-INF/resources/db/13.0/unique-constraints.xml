@@ -357,14 +357,6 @@
     </customChange>
   </changeSet>
 
-  <changeSet author="vpawar" id="Unique constraint on os_cpr_spmn_stats">
-    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
-      <param name="tableName" value="OS_CPR_SPMN_STATS" />
-      <param name="columnNames" value="IDENTIFIER" />
-      <param name="constraintName" value="OS_CPR_SPMN_STATS_UQ" />
-    </customChange>
-  </changeSet>
-
   <changeSet author="vpawar" id="Cleanup duplicate form record statuses by retaining the latest one">
     <sql>
       delete from

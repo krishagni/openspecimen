@@ -108,7 +108,10 @@
 
           alter table tmp_os_cpr_spmn_stats rename os_cpr_spmn_stats;
 
-          create index os_cpr_spmn_stats_idx on os_cpr_spmn_stats (identifier);
+          alter table
+            os_cpr_spmn_stats
+          add constraint
+            os_cpr_spmn_stats_uq unique (identifier);
         end if;
       end;
       //
@@ -210,7 +213,7 @@
 
           execute immediate 'alter table tmp_os_cpr_spmn_stats rename to os_cpr_spmn_stats';
 
-          execute immediate 'create index os_cpr_spmn_stats_idx on os_cpr_spmn_stats (identifier)';
+          execute immediate 'alter table os_cpr_spmn_stats add constraint os_cpr_spmn_stats_uq unique (identifier)';
         end if;
       end;
       //
