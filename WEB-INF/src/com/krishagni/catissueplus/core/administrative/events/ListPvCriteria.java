@@ -12,6 +12,8 @@ public class ListPvCriteria extends AbstractListCriteria<ListPvCriteria> {
 
 	private List<String> values;
 
+	private List<String> queries;
+
 	private String parentValue;
 	
 	private boolean includeParentValue;
@@ -41,6 +43,15 @@ public class ListPvCriteria extends AbstractListCriteria<ListPvCriteria> {
 
 	public ListPvCriteria values(List<String> values) {
 		this.values = values;
+		return self();
+	}
+
+	public List<String> queries() {
+		return queries;
+	}
+
+	public ListPvCriteria queries(List<String> queries) {
+		this.queries = queries;
 		return self();
 	}
 

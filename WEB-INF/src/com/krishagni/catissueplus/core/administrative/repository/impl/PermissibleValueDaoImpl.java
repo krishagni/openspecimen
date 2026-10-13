@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.repository.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Disjunction;
+import com.krishagni.catissueplus.core.common.repository.Restriction;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Status;
 
@@ -384,33 +386,35 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 			query.add(query.eq("pv.activityStatus", crit.activityStatus()));
 		}
 
-		if (StringUtils.isNotBlank(crit.query())) {
+		List<String> queries = CollectionUtils.isNotEmpty(crit.queries())
+			? crit.queries().stream().filter(StringUtils::isNotBlank).collect(Collectors.toList())
+			: StringUtils.isNotBlank(crit.query()) ? Collections.singletonList(crit.query()) : List.of();
+		if (CollectionUtils.isNotEmpty(queries)) {
 			if (crit.exactMatch()) {
 				if (isMySQL()) {
 					query.add(
 						query.or(
-							query.eq("pv.value", crit.query()),
-							query.eq("pv.conceptCode", crit.query())
+							query.in("pv.value", queries),
+							query.in("pv.conceptCode", queries)
 						)
 					);
 				} else {
-					String input = crit.query().toLowerCase(Locale.ROOT);
-					query.add(
-						query.or(
-							query.eq(query.lower("pv.value"), input),
-							query.eq(query.lower("pv.conceptCode"), input)
-						)
-					);
+					List<String> inputs = queries.stream()
+						.map(input -> input.toLowerCase(Locale.ROOT))
+						.collect(Collectors.toList());
+					query.add(query.or(
+						query.in(query.lower("pv.value"), inputs),
+						query.in(query.lower("pv.conceptCode"), inputs)
+					));
 				}
 			} else {
-				query.add(
-					query.or(
-						query.ilike("pv.value", crit.query()),
-						query.ilike("pv.conceptCode", crit.query())
-					)
-				);
-
-				query.addOrder(query.asc(query.ilocate("pv.value", crit.query())));
+				List<Restriction> restrictions = new ArrayList<>();
+				for (String input : queries) {
+					restrictions.add(query.ilike("pv.value", input));
+					restrictions.add(query.ilike("pv.conceptCode", input));
+				}
+				query.add(query.or(restrictions.toArray(new Restriction[0])));
+				query.addOrder(query.asc(query.ilocate("pv.value", queries.get(0))));
 			}
 		}
 
