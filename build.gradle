@@ -1,3 +1,15 @@
+buildscript {
+  repositories {
+    maven {
+      url 'https://plugins.gradle.org/m2/'
+    }
+  }
+
+  dependencies {
+    classpath 'org.owasp:dependency-check-gradle:13.0.0'
+  }
+}
+
 import org.apache.tools.ant.filters.ReplaceTokens;
 import org.gradle.api.tasks.Exec;
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -6,6 +18,17 @@ apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'org.owasp.dependencycheck'
+
+dependencyCheck {
+  formats = ['HTML', 'JSON']
+  failBuildOnCVSS = 7.0f
+
+  nvd {
+    // Replaces the slow official API calls with a highly optimized, fast GitHub compressed data feed
+    datafeedUrl = 'https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz'
+  }
+}
 
 archivesBaseName = 'openspecimen'
 
