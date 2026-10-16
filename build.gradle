@@ -78,6 +78,11 @@ tasks.withType(JavaCompile) {
 
 description = "openspecimen"
 
+def springFrameworkVersion = '7.0.9'
+def springSecurityVersion  = '7.0.7'
+def httpClient5Version     = '5.6.5'
+def httpCore5Version       = '5.4.4'
+
 repositories {
   mavenCentral()
 
@@ -106,7 +111,7 @@ configurations.all {
 dependencies {
   ajc       "org.aspectj:aspectjtools:1.9.19"
   implementation   "org.aspectj:aspectjrt:1.9.19"
-  aspects   "org.springframework:spring-aspects:6.2.16"
+  aspects   "org.springframework:spring-aspects:${springFrameworkVersion}"
 
   implementation fileTree(dir: 'lib', include: ['os-dynamic-forms-trunk.jar', 'os-tinymce.jar'])
   
@@ -167,42 +172,42 @@ dependencies {
 
   implementation group: 'quartz', name: 'quartz', version:'1.5.2'
 
-  implementation group: 'org.springframework', name: 'spring-aspects', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-aop', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-beans', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-context', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-context-support', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-core', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-expression', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-instrument', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-jdbc', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-tx', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-web', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-webmvc', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-orm', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-messaging', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-jms', version: '7.0.8'
+  implementation group: 'org.springframework', name: 'spring-aspects',         version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-aop',             version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-beans',           version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-context',         version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-context-support', version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-core',            version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-expression',      version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-instrument',      version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-jdbc',            version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-tx',              version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-web',             version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-webmvc',          version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-orm',             version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-messaging',       version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-jms',             version: springFrameworkVersion
   implementation group: 'org.springframework.integration', name: 'spring-integration-core', version: '7.0.5'
   implementation group: 'org.springframework.integration', name: 'spring-integration-mail', version: '7.0.5'
   implementation group: 'org.springframework.ldap', name: 'spring-ldap-core', version: '4.0.4'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-crypto', version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-config', version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-core',   version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-ldap',   version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-web',    version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-core', version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose', version: '7.0.6'
+  implementation group: 'org.springframework.security', name: 'spring-security-crypto',      version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-config',      version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-core',        version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-ldap',        version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-web',         version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-core', version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose', version: springSecurityVersion
 
   implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.31'
 
   implementation group: 'com.thoughtworks.xstream', name: 'xstream', version:'1.4.19'
   implementation group: 'com.itextpdf', name: 'itextpdf', version:'5.5.13.2'
-  implementation group: 'dom4j', name: 'dom4j', version: '1.6.1'
+  implementation group: 'org.dom4j', name: 'dom4j', version: '2.1.5'
   implementation group: 'com.jcraft', name: 'jsch', version: '0.1.54'
 
-  implementation group: 'com.github.ua-parser', name: 'uap-java', version: '1.5.2'
-  implementation group: 'org.yaml', name: 'snakeyaml', version: '1.28'
+  implementation group: 'com.github.ua-parser', name: 'uap-java', version: '1.6.1'
+  implementation group: 'org.yaml', name: 'snakeyaml', version: '2.7'
 
   implementation group: 'org.owasp.encoder', name: 'encoder', version: '1.2.3'
 
@@ -237,7 +242,7 @@ dependencies {
   implementation group: 'org.jspecify', name: 'jspecify', version: '1.0.0'
 
   // New SAML library
-  implementation group: 'org.springframework.security', name: 'spring-security-saml2-service-provider', version: '7.0.6'
+  implementation group: 'org.springframework.security', name: 'spring-security-saml2-service-provider', version: springSecurityVersion
   implementation group: 'org.opensaml', name: 'opensaml-core-api', version: '5.1.6'
   implementation group: 'org.opensaml', name: 'opensaml-core-impl', version: '5.1.6'
   implementation group: 'org.opensaml', name: 'opensaml-saml-api', version: '5.1.6'
@@ -256,8 +261,8 @@ dependencies {
   implementation group: 'org.cryptacular', name: 'cryptacular', version: '1.2.7'
   implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.16'  // Core HTTP functionality
   implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
-  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.4.1'
-  implementation group: 'org.apache.httpcomponents.core5', name: 'httpcore5', version: '5.2.5'
+  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: httpClient5Version
+  implementation group: 'org.apache.httpcomponents.core5', name: 'httpcore5', version: httpCore5Version
   implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.84'
   implementation group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: '1.84'
   implementation group: 'org.bouncycastle', name: 'bcutil-jdk18on', version: '1.84'
