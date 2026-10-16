@@ -62,6 +62,8 @@ public class OAuthServiceImpl implements OAuthService, InitializingBean, Applica
 
 	private static final int ALLOWED_SKEW = 60000; // 60 seconds
 
+	private static final int MAX_JWT_LENGTH = 64 * 1024;
+
 	private static final int OLD_STATE_MINS = 60;
 
 	private static final int OLD_STATE_CLEAN_UP_FREQ_MINS = 30;
@@ -102,6 +104,10 @@ public class OAuthServiceImpl implements OAuthService, InitializingBean, Applica
 	@Override
 	public User resolveUser(String jwt) {
 		try {
+			if (jwt == null || jwt.length() > MAX_JWT_LENGTH) {
+				throw OpenSpecimenException.userError(AuthErrorCode.JWT_PARSE_ERROR, "JWT exceeds the allowed size");
+			}
+
 			return resolveUser(validateToken(getIssuer(jwt), jwt));
 		} catch (OpenSpecimenException ose) {
 			throw ose;

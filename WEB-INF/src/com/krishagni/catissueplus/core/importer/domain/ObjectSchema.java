@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
 import com.thoughtworks.xstream.io.xml.Dom4JDriver;
-import com.thoughtworks.xstream.security.AnyTypePermission;
 import com.thoughtworks.xstream.security.NoTypePermission;
 
 public class ObjectSchema {
@@ -81,7 +80,7 @@ public class ObjectSchema {
 	private static XStream getSchemaParser() {
 		XStream xstream = new XStream(new PureJavaReflectionProvider(), new Dom4JDriver());
 		xstream.addPermission(NoTypePermission.NONE);
-		xstream.addPermission(AnyTypePermission.ANY);
+		xstream.allowTypes(new Class<?>[] {ObjectSchema.class, Record.class, Field.class});
 
 		xstream.alias("object-schema", ObjectSchema.class);
 		xstream.aliasAttribute(ObjectSchema.class, "fieldSeparator", "field-separator");

@@ -23,6 +23,7 @@ apply plugin: 'org.owasp.dependencycheck'
 dependencyCheck {
   formats = ['HTML', 'JSON']
   failBuildOnCVSS = 7.0f
+  suppressionFile = 'dependency-check-suppressions.xml'
 
   nvd {
     // Replaces the slow official API calls with a highly optimized, fast GitHub compressed data feed
@@ -78,6 +79,21 @@ tasks.withType(JavaCompile) {
 
 description = "openspecimen"
 
+def springFrameworkVersion = '7.0.9'
+def springSecurityVersion  = '7.0.7'
+def springIntegrationVersion = '7.0.6'
+def httpClient5Version     = '5.6.5'
+def httpCore5Version       = '5.4.4'
+def beanUtilsVersion       = '1.11.0'
+def fileUploadVersion      = '1.6.0'
+def esapiVersion           = '2.7.0.0'
+def nimbusJoseJwtVersion   = '10.9'
+def xstreamVersion         = '1.4.21'
+def log4jVersion           = '2.25.5'
+def pdfboxVersion          = '2.0.37'
+def poiVersion             = '5.5.1'
+def tikaVersion            = '3.3.3'
+
 repositories {
   mavenCentral()
 
@@ -106,7 +122,7 @@ configurations.all {
 dependencies {
   ajc       "org.aspectj:aspectjtools:1.9.19"
   implementation   "org.aspectj:aspectjrt:1.9.19"
-  aspects   "org.springframework:spring-aspects:6.2.16"
+  aspects   "org.springframework:spring-aspects:${springFrameworkVersion}"
 
   implementation fileTree(dir: 'lib', include: ['os-dynamic-forms-trunk.jar', 'os-tinymce.jar'])
   
@@ -118,19 +134,18 @@ dependencies {
   implementation group: 'asm', name: 'asm', version:'3.3.1'
   implementation group: 'org.aspectj', name: 'aspectjweaver', version:'1.9.19'
   implementation group: 'cglib', name: 'cglib', version:'3.1'
-  implementation group: 'commons-beanutils', name: 'commons-beanutils', version:'1.9.4'
-  implementation group: 'commons-codec', name: 'commons-codec', version:'1.15'
-  implementation group: 'commons-fileupload', name: 'commons-fileupload', version:'1.4'
-  implementation group: 'commons-httpclient', name: 'commons-httpclient', version:'3.1'
-  implementation group: 'commons-io', name: 'commons-io', version:'2.18.0'
-  implementation group: 'org.apache.commons', name: 'commons-collections4', version:'4.4'
+  implementation group: 'commons-beanutils', name: 'commons-beanutils', version: beanUtilsVersion
+  implementation group: 'commons-codec', name: 'commons-codec', version:'1.20.0'
+  implementation group: 'commons-fileupload', name: 'commons-fileupload', version: fileUploadVersion
+  implementation group: 'commons-io', name: 'commons-io', version:'2.21.0'
+  implementation group: 'org.apache.commons', name: 'commons-collections4', version:'4.5.0'
   implementation group: 'org.apache.commons', name: 'commons-digester3', version:'3.2'
-  implementation group: 'org.apache.commons', name: 'commons-lang3', version:'3.17.0'
-  implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.27.1'
+  implementation group: 'org.apache.commons', name: 'commons-lang3', version:'3.18.0'
+  implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.28.0'
   implementation group: 'org.apache.commons', name: 'commons-text', version: '1.15.0'
   implementation group: 'org.apache.taglibs', name: 'taglibs-standard-impl', version: '1.2.5'
-  implementation group: 'org.apache.tika', name: 'tika-core', version: '3.3.1'
-  implementation group: 'org.apache.tika', name: 'tika-parsers-standard-package', version: '3.3.1'
+  implementation group: 'org.apache.tika', name: 'tika-core', version: tikaVersion
+  implementation group: 'org.apache.tika', name: 'tika-parsers-standard-package', version: tikaVersion
   implementation group: 'net.sf.kxml', name: 'kxml2-min', version:'2.3.0'
   implementation group: 'net.sf.ehcache', name: 'ehcache', version:'1.2.3'
   implementation group: 'net.sf.opencsv', name: 'opencsv', version:'2.3'
@@ -161,73 +176,73 @@ dependencies {
   implementation group: 'org.liquibase', name: 'liquibase-core', version:'4.8.0'
 
   implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.1'
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
   implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
 
   implementation group: 'quartz', name: 'quartz', version:'1.5.2'
 
-  implementation group: 'org.springframework', name: 'spring-aspects', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-aop', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-beans', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-context', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-context-support', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-core', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-expression', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-instrument', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-jdbc', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-tx', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-web', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-webmvc', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-orm', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-messaging', version: '7.0.8'
-  implementation group: 'org.springframework', name: 'spring-jms', version: '7.0.8'
-  implementation group: 'org.springframework.integration', name: 'spring-integration-core', version: '7.0.5'
-  implementation group: 'org.springframework.integration', name: 'spring-integration-mail', version: '7.0.5'
+  implementation group: 'org.springframework', name: 'spring-aspects',         version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-aop',             version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-beans',           version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-context',         version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-context-support', version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-core',            version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-expression',      version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-instrument',      version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-jdbc',            version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-tx',              version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-web',             version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-webmvc',          version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-orm',             version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-messaging',       version: springFrameworkVersion
+  implementation group: 'org.springframework', name: 'spring-jms',             version: springFrameworkVersion
+  implementation group: 'org.springframework.integration', name: 'spring-integration-core', version: springIntegrationVersion
+  implementation group: 'org.springframework.integration', name: 'spring-integration-mail', version: springIntegrationVersion
   implementation group: 'org.springframework.ldap', name: 'spring-ldap-core', version: '4.0.4'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-crypto', version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-config', version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-core',   version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-ldap',   version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-web',    version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-core', version: '7.0.6'
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose', version: '7.0.6'
+  implementation group: 'org.springframework.security', name: 'spring-security-crypto',      version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-config',      version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-core',        version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-ldap',        version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-web',         version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-core', version: springSecurityVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose', version: springSecurityVersion
 
-  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.31'
+  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: nimbusJoseJwtVersion
 
-  implementation group: 'com.thoughtworks.xstream', name: 'xstream', version:'1.4.19'
+  implementation group: 'com.thoughtworks.xstream', name: 'xstream', version: xstreamVersion
   implementation group: 'com.itextpdf', name: 'itextpdf', version:'5.5.13.2'
-  implementation group: 'dom4j', name: 'dom4j', version: '1.6.1'
+  implementation group: 'org.dom4j', name: 'dom4j', version: '2.1.5'
   implementation group: 'com.jcraft', name: 'jsch', version: '0.1.54'
 
-  implementation group: 'com.github.ua-parser', name: 'uap-java', version: '1.5.2'
-  implementation group: 'org.yaml', name: 'snakeyaml', version: '1.28'
+  implementation group: 'com.github.ua-parser', name: 'uap-java', version: '1.6.1'
+  implementation group: 'org.yaml', name: 'snakeyaml', version: '2.7'
 
   implementation group: 'org.owasp.encoder', name: 'encoder', version: '1.2.3'
 
   // HTML to PDF lib
-  implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.24'
-  implementation group: 'org.apache.pdfbox', name: 'xmpbox', version: '2.0.24'
-  implementation group: 'org.apache.pdfbox', name: 'fontbox', version: '2.0.24'
+  implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: pdfboxVersion
+  implementation group: 'org.apache.pdfbox', name: 'xmpbox', version: pdfboxVersion
+  implementation group: 'org.apache.pdfbox', name: 'fontbox', version: pdfboxVersion
   implementation group: 'de.rototor.pdfbox', name: 'graphics2d', version: '0.32'
   implementation group: 'com.openhtmltopdf', name: 'openhtmltopdf-core', version: '1.0.9'
   implementation group: 'com.openhtmltopdf', name: 'openhtmltopdf-pdfbox', version: '1.0.9'
 
   // Java APIs to access MS format files
-  implementation group: 'org.apache.poi', name: 'poi', version: '5.3.0'
-  implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.3.0'
-  implementation group: 'org.apache.poi', name: 'poi-ooxml-lite', version: '5.3.0'
-  implementation group: 'org.apache.xmlbeans', name: 'xmlbeans', version: '5.2.2'
+  implementation group: 'org.apache.poi', name: 'poi', version: poiVersion
+  implementation group: 'org.apache.poi', name: 'poi-ooxml', version: poiVersion
+  implementation group: 'org.apache.poi', name: 'poi-ooxml-lite', version: poiVersion
+  implementation group: 'org.apache.xmlbeans', name: 'xmlbeans', version: '5.3.0'
 
   implementation group: 'com.google.zxing', name: 'core', version: '3.4.1'
 
-  implementation group: 'org.owasp.esapi', name: 'esapi', version: '2.2.0.0'
+  implementation group: 'org.owasp.esapi', name: 'esapi', version: esapiVersion
   implementation group: 'xerces', name: 'xercesImpl', version: '2.12.2'
   implementation group: 'xalan', name: 'xalan', version: '2.7.3'
   implementation group: 'xalan', name: 'serializer', version: '2.7.3'
   implementation group: 'joda-time', name: 'joda-time', version: '2.10'
-  implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version:'2.3'
+  implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version:'2.4.1'
 
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.2'
   implementation group: 'org.eclipse.angus',  name: 'angus-activation', version: '2.0.2'
@@ -237,7 +252,7 @@ dependencies {
   implementation group: 'org.jspecify', name: 'jspecify', version: '1.0.0'
 
   // New SAML library
-  implementation group: 'org.springframework.security', name: 'spring-security-saml2-service-provider', version: '7.0.6'
+  implementation group: 'org.springframework.security', name: 'spring-security-saml2-service-provider', version: springSecurityVersion
   implementation group: 'org.opensaml', name: 'opensaml-core-api', version: '5.1.6'
   implementation group: 'org.opensaml', name: 'opensaml-core-impl', version: '5.1.6'
   implementation group: 'org.opensaml', name: 'opensaml-saml-api', version: '5.1.6'
@@ -256,12 +271,12 @@ dependencies {
   implementation group: 'org.cryptacular', name: 'cryptacular', version: '1.2.7'
   implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.16'  // Core HTTP functionality
   implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
-  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.4.1'
-  implementation group: 'org.apache.httpcomponents.core5', name: 'httpcore5', version: '5.2.5'
+  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: httpClient5Version
+  implementation group: 'org.apache.httpcomponents.core5', name: 'httpcore5', version: httpCore5Version
   implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.84'
   implementation group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: '1.84'
   implementation group: 'org.bouncycastle', name: 'bcutil-jdk18on', version: '1.84'
-  implementation group: 'org.apache.santuario', name: 'xmlsec', version: '2.3.0'
+  implementation group: 'org.apache.santuario', name: 'xmlsec', version: '3.0.6'
 
   implementation group: 'io.micrometer', name: 'micrometer-commons', version: '1.16.1'
   implementation group: 'io.micrometer', name: 'micrometer-core', version: '1.16.1'
@@ -274,8 +289,8 @@ dependencies {
   implementation group: 'io.prometheus', name: 'prometheus-metrics-shaded-protobuf', version: '1.3.1'
 
   runtimeOnly group: 'antlr', name: 'antlr', version: '2.7.7'
-  runtimeOnly group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.16.0'
-  runtimeOnly group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.16.0'
+  runtimeOnly group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: log4jVersion
+  runtimeOnly group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: log4jVersion
 
   testImplementation group: 'junit', name: 'junit', version:'4.13.1'
   testImplementation group: 'org.hamcrest', name: 'hamcrest-core', version: '1.3'
