@@ -80,8 +80,14 @@ description = "openspecimen"
 
 def springFrameworkVersion = '7.0.9'
 def springSecurityVersion  = '7.0.7'
+def springIntegrationVersion = '7.0.6'
 def httpClient5Version     = '5.6.5'
 def httpCore5Version       = '5.4.4'
+def beanUtilsVersion       = '1.11.0'
+def fileUploadVersion      = '1.6.0'
+def esapiVersion           = '2.7.0.0'
+def nimbusJoseJwtVersion   = '10.9'
+def xstreamVersion         = '1.4.21'
 
 repositories {
   mavenCentral()
@@ -123,9 +129,9 @@ dependencies {
   implementation group: 'asm', name: 'asm', version:'3.3.1'
   implementation group: 'org.aspectj', name: 'aspectjweaver', version:'1.9.19'
   implementation group: 'cglib', name: 'cglib', version:'3.1'
-  implementation group: 'commons-beanutils', name: 'commons-beanutils', version:'1.9.4'
+  implementation group: 'commons-beanutils', name: 'commons-beanutils', version: beanUtilsVersion
   implementation group: 'commons-codec', name: 'commons-codec', version:'1.15'
-  implementation group: 'commons-fileupload', name: 'commons-fileupload', version:'1.4'
+  implementation group: 'commons-fileupload', name: 'commons-fileupload', version: fileUploadVersion
   implementation group: 'commons-httpclient', name: 'commons-httpclient', version:'3.1'
   implementation group: 'commons-io', name: 'commons-io', version:'2.18.0'
   implementation group: 'org.apache.commons', name: 'commons-collections4', version:'4.4'
@@ -187,8 +193,8 @@ dependencies {
   implementation group: 'org.springframework', name: 'spring-orm',             version: springFrameworkVersion
   implementation group: 'org.springframework', name: 'spring-messaging',       version: springFrameworkVersion
   implementation group: 'org.springframework', name: 'spring-jms',             version: springFrameworkVersion
-  implementation group: 'org.springframework.integration', name: 'spring-integration-core', version: '7.0.5'
-  implementation group: 'org.springframework.integration', name: 'spring-integration-mail', version: '7.0.5'
+  implementation group: 'org.springframework.integration', name: 'spring-integration-core', version: springIntegrationVersion
+  implementation group: 'org.springframework.integration', name: 'spring-integration-mail', version: springIntegrationVersion
   implementation group: 'org.springframework.ldap', name: 'spring-ldap-core', version: '4.0.4'
 
   implementation group: 'org.springframework.security', name: 'spring-security-crypto',      version: springSecurityVersion
@@ -199,9 +205,9 @@ dependencies {
   implementation group: 'org.springframework.security', name: 'spring-security-oauth2-core', version: springSecurityVersion
   implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose', version: springSecurityVersion
 
-  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.31'
+  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: nimbusJoseJwtVersion
 
-  implementation group: 'com.thoughtworks.xstream', name: 'xstream', version:'1.4.19'
+  implementation group: 'com.thoughtworks.xstream', name: 'xstream', version: xstreamVersion
   implementation group: 'com.itextpdf', name: 'itextpdf', version:'5.5.13.2'
   implementation group: 'org.dom4j', name: 'dom4j', version: '2.1.5'
   implementation group: 'com.jcraft', name: 'jsch', version: '0.1.54'
@@ -227,7 +233,7 @@ dependencies {
 
   implementation group: 'com.google.zxing', name: 'core', version: '3.4.1'
 
-  implementation group: 'org.owasp.esapi', name: 'esapi', version: '2.2.0.0'
+  implementation group: 'org.owasp.esapi', name: 'esapi', version: esapiVersion
   implementation group: 'xerces', name: 'xercesImpl', version: '2.12.2'
   implementation group: 'xalan', name: 'xalan', version: '2.7.3'
   implementation group: 'xalan', name: 'serializer', version: '2.7.3'
