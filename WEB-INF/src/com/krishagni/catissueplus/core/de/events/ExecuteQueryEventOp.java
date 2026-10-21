@@ -39,6 +39,13 @@ public class ExecuteQueryEventOp  {
 	private boolean disableAccessChecks;
 
 	//
+	// Set only by trusted catalog services. Catalog queries do not require
+	// Query read rights. CP-scoped queries use CP read rights; unscoped
+	// queries use Catalog read rights.
+	//
+	private boolean catalogQuery;
+
+	//
 	// mostly used by the list generator API
 	//
 	private boolean disableAuditing;
@@ -168,6 +175,15 @@ public class ExecuteQueryEventOp  {
 
 	public void setDisableAccessChecks(boolean disableAccessChecks) {
 		this.disableAccessChecks = disableAccessChecks;
+	}
+
+	@JsonIgnore
+	public boolean isCatalogQuery() {
+		return catalogQuery;
+	}
+
+	public void setCatalogQuery(boolean catalogQuery) {
+		this.catalogQuery = catalogQuery;
 	}
 
 	@JsonIgnore
