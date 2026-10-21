@@ -528,7 +528,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		Date startTime = null;
 		boolean queryCntIncremented = false;
 		try {
-			if (!opDetail.isDisableAccessChecks()) {
+			if (!opDetail.isDisableAccessChecks() && !opDetail.isCatalogQuery()) {
 				ensureReadRights();
 			}
 
@@ -1186,7 +1186,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	@Override
 	@PlusTransactional
 	public QueryDataExportResult exportQueryData(final ExecuteQueryEventOp opDetail, final ExportProcessor processor) {
-		if (!opDetail.isDisableAccessChecks()) {
+		if (!opDetail.isDisableAccessChecks() && !opDetail.isCatalogQuery()) {
 			ensureReadRights();
 		}
 
@@ -1207,7 +1207,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		GetFacetValuesOp op = req.getPayload();
 		DataSource queryDataSource = getReportingDataSource(op);
 		try {
-			if (!op.isDisableAccessChecks()) {
+			if (!op.isDisableAccessChecks() && !op.isCatalogQuery()) {
 				ensureReadRights();
 			}
 
@@ -1217,7 +1217,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			String restriction = qs == null
 				? getRestriction(
 					AuthUtil.getCurrentUser(),
-					op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(),
+					op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(), op.isCatalogQuery(),
 					queryId, queryDataSource, isCpOnlyQuery(inputFields))
 				: StringUtils.EMPTY;
 
@@ -1492,7 +1492,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		query.compile(
 			rootForm, aql,
 			getRestriction(
-				user, op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(),
+				user, op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(), op.isCatalogQuery(),
 				queryId, queryDataSource, isCpOnlyQuery(op.getAql())
 			)
 		);
@@ -1544,7 +1544,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		return formattedResult;
 	}
 
-	private String getRestriction(User user, Long cpId, Long groupId, boolean disableAccessChecks, String queryId, DataSource queryDataSource, boolean cpOnly) {
+	private String getRestriction(User user, Long cpId, Long groupId, boolean disableAccessChecks, boolean catalogQuery, String queryId, DataSource queryDataSource, boolean cpOnly) {
 		String restriction = null;
 		if (groupId != null && groupId > 0L) {
 			restriction = cpForm + ".cpGroup.id = " + groupId;
@@ -1555,7 +1555,9 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		}
 
 		if (!user.isAdmin() && !disableAccessChecks) {
-			Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
+			Set<SiteCpPair> siteCps = catalogQuery && (cpId == null || cpId <= 0L)
+				? AccessCtrlMgr.getInstance().getCatalogReadableSiteCps()
+				: AccessCtrlMgr.getInstance().getReadableSiteCps();
 			if (CollectionUtils.isEmpty(siteCps)) {
 				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 			}
