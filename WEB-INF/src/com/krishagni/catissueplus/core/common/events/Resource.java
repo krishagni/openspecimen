@@ -33,6 +33,8 @@ public enum Resource {
 
 	QUERY("Query"),
 
+	CATALOG("Catalog"),
+
 	PRINT_RULE("PrintRule")
 
 	;

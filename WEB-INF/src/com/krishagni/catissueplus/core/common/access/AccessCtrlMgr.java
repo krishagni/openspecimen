@@ -428,6 +428,10 @@ public class AccessCtrlMgr {
 		return getSiteCps(Resource.CP, Operation.READ, false);
 	}
 
+	public Set<SiteCpPair> getCatalogReadableSiteCps() {
+		return getSiteCps(Resource.CATALOG, Operation.READ, false);
+	}
+
 	public String getAllowedCpIdsSql(Collection<SiteCpPair> siteCps) {
 		if (siteCps == null) {
 			return "";

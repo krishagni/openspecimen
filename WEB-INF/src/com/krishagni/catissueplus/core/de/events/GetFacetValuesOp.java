@@ -20,6 +20,13 @@ public class GetFacetValuesOp {
 	private boolean disableAccessChecks;
 
 	//
+	// Set only by trusted catalog services. Catalog queries do not require
+	// Query read rights. CP-scoped queries use CP read rights; unscoped
+	// queries use Catalog read rights.
+	//
+	private boolean catalogQuery;
+
+	//
 	// Not for use by the query client
 	//
 	private boolean useReportingDataSource;
@@ -79,6 +86,15 @@ public class GetFacetValuesOp {
 
 	public void setDisableAccessChecks(boolean disableAccessChecks) {
 		this.disableAccessChecks = disableAccessChecks;
+	}
+
+	@JsonIgnore
+	public boolean isCatalogQuery() {
+		return catalogQuery;
+	}
+
+	public void setCatalogQuery(boolean catalogQuery) {
+		this.catalogQuery = catalogQuery;
 	}
 
 	@JsonIgnore
