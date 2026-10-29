@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.krishagni.catissueplus.core.administrative.domain.FormDataDeleteEvent;
@@ -163,6 +164,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	private static final String SPECIMEN_FORM = "Specimen";
 	
 	private static final String SPECIMEN_EVENT_FORM = "SpecimenEvent";
+
+	private static final long FORM_FILE_OWNERSHIP_EXPIRY_MILLIS = 24 * 60 * 60 * 1000L;
+
+	private static final FormFileUploadTracker FORM_FILE_UPLOAD_TRACKER = new FormFileUploadTracker();
 	
 	private static Set<String> staticExtendedForms = new HashSet<>();
 	
@@ -786,8 +791,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		GetFileDetailOp op = req.getPayload();
 		FileControlValue fcv = formDataMgr.getFileMetadata(op.getFileId());
 		if (fcv == null) {
-			File file = new File(DeConfiguration.getInstance().fileUploadDir(), op.getFileId());
-			if (file.exists()) {
+			File uploadDir = getFormFileUploadDir();
+			User currentUser = AuthUtil.getCurrentUser();
+			File file = FORM_FILE_UPLOAD_TRACKER.getUpload(uploadDir, op.getFileId());
+			if (file != null && file.isFile() && FORM_FILE_UPLOAD_TRACKER.isOwner(uploadDir, currentUser.getId(), op.getFileId())) {
 				return ResponseEvent.response(FileDetail.from(file));
 			}
 
@@ -815,6 +822,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		try {
 			InputStream in = input.getInputStream();
 			String fileId = FileUploadMgr.getInstance().saveFile(in);
+			FORM_FILE_UPLOAD_TRACKER.add(getFormFileUploadDir(), AuthUtil.getCurrentUser().getId(), fileId);
 			fileDetail.setFileId(fileId);
 			return ResponseEvent.response(fileDetail);
 		} catch (Exception e) {
@@ -848,6 +856,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 		try {
 			String fileId = FileUploadMgr.getInstance().saveFile(bin, type);
+			FORM_FILE_UPLOAD_TRACKER.add(getFormFileUploadDir(), AuthUtil.getCurrentUser().getId(), fileId);
 
 			FileDetail result = new FileDetail();
 			result.setFileId(fileId);
@@ -858,7 +867,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			return ResponseEvent.serverError(e);
 		}
 	}
-	
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<Long> deleteRecord(RequestEvent<FormRecordCriteria> req) {
@@ -1167,6 +1176,20 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	@Override
 	public void addAccessChecker(String entityType, FormAccessChecker checker) {
 		formAccessCheckers.put(entityType, checker);
+	}
+
+	@Scheduled(fixedDelay = 60 * 60 * 1000L)
+	public void deleteExpiredFormFileOwnershipMarkers() {
+		try {
+			long expiryTime = Calendar.getInstance().getTimeInMillis() - FORM_FILE_OWNERSHIP_EXPIRY_MILLIS;
+			FORM_FILE_UPLOAD_TRACKER.deleteOlderThan(getFormFileUploadDir(), expiryTime);
+		} catch (Exception e) {
+			logger.error("Error deleting expired form file ownership markers", e);
+		}
+	}
+
+	private File getFormFileUploadDir() {
+		return new File(DeConfiguration.getInstance().fileUploadDir());
 	}
 
 	private FormListCriteria addFormsListCriteria(FormListCriteria crit) {
