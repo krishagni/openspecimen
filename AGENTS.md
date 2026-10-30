@@ -6,6 +6,7 @@
 
 - Methods that are not used by templates/views should start with `_`. Applies only to the UI code.
 - Methods should occur in the order of their usage.
+- In implementation classes, public methods that implement an interface should appear in the same order as the interface. Place additional public methods after all interface methods, and place private methods after all public methods; do not interleave private and public methods.
 - For UI components, keep template/view-facing methods first, in template usage order, followed by internal helper methods.
 - Avoid duplicating logic. When multiple code paths perform substantially the same operation, extract and reuse a common abstraction while keeping path-specific behaviour at the call sites.
 - Avoid redundant guards and checks when the preceding control flow has already established the required invariant.
